@@ -1,0 +1,5 @@
+<IfModule mod_rewrite.c>
+	RewriteEngine On
+	RewriteRule ^(config|controllers|models|scripts|views) - [F,L]
+	RewriteRule .* webroot/$0 [L]
+</IfModule>
