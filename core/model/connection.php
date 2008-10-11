@@ -40,7 +40,9 @@ class Connection {
  * @return void
  */
 	private function __construct() {
-		$params = parse_ini_file(::c('CONFIG').'db.ini');
+		$config = ::Config::instance();
+		require_once ::c('CONFIG').'db.php';
+		$params = $config->db[::c('status')];
 		$this->adapter = 'Prank::Model::Adapters::'.ucfirst($params['type']);
 		$dsn           = $params['type'].':host='.$params['host'].';dbname='.$params['db'];
 		if (class_exists($this->adapter)) {
