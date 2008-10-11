@@ -26,7 +26,7 @@ if (array_search($argv[1], $methods) !== false) {
 
 function add() {
 	$args = func_get_args();
-	if (count($args) <= 2) {
+	if (count($args) >= 2) {
 		$method = 'add_'.$args[0];
 		if (function_exists($method)) {
 			print 'Adding new '.$args[0]." - ".$args[1]."\n";
@@ -44,12 +44,32 @@ function add_test($file, $force=false) {
 	$test_file = ROOT.'tests'.DS.$file;
 	$test_file = str_replace('.php', '.test.php', $test_file);
 	if (!is_file($test_file) || $force !== false) {
+		$tests     = '';
+		$classes   = get_declared_classes();
+		$functions = get_defined_functions();
+		require_once ROOT.$file;
+		$classes   = array_diff(get_declared_classes(), $classes);
+		$functions_new = get_defined_functions();
+		$functions = array_diff($functions_new['user'], $functions['user']);
+		
+		foreach ($classes as $class) {
+			$class_reflection = new ReflectionClass($class);
+			foreach ($class_reflection->getMethods() as $method) {
+				$tests .= "\n\tpublic function test_".$method->getName()."() {\n\t}\n";
+			}
+		}
+		
+		foreach ($functions as $function) {
+			$tests .= "\n\tpublic function test_".$function."() {\n\t}\n";
+		}
+		
 		$template  = file_get_contents(ROOT.'scripts'.DS.'templates'.DS.'new_test.tpl');
 		$classname = str_replace(' ', '', ucwords(str_replace(DS, ' ', str_replace('.php', '', $file))));
 		$classname = str_replace('Core', '', $classname);
 		$tags = array(
 			'/**CLASSFILE**/'     => $file,
-			'/**CLASSFILENAME**/' => $classname);
+			'/**CLASSFILENAME**/' => $classname,
+			'/**TESTS**/'         => $tests);
 		$template = str_replace(array_keys($tags), $tags, $template);
 		
 		file_put_contents($test_file, $template);
