@@ -27,28 +27,45 @@ class Base {
 	public $layout         = 'default';
 	public $shortname      = null;
 	public $view_variables = array();
-	
+
+/**
+ * All unknown variables are defined as view variables
+ *
+ * @param string $var
+ * @param string $val 
+ * @return void
+ */
 	public function __set($var, $val) {
 		$this->view_variables[$var] = $val;
 	}
-	
+
+/**
+ * Runs the controller and the view
+ *
+ * Calls all callbacks, the action method, and renders the output. Also
+ * provides the layout functionality.
+ * 
+ * @return void
+ */
 	public function run() {
 		$this->before_run();
-		$this->before_render();
-			
-		ob_start();
 		
 		call_user_func_array(array($this, $this->action), $this->params);
 			
 		$this->after_run();
+		$this->before_render();
 		
 		extract($this->view_variables);
+		
+		ob_start();
 
 		if (file_exists(::c('VIEWS').$this->shortname.::c('DS').$this->view.'.php') && $this->view !== false) {
 			require_once ::c('VIEWS').$this->shortname.::c('DS').$this->view.'.php';
 		}
 		
 		$content_for_layout = ob_get_clean();
+		
+		$content_for_layout = $this->before_layout($content_for_layout);
 			
 		if (file_exists(::c('VIEWS').'layouts'.::c('DS').$this->layout.'.php') && $this->layout !== false) {
 			ob_start();
@@ -60,17 +77,61 @@ class Base {
 		
 		$this->after_render($output);
 	}
-	
+
+/**
+ * Callback
+ *
+ * Runs before acition is executed, but after the controller is set-up.
+ * 
+ * @return void
+ */	
 	public function before_run() {
 	}
-	
+
+/**
+ * Callback
+ *
+ * Runs after the action is run, but before any actuall rendering is done.
+ * 
+ * @return void
+ */
 	public function after_run() {
 	}
-	
+
+/**
+ * Callback
+ * 
+ * Runs after after_run, but still before any actuall rendering.
+ *
+ * @return void
+ */
 	public function before_render() {
 	}
-	
-	public function after_render($content = null) {
+
+/**
+ * Callback
+ * 
+ * Runs after view rendering, but before it is passed to the layout. Has to
+ * return contents for the view.
+ *
+ * @param  string $view Contents of the view rendering
+ * @return string
+ */
+	public function before_layout($view=null) {
+		return $view;
+	}
+
+/**
+ * Callback
+ * 
+ * Runs after the view is rendered, and inserted into the layout (if
+ * applicable). If any rendering is to be displayed - this callback have to do
+ * it.
+ *
+ * @param  string $content
+ * @return void
+ */
+	public function after_render($content=null) {
 		print $content;
 	}
 }
