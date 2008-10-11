@@ -58,17 +58,18 @@ class InflectorTestCase extends PrankTestCase {
 	}
 
 	public function test_modelize() {
+		$this->assert_equal(Inflector::modelize('models'), 'Model');
 	}
 
 	public function test_tabelize() {
+		$this->assert_equal(Inflector::tabelize('Model'), 'models');
+		$this->assert_equal(Inflector::tabelize('Models'), 'models');
 	}
 
 	public function test_controlize() {
+		$this->assert_equal(Inflector::controlize('default'), 'DefaultController');
+		$this->assert_equal(Inflector::controlize('Models'), 'ModelController');
 	}
-
-	public function test_enclose() {
-	}
-
 }
 
 ?>

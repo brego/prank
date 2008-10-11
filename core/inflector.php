@@ -24,12 +24,12 @@ class Inflector {
 	private function __construct() {}
 	
 /**
- * Return $word in plural form.
+ * Return $string in plural form.
  *
- * @param  string $word Word in singular
+ * @param  string $string Word in singular
  * @return string Word in plural
  */
-	public static function pluralize($word)	{
+	public static function pluralize($string)	{
 		$core_plural_rules = array(
 			'/(s)tatus$/i'             => '\1\2tatuses',
 			'/^(ox)$/i'                => '\1\2en',
@@ -107,29 +107,29 @@ class Inflector {
 		$regex_uninflected = self::enclose(join('|', $uninflected));
 		$regex_irregular   = self::enclose(join('|', array_keys($irregular)));
 
-		if (preg_match('/^('.$regex_uninflected.')$/i', $word, $regs)) {
-			return $word;
+		if (preg_match('/^('.$regex_uninflected.')$/i', $string, $regs)) {
+			return $string;
 		}
 
-		if (preg_match('/(.*)\\b('.$regex_irregular.')$/i', $word, $regs)) {
+		if (preg_match('/(.*)\\b('.$regex_irregular.')$/i', $string, $regs)) {
 			return $regs[1] . $irregular[strtolower($regs[2])];
 		}
 
 		foreach($plural_rules as $rule => $replacement) {
-			if (preg_match($rule, $word)) {
-				return preg_replace($rule, $replacement, $word);
+			if (preg_match($rule, $string)) {
+				return preg_replace($rule, $replacement, $string);
 			}
 		}
-		return $word;
+		return $string;
 	}
 
 /**
- * Return $word in singular form.
+ * Return $string in singular form.
  *
- * @param  string $word Word in plural
+ * @param  string $string Word in plural
  * @return string Word in singular
  */
-	public static function singularize($word)
+	public static function singularize($string)
 	{
 		$core_singular_rules = array(
 			'/(s)tatuses$/i'        => '\1\2tatus',
@@ -216,92 +216,127 @@ class Inflector {
 		$regex_uninflected = self::enclose(join('|', $uninflected));
 		$regex_irregular   = self::enclose(join('|', array_keys($irregular)));
 
-		if (preg_match('/^('.$regex_uninflected.')$/i', $word, $regs)) {
-			return $word;
+		if (preg_match('/^('.$regex_uninflected.')$/i', $string, $regs)) {
+			return $string;
 		}
 
-		if (preg_match('/(.*)\\b('.$regex_irregular . ')$/i', $word, $regs)) {
+		if (preg_match('/(.*)\\b('.$regex_irregular . ')$/i', $string, $regs)) {
 			return $regs[1].$irregular[strtolower($regs[2])];
 		}
 
 		foreach ($singular_rules as $rule => $replacement) {
-			if (preg_match($rule, $word)) {
-				return preg_replace($rule, $replacement, $word);
+			if (preg_match($rule, $string)) {
+				return preg_replace($rule, $replacement, $string);
 			}
 		}
-		return $word;
+		return $string;
 	}
 
 /**
- * Returns given lower_case_and_underscored_word as a CamelCased word.
+ * Returns given string as CamelCase
  *
- * @param  string $word Word to camelize
- * @return string Camelized word. LikeThis.
+ * String an be underscored, or spaced.
+ * 
+ * @param  string $string String to camelize
+ * @return string Camelized word - LikeThis
  */
-	public static function camelize($word)
+	public static function camelcase($string)
 	{
-		return str_replace(" ", "", ucwords(str_replace("_", " ", $word)));
+		return str_replace(" ", "", ucwords(str_replace("_", " ", strtolower($string))));
 	}
 
 /**
- * Returns an underscore-syntaxed (like_this) version of the CamelCased word.
+ * Returns given string as camelBack
  *
- * @param  string $word CamelCased word to be "underscorized"
- * @return string Underscore syntaxed version of the $word
+ * String an be underscored, or spaced.
+ *
+ * @param  string $string String to camelback
+ * @return string Camelbacked word - likeThis
  */
-	public static function underscore($word)
-	{
-		return strtolower(preg_replace('/(?<=\\w)([A-Z])/', '_\\1', $word));
+	public static function camelback($string) {
+		$string = str_replace(" ", "", ucwords(str_replace("_", " ", strtolower($string))));
+		$replace = strtolower(substr($string, 0, 1));
+		return substr_replace($string, $replace, 0, 1);
 	}
 
 /**
- * Returns a human-readable string from $word, by replacing underscores with a
- * space, and by upper-casing the initial character.
+ * Returns the string underscored
+ * 
+ * @param  string $string String to be underscored
+ * @return string Underscored version of the $string
+ */
+	public static function underscore($string)
+	{
+		if (strpos($string, ' ') !== false) {
+			return strtolower(str_replace(' ', '_', $string));
+		} else {
+			return strtolower(preg_replace('/(?<=\\w)([A-Z])/', '_\\1', $string));
+		}
+	}
+
+/**
+ * Returns a human-readable string from $string, by replacing underscores with
+ * a space, and by upper-casing the initial character. Whole string, apart from
+ * the initial character, are lower-cased. CamelCased strings are split by
+ * a space.
  *
- * @param  string $word String to be made more readable
+ * @param  string $string String to be made more readable
  * @return string Human-readable string
  */
-	public static function humanize($word)
+	public static function humanize($string)
 	{
-		return ucfirst(str_replace("_", " ", $word));
+		if (strpos($string, '_') !== false) {
+			return ucfirst(str_replace("_", " ", strtolower($string)));
+		} elseif (strpos($string, ' ') !== false) {
+			return ucfirst(strtolower($string));
+		} else {
+			return ucfirst(strtolower(preg_replace('/(?<=\\w)([A-Z])/', ' \\1', $string)));
+		}
 	}
 
 /**
- * Returns model class name ("Post" for the database table "posts".) for given
- * database table.
+ * Returns model class name ("Post" for the database table "posts") for given
+ * database table name.
  *
- * @param  string $tableName Name of database table to get class name for
- * @return string Singularized and Camelized $word
+ * @param  string $table_name Name of database table to get class name for
+ * @return string Singularized and Camelized $class_name
  */
-	public static function modelize($tableName)
+	public static function modelize($table_name)
 	{
-		return self::camelize(self::singularize($tableName));
+		return self::camelcase(self::singularize($table_name));
 	}
 
 /**
- * Returns corresponding table name for given $className. ("posts" for the model
- * class "Posts" or controller class "Post").
+ * Returns corresponding table name for given $class_name. For example "posts" for the model
+ * class "Post".
  *
- * @param  string $className Name of class to get database table name for
+ * @param  string $class_name Name of class to get database table name for
  * @return string Name of the database table for given class
  */
-	public static function tabelize($className)
+	public static function tabelize($class_name)
 	{
-		return self::pluralize(self::underscore($className));
+		return self::pluralize(self::underscore($class_name));
 	}
 
 /**
- * Returns corresponding controller name for given $word. ("Post" for the model
- * class "Posts" or table "posts").
+ * Returns corresponding controller name for given $string.
  *
- * @param  string $word Name of class to get database table name for
- * @return string Singularized and camelized $word
+ * @param  string $class_name
+ * @return string Singularized and camelized $class_name
  */
-	public static function controlize($className)
+	public static function controlize($class_name)
 	{
-		return self::camelize(self::singularize($className));
+		return self::camelcase(self::singularize($class_name)).'Controller';
 	}
 
+/**
+ * Encloses a string for parsing
+ *
+ * Internal function for singularize and pluralize.
+ * 
+ * @param  string $string 
+ * @return void
+ */
 	private static function enclose($string)
 	{
 		return '(?:' . $string . ')';

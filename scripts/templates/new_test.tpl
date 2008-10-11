@@ -8,11 +8,8 @@ class /**CLASSFILENAME**/TestCase extends PrankTestCase {
 	}
 	
 	public function teardown() {
-	}
-	
-	public function test_() {
-		
-	}
+	}	
+	/**TESTS**/
 }
 
 ?>

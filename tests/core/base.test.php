@@ -13,14 +13,24 @@ class BaseTestCase extends PrankTestCase {
 	}
 	
 	public function test_loader() {
-		loader('Prank::Controller::Base');
-		$this->assert_true(class_exists('Prank::Controller::Base'));
+		loader('Prank::Model::Base');
+		$this->assert_true(class_exists('Prank::Model::Base'));
 	}
 	
 	public function test__() {
+		$string = 'I am printing';
+		ob_start();
+		_($string);
+		$result = ob_get_clean();
+		$this->assert_equal($result, $string);
 	}
 	
 	public function test_d() {
+		$string = 'I am printing';
+		ob_start();
+		d($string);
+		$result = ob_get_clean();
+		$this->assert_equal($result, '<pre>string(13) "'.$string.'"'."\n".'</pre>');
 	}
 
 	public function test_array_cleanup() {
@@ -31,9 +41,19 @@ class BaseTestCase extends PrankTestCase {
 	}
 	
 	public function test_c() {
+		$var = Config::get('DS');
+		$this->assert_equal($var, c('DS'));
+		
+		c('test', 'a');
+		$this->assert_equal(Config::get('test'), 'a');
 	}
 	
 	public function test_rm() {
+		$test_directory = ROOT.'tests'.DS.'tmp'.DS.'rm-test-dir'.DS;
+		mkdir($test_directory);
+		mkdir($test_directory.'some-content-dir');
+		rm($test_directory);
+		$this->assert_false(is_dir($test_directory));
 	}
 	
 	public function test_up() {
@@ -66,6 +86,8 @@ class BaseTestCase extends PrankTestCase {
 		//TEST ME MORE!
 		
 	}
+	
+	// should this be moved to a separate class/file?
 	
 	public function test_css() {
 	}

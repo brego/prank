@@ -25,7 +25,28 @@ class Boot {
 	public  static $controller = null;
 	public  static $action     = null;
 	public  static $params     = array();
-	
+
+/**
+ * Kickstarts the framework
+ *
+ * @param  string $start_point Full path of index.php (__FILE__)
+ * @return void
+ */
+	public static function run($start_point = null) {
+		if (self::$instance === null) {
+			self::$instance = new self($start_point);
+		}
+		return self::$instance;
+	}
+
+/**
+ * Private constructor
+ * 
+ * Initializes the framework, and starts the Controller.
+ *
+ * @param  string $start_point Full path of index.php (__FILE__)
+ * @return void
+ */
 	private function __construct($start_point) {
 		$this->load_base_libs();
 		
@@ -40,12 +61,25 @@ class Boot {
 		$this->run_controller();
 	}
 	
+/**
+ * Loads Config, Inflector and Base
+ *
+ * @return void
+ */
 	private function load_base_libs() {
 		require_once 'config.php';
 		require_once 'inflector.php';
 		require_once 'base.php';
 	}
-	
+
+/**
+ * Sets error reporting
+ *
+ * Depending on $status sets proper error_reporting level.
+ * 
+ * @param  string $status Envoirnmental status
+ * @return void
+ */
 	private function set_error_reporting($status) {
 		switch ($status) {
 			case 'development':
@@ -60,7 +94,15 @@ class Boot {
 				break;
 		}
 	}
-	
+
+/**
+ * Parse given url
+ * 
+ * Parses given url, and adapts it's elements as basic values for booting.
+ *
+ * @param  string $url 
+ * @return void
+ */
 	public function parse_url($url = null) {
 		$path       = array();
 		$controller = null;
@@ -114,7 +156,12 @@ class Boot {
 		self::$action     = $action;
 		self::$params     = $params;
 	}
-	
+
+/**
+ * Runs the Controller determined by Boot::parse_url
+ *
+ * @return void
+ */	
 	private function run_controller() {
 		function partial($name) {
 			require_once c('VIEWS').Boot::$controller.c('DS').'_'.$name.'.php';
@@ -134,12 +181,5 @@ class Boot {
 			print '<p>Exception: '.$e->getMessage().' in '.$e->getFile().' on line '.$e->getLine().".</p>\n";
 			print str_replace("\n", '<br />', $e->getTraceAsString());
 		}
-	}
-	
-	public static function run($start_point = null) {
-		if (self::$instance === null) {
-			self::$instance = new self($start_point);
-		}
-		return self::$instance;
 	}
 }

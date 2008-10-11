@@ -92,6 +92,19 @@ function array_cleanup($array) {
 	return $clean_array;
 }
 
+/**
+ * Interface for Config class
+ *
+ * Acts as a combined interface to Config::get and Config::set methods.
+ * If given two arguments, the first one is treated as a lable for an option,
+ * and the second one as value of that option.
+ * If given an array, treats the array as an array of option=>value pairs to be
+ * added to the configuration.
+ * If given one argument, returns value of a corresponding key in the Config
+ * class.
+ * 
+ * @return mixed
+ */
 function c() {
 	$args = func_get_args();
 	if (is_array($args[0]) && count($args) == 1) {
@@ -103,6 +116,14 @@ function c() {
 	}
 }
 
+/**
+ * Recursively delete a directory
+ * 
+ * Removes specified directory/files.
+ *
+ * @param  string  $target Directory or file to be removed.
+ * @return boolean Result of the removal.
+ */
 function rm($target) {
 	if (is_file($target)) {
 		if (is_writable($target)) {
@@ -170,7 +191,7 @@ function down($string) {
  **/
 function to_controller($name)
 {
-	return ucfirst(down($name)).'Controller';
+	return Inflector::controlize($name);
 }
 
 
