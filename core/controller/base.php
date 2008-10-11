@@ -28,13 +28,6 @@ class Base {
 	public $shortname      = null;
 	public $view_variables = array();
 	
-	public function __call($function, $params) {
-		if (substr($function, 0, 4) == 'set_') {
-			$variable = substr($function, 4);
-			$this->$variable = $params[0];
-		}
-	}
-	
 	public function __set($var, $val) {
 		$this->view_variables[$var] = $val;
 	}

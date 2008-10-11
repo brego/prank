@@ -171,10 +171,10 @@ class Boot {
 			$controller_name   = to_controller(self::$controller);
 			$controller_object = new $controller_name;
 
-			$controller_object->set_action(self::$action);
-			$controller_object->set_view(self::$action);
-			$controller_object->set_params(self::$params);
-			$controller_object->set_shortname(self::$controller);
+			$controller_object->action    = self::$action;
+			$controller_object->view      = self::$action;
+			$controller_object->params    = self::$params;
+			$controller_object->shortname = self::$controller;
 
 			$controller_object->run();
 		} catch (Exception $e) {
