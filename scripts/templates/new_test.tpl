@@ -1,6 +1,6 @@
 <?php
 
-require_once dirname(dirname(dirname(__FILE__))).DS.'/**CLASSFILE**/';
+require_once /**REQUIRE**/.DS.'/**CLASSFILE**/';
 
 class /**CLASSFILENAME**/TestCase extends PrankTestCase {
 	

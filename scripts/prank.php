@@ -63,10 +63,17 @@ function add_test($file, $force=false) {
 			$tests .= "\n\tpublic function test_".$function."() {\n\t}\n";
 		}
 		
+		$directory_count = explode(DS, $file);
+		$require         = 'dirname(__FILE__)';
+		foreach ($directory_count as $value) {
+			$require = 'dirname('.$require.')';
+		}
+		
 		$template  = file_get_contents(ROOT.'scripts'.DS.'templates'.DS.'new_test.tpl');
 		$classname = str_replace(' ', '', ucwords(str_replace(DS, ' ', str_replace('.php', '', $file))));
 		$classname = str_replace('Core', '', $classname);
 		$tags = array(
+			'/**REQUIRE**/'       => $require,
 			'/**CLASSFILE**/'     => $file,
 			'/**CLASSFILENAME**/' => $classname,
 			'/**TESTS**/'         => $tests);
