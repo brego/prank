@@ -1,5 +1,6 @@
 <?php
 
+require_once dirname(dirname(dirname(dirname(dirname(__FILE__))))).DS.'core/model/adapter.php';
 require_once dirname(dirname(dirname(dirname(dirname(__FILE__))))).DS.'core/model/adapters/mysql.php';
 
 use Prank::Model::Connection;
@@ -83,6 +84,10 @@ class ModelAdaptersMysqlTestCase extends PrankTestCase {
 		$this->mysql->delete('users', "name='test1'");
 		$result = $this->db->query("select * from users where name='test1';");
 		$this->assert_equal($result->rowCount(), 0);
+	}
+	
+	public function test_now() {
+		$this->assert_equal($this->mysql->now(), date('Y-m-d H:i:s'));
 	}
 
 }

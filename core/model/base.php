@@ -92,8 +92,14 @@ class Base {
  */
 	public function save() {
 		if ($this->exists_in_table === true) {
+			if ($this->connection->is_column_of('updated_at', $this->table)) {
+				$this->updated_at = $this->connection->now();
+			}
 			$this->connection->update($this->table, $this->data, 'id='.$this->id);
 		} else {
+			if ($this->connection->is_column_of('created_at', $this->table)) {
+				$this->created_at = $this->connection->now();
+			}
 			$this->connection->insert($this->table, $this->data);
 			$this->id = $this->connection->last_insert_id();
 		}

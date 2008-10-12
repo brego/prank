@@ -20,7 +20,7 @@
 
 namespace Prank::Model::Adapters;
 
-class Mysql extends PDO {
+class Mysql extends PDO implements Prank::Model::Adapter {
 	private $columns = array();
 
 /**
@@ -115,6 +115,10 @@ class Mysql extends PDO {
  */
 	public function delete($table, $condition) {
 		return $this->exec('delete from '.$table.' where '.$condition.';');
+	}
+	
+	public function now() {
+		return date('Y-m-d H:i:s');
 	}
 }
 

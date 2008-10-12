@@ -38,6 +38,7 @@ function loader($class_name) {
 		$class_name = str_replace('::', c('DS'), $class_name);
 		$class_name = str_replace('prank'.c('DS'), '', $class_name);
 		
+		
 		if(is_file(c('CORE').$class_name.'.php')) {
 			require_once c('CORE').$class_name.'.php';
 		}
