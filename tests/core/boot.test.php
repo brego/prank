@@ -45,7 +45,7 @@ class BootTestCase extends PrankTestCase {
 		$this->assert_equal(c('CONTROLLERS'), $this->app_dir.'controllers'.DS);
 		$this->assert_equal(c('CONFIG'),      $this->app_dir.'config'.DS);
 		$this->assert_equal(c('WEBROOT'),     $this->app_dir.'webroot'.DS);
-		$this->assert_equal(c('status'),      'test');
+		$this->assert_equal(c('state'),      'test');
 	}
 	
 	public function test_parse_url() {

@@ -70,11 +70,11 @@ class CollectionTestCase extends PrankTestCase {
 		$this->collection->add(new stdClass);
 		$this->assert_equal(count($this->collection), 3);
 	}
-	// Commented for now...
-	// public function test_clear() {
-	// 	$this->collection->clear();
-	// 	$this->assert_equal(count($this->collection), 0);
-	// }
+	
+	public function test_clear() {
+		$this->collection->clear();
+		$this->assert_equal(count($this->collection), 0);
+	}
 }
 
 ?>

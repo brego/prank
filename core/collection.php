@@ -2,8 +2,10 @@
 /**
  * Collection - used to collect items
  * 
- * Collection makes it easy to enclose multiple 
+ * Collection makes it easy to enclose multiple objects in one.
  *
+ * Dev note: this could also be based of off ArrayObject.
+ * 
  * PHP version 5.3.
  *
  * @filesource
@@ -17,10 +19,10 @@
  * @version    Prank 0.10
  */
 
-class Collection extends ArrayObject { // implements Iterator, Countable {
-	// private   $key       = 0;
-	// private   $size      = 0;
-	// private   $items     = array();
+class Collection implements Iterator, Countable {
+	private   $key       = 0;
+	private   $size      = 0;
+	private   $items     = array();
 	protected $item_name = 'item';
 
 /**
@@ -29,11 +31,13 @@ class Collection extends ArrayObject { // implements Iterator, Countable {
  * @param  array $items Items to initially create the collection
  * @return void
  */
-	// public function __construct($items = null) {
-	// 	if (is_array($items)) {
-	// 		parent::__construct($items);
-	// 	}
-	// }
+	public function __construct($items = null) {
+		if (is_array($items)) {
+			foreach ($items as $item) {
+				$this->add($item);
+			}
+		}
+	}
 
 /**
  * Magic internal iterator
@@ -105,36 +109,36 @@ class Collection extends ArrayObject { // implements Iterator, Countable {
 		return (count($return)==0?null:$return);
 	}
 	
-	// public function count() {
-	// 	return $this->size;
-	// }
+	public function count() {
+		return $this->size;
+	}
 
 	/**
 	 * Part of the Iterator, returns current item.
 	 *
 	 * @return mixed Current item from the collection
 	 */
-	// public function current() {
-	// 	return $this->items[$this->key];
-	// }
+	public function current() {
+		return $this->items[$this->key];
+	}
 
 	/**
 	 * Part of the Iterator, moves the set one step forward
 	 *
 	 * @return void
 	 */
-	// public function next() {
-	// 		$this->key++;
-	// 	}
+	public function next() {
+		$this->key++;
+	}
 
 	/**
 	 * Part of the Iterator, moves the set to the beginning
 	 *
 	 * @return void
 	 */
-	// public function rewind() {
-	// 	$this->key = 0;
-	// }
+	public function rewind() {
+		$this->key = 0;
+	}
 
 	/**
 	 * Part of the Iterator, checks if there are any more elements after the
@@ -142,13 +146,13 @@ class Collection extends ArrayObject { // implements Iterator, Countable {
 	 *
 	 * @return boolean
 	 */
-	// public function valid() {
-	// 	if ($this->key >= $this->size) {
-	// 		return false;
-	// 	} else {
-	// 		return true;
-	// 	}
-	// }
+	public function valid() {
+		if ($this->key >= $this->size) {
+			return false;
+		} else {
+			return true;
+		}
+	}
 
 	/**
 	 * This reverses the internal array
@@ -157,19 +161,19 @@ class Collection extends ArrayObject { // implements Iterator, Countable {
 	 *
 	 * @return void
 	 */
-	// public function reverse() {
-	// 	$this->items = array_reverse($this->items);
-	// 	$this->rewind();
-	// }
+	public function reverse() {
+		$this->items = array_reverse($this->items);
+		$this->rewind();
+	}
 
 	/**
 	 * Part of the Iterator, returns the current position in the set
 	 *
 	 * @return integer
 	 */
-	// public function key() {
-	// 	return $this->key;
-	// }
+	public function key() {
+		return $this->key;
+	}
 
 	/**
 	 * Adds new item to the collection
@@ -180,16 +184,15 @@ class Collection extends ArrayObject { // implements Iterator, Countable {
 	 * @return void
 	 */
 	public function add($item) {
-		// $this->items[] = $item;
-		// $this->size++;
-		$this->append($item);
+		$this->items[] = $item;
+		$this->size++;
 	}
 
-	// public function clear() {
-	// 	foreach ($this as $element) {
-	// 		# code...
-	// 	}
-	// }
+	public function clear() {
+		$this->items = array();
+		$this->key   = 0;
+		$this->size  = 0;
+	}
 }
 
 

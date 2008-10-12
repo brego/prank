@@ -56,7 +56,7 @@ class Boot {
 		
 		require_once c('APP').'config'.c('DS').'app.php';
 		
-		$this->set_error_reporting(c('status'));
+		$this->set_error_reporting(c('state'));
 		$this->parse_url(isset($_GET['url']) ? $_GET['url'] : null);
 		$this->run_controller();
 	}

@@ -6,6 +6,6 @@ c('CONTROLLERS', c('APP').'controllers'.c('DS'));
 c('CONFIG',      c('APP').'config'.c('DS'));
 c('WEBROOT',     c('APP').'webroot'.c('DS'));
 
-c('status',      'development');
+c('state',       'development');
 
 ?>

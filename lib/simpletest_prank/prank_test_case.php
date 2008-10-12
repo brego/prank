@@ -42,6 +42,7 @@ class PrankTestCase extends UnitTestCase {
 		$this->controllers_dir         = $this->app_dir.'controllers'.DS;
 		
 		$this->config_file             = $this->config_dir.'app.php';
+		$this->db_config_file          = $this->config_dir.'db.php';
 		$this->index_file              = $this->webroot_dir.'index.php';
 		$this->default_controller_file = $this->controllers_dir.'default.controller.php';
 		
@@ -56,9 +57,12 @@ class PrankTestCase extends UnitTestCase {
 			"c('CONTROLLERS', c('APP').'controllers'.c('DS'));\n".
 			"c('CONFIG',      c('APP').'config'.c('DS'));\n".
 			"c('WEBROOT',     c('APP').'webroot'.c('DS'));\n".
-			"c('status',      'test');\n".
+			"c('state',      'test');\n".
 			"?>";
 		file_put_contents($this->config_file, $sample_app_config);
+		
+		$org_db_config_file = file_get_contents(ROOT.'app'.DS.'config'.DS.'db.php');
+		file_put_contents($this->db_config_file, $org_db_config_file);
 				
 		$default_controller_file = "<?php\n".
 			"class DefaultController extends Prank::Controller::Base {\n".
@@ -75,6 +79,7 @@ class PrankTestCase extends UnitTestCase {
 		$this->instance = null;
 		
 		unlink($this->config_file);
+		unlink($this->db_config_file);
 		unlink($this->index_file);
 		unlink($this->default_controller_file);
 		

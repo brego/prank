@@ -21,10 +21,14 @@
 namespace Prank::Model;
 
 class Connection {
-	private static $instance   = null;
-	private        $connection = null;
-	private        $adapter    = null;
-	
+	private static $instance = null;  
+	private        $adapter  = null;
+
+/**
+ * Singleton accessor
+ *
+ * @return Connection
+ */	
 	public static function instance() {
 		if(self::$instance === null) {
 			self::$instance = new self;
@@ -33,30 +37,80 @@ class Connection {
 	}
 	
 /**
- * Constructor.
+ * Constructor
  *
- * @todo   Implement some sort of environment-detection - use different configs!
- * @todo   Fuck tha exception away from here.
+ * Fetches DB configuration dependent on the 'state' setting in app.php. If
+ * appropriate adapter is available, it's used - else an exception is thrown.
+ * 
  * @return void
  */
 	private function __construct() {
 		$config = ::Config::instance();
 		require_once ::c('CONFIG').'db.php';
-		$params = $config->db[::c('status')];
-		$this->adapter = 'Prank::Model::Adapters::'.ucfirst($params['type']);
+		$params = $config->db[::c('state')];
+		
+		$adapter_class = 'Prank::Model::Adapters::'.ucfirst($params['type']);
 		$dsn           = $params['type'].':host='.$params['host'].';dbname='.$params['db'];
-		if (class_exists($this->adapter)) {
-			$this->connection = new $this->adapter($dsn, $params['user'], $params['password']);
+		
+		if (class_exists($adapter_class)) {
+			$this->adapter = new $adapter_class($dsn, $params['user'], $params['password']);
 		} else {
-			$this->connection = new PDO($dsn, $params['user'], $params['password']);
+			throw new Exception('Adapter of type '.$params['type'].' not found.');
 		}
 	}
-	
-	public function __call($method, $params) {
-		if(method_exists($this->connection, $method)) {
-			return call_user_func_array(array($this->connection, $method), $params);
+
+/**
+ * Returns a query result wrapped in a specified model or a set
+ *
+ * Executes the $query, and if the result is a single row, a new $model is
+ * returned with that row's data. If the result contains more than one row,
+ * a Model::Set is created, and filled with new $model's corresponding to the
+ * returned rows.
+ * If the result is empty, false is returned.
+ * 
+ * @param  string $query 
+ * @param  string $model 
+ * @return mixed
+ */	
+	public function query_wrapped($query, $model) {
+		$result = $this->query($query, PDO::FETCH_ASSOC);
+		
+		if ($result !== false) {
+			if ($result->rowCount() > 1) {
+				$set = new Prank::Model::Set;
+				foreach($result as $row) {
+					$set->add(new $model($row));
+				}
+				return $set;
+			} elseif ($result->rowCount() == 1) {
+				return new $model($result->fetch());
+			} elseif ($result->rowCount() == 0) {
+				return false;
+			} else {
+				throw new Exception('Illogical count of rows returned: '.$result->rowCount());
+			}
 		} else {
-			throw new Prank::Model::Exceptions::UnknownMethod;
+			return false;
+		}
+	}
+
+/**
+ * Member override
+ *
+ * If a method is available in the adapter, it'll be called. If an unknown
+ * method is called, UnknownMethod will be thrown.
+ * 
+ * @param  string $method 
+ * @param  string $params 
+ * @return mixed
+ */	
+	public function __call($method, $params) {
+		if(method_exists($this->adapter, $method)) {
+			return call_user_func_array(array($this->adapter, $method), $params);
+		} elseif (method_exists($this->adapter, ::Inflector::camelback($method))) {
+			return call_user_func_array(array($this->adapter, ::Inflector::camelback($method)), $params);
+		} else {
+			throw new Exception('Unknown method has been called - '.$method);
 		}
 	}
 }

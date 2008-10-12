@@ -2,7 +2,8 @@
 /**
  * MySQL adapter.
  *
- * Provides methods for basic interaction with MySQL databases.
+ * Provides methods for basic interaction with MySQL databases. Extends upon
+ * PDO base class,
  *
  * PHP version 5.3.
  *
@@ -21,11 +22,14 @@ namespace Prank::Model::Adapters;
 
 class Mysql extends PDO {
 	private $columns = array();
-	
-	public function __construct($params, $user, $password) {
-		parent::__construct($params, $user, $password);
-	}
-	
+
+/**
+ * Checks if $column belongs to $table
+ *
+ * @param  string  $column 
+ * @param  string  $table 
+ * @return boolean
+ */	
 	public function is_column_of($column, $table) {
 		$this->columns($table);
 		if (array_search($column, $this->columns[$table]) !== false) {
@@ -34,25 +38,50 @@ class Mysql extends PDO {
 			return false;
 		}
 	}
-	
+
+/**
+ * Fetches column information from the table
+ *
+ * Always fetches the column informtion from the table, and saves them in the
+ * cache.
+ * 
+ * @param  string $table 
+ * @return void
+ */
 	public function fetch_columns($table) {
+		$this->columns[$table] = array();
 		foreach ($this->query('show columns from '.$table.';') as $row) {
 			$this->columns[$table][] = $row[0];
 		}
 		return $this->columns[$table];
 	}
-	
+
+/**
+ * Fetches column informtion from the cache
+ *
+ * Tries to fetch column informtion from the cache, but calls
+ * Mysql::fetch_columns if there's no cache data for this table.
+ * 
+ * @param  string $table 
+ * @return void
+ */
 	public function columns($table) {
 		if (!isset($this->columns[$table])) {
 			$this->fetch_columns($table);
 		}
 		return $this->columns[$table];
 	}
-	
-	public function rowCount() {
-		return parent::rowCount();
-	}
-	
+
+/**
+ * Inserts $data into the $table
+ *
+ * $data is supposed to be an array of key-value pairs with keys corresponding
+ * to the table columns.
+ * 
+ * @param  string $table 
+ * @param  string $data 
+ * @return mixed  Number of affected collumns, or false
+ */
 	public function insert($table, $data) {
 		$prepared_data = array();
 		foreach ($data as $column => $value) {
@@ -60,7 +89,15 @@ class Mysql extends PDO {
 		}
 		return $this->exec('insert into '.$table.' set '.implode(', ', $prepared_data).';');
 	}
-	
+
+/**
+ * Updates a record in the table
+ *
+ * @param  string $table 
+ * @param  string $data 
+ * @param  string $condition 
+ * @return mixed  Number of affected collumns, or false
+ */
 	public function update($table, $data, $condition) {
 		$prepared_data = array();
 		foreach ($data as $column => $value) {
@@ -68,7 +105,14 @@ class Mysql extends PDO {
 		}
 		return $this->exec('update '.$table.' set '.implode(', ', $prepared_data).' where '.$condition.';');
 	}
-	
+
+/**
+ * Deletes from table, with $condition
+ *
+ * @param  string $table 
+ * @param  string $condition 
+ * @return mixed  Number of affected collumns, or false
+ */
 	public function delete($table, $condition) {
 		return $this->exec('delete from '.$table.' where '.$condition.';');
 	}
