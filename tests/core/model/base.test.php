@@ -4,7 +4,9 @@ require_once dirname(dirname(dirname(dirname(__FILE__)))).DS.'core/model/base.ph
 
 use Prank::Model::Connection;
 
-class User extends Prank::Model::Base {
+if (!class_exists('User')) {
+	class User extends Prank::Model::Base {
+	}	
 }
 
 class ModelBaseTestCase extends PrankTestCase {

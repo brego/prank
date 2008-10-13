@@ -78,6 +78,7 @@ class Connection {
 		if ($result !== false) {
 			if ($result->rowCount() > 1) {
 				$set = new Prank::Model::Set;
+				$set->item_name(::Inflector::underscore($model));
 				foreach($result as $row) {
 					$set->add(new $model($row));
 				}

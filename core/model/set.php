@@ -22,6 +22,14 @@ namespace Prank::Model;
 
 class Set extends ::Collection {
 	protected $item_name = 'model';
+	
+	public function item_name($name=null) {
+		if ($name === null) {
+			return $this->item_name;
+		} else {
+			$this->item_name = $name;
+		}
+	}
 }
 
 ?>
