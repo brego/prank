@@ -116,6 +116,16 @@ function c() {
 }
 
 /**
+ * Returns an array composed of given arguments.
+ *
+ * @return array
+ */
+function a() {
+	$args = func_get_args();
+	return $args;
+}
+
+/**
  * Recursively delete a directory
  * 
  * Removes specified directory/files.

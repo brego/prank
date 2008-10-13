@@ -43,6 +43,10 @@ class BaseTestCase extends PrankTestCase {
 		$this->assert_equal(Config::get('test'), 'a');
 	}
 	
+	public function test_a() {
+		$this->assert_equal(a('one', 'two', 'three'), array('one', 'two', 'three'));
+	}
+	
 	public function test_rm() {
 		$test_directory = ROOT.'tests'.DS.'tmp'.DS.'rm-test-dir'.DS;
 		mkdir($test_directory);
