@@ -41,6 +41,17 @@ function add() {
 }
 
 function add_test($file, $force=false) {
+	
+	function __autoload($class_name) {
+		$class_name = strtolower(preg_replace('/(?<=\\w)([A-Z])/', '_\\1', $class_name));
+		$class_name = str_replace('_', DS, $class_name);
+
+		if(is_file(ROOT.'core'.DS.$class_name.'.php')) {
+			require_once ROOT.'core'.DS.$class_name.'.php';
+		}
+	}
+	
+	
 	$test_file = ROOT.'tests'.DS.$file;
 	$test_file = str_replace('.php', '.test.php', $test_file);
 	if (!is_file($test_file) || $force !== false) {

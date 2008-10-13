@@ -38,7 +38,7 @@ class ModelConnectionTestCase extends PrankTestCase {
 	
 	public function test_query_wrapped() {
 		$result = $this->db->query_wrapped('select * from users;', 'User');
-		$this->assert_is_a($result, 'ModelSet');
+		$this->assert_is_a($result, 'Collection');
 		$this->assert_equal($result->item_name(), 'user');
 	}
 

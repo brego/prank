@@ -62,6 +62,32 @@ class CollectionTestCase extends PrankTestCase {
 		$this->assert_equal($result, null);
 	}
 	
+	public function test_each_item_name() {
+		$books = new Collection();
+		$books->item_name('book');
+		
+		$test1 = new stdClass;
+		$test1->name   = 'Test One';
+		$test1->author = 'Test Ones Author';
+		$test2 = new stdClass;
+		$test2->name   = 'Test Two';
+		$test2->author = 'Test Twos Author';
+		
+		$books->add($test1);
+		$books->add($test2);
+		
+		$this->assert_equal(count($books), 2);
+		
+		$result = $books->each(function($book){return $book->name;});
+		$this->assert_equal($result, array('Test One', 'Test Two'));
+		
+		$result = $books->each(function($name){return $name;});
+		$this->assert_equal($result, array('Test One', 'Test Two'));
+		
+		$result = $books->each(function($book, $name){return $name;});
+		$this->assert_equal($result, array('Test One', 'Test Two'));
+	}
+	
 	public function test_count() {
 		$this->assert_equal(count($this->collection), 2);
 	}

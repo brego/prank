@@ -105,7 +105,7 @@ class ModelBaseTestCase extends PrankTestCase {
 
 	public function test___callStatic() {
 		$test = User::find_all();
-		$this->assert_is_a($test, 'ModelSet');
+		$this->assert_is_a($test, 'Collection');
 		$this->assert_equal(count($test), 2);
 		
 		$test = User::find_by_name('test1');

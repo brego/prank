@@ -40,6 +40,20 @@ class Collection implements Iterator, Countable {
 	}
 
 /**
+ * Sets the name of a single item, used in each
+ *
+ * @param  string $name 
+ * @return mixed
+ */
+	public function item_name($name=null) {
+		if ($name === null) {
+			return $this->item_name;
+		} else {
+			$this->item_name = $name;
+		}
+	}
+
+/**
  * Magic internal iterator
  *
  * This method iterates through the Collection, executing the lambda function
@@ -79,19 +93,25 @@ class Collection implements Iterator, Countable {
 		$parameter_names = array();
 		$return          = array();
 		
+		// find the parameters given in lambda
 		foreach ($reflection->getParameters() as $param) {
 			$parameter_names[] = $param->getName();
 		}
 		
-		foreach($this as $item){
+		// loop through the collection
+		foreach ($this as $item) {
 			$parameters = array();
+			
 			if (count($parameter_names)>1) {
 				foreach ($parameter_names as $key => $value) {
 					if ($value == $this->item_name) {
+						// parameter refers to current object
 						$parameters[$key] = $item;
-					} elseif(isset($key->$value)) {
+					} elseif(isset($item->$value)) {
+						// parameter refers to a property
 						$parameters[$key] = $item->$value;
 					} else {
+						// we default to null
 						$parameters[$key] = null;
 					}
 				}
