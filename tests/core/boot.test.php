@@ -16,7 +16,7 @@ class BootTestCase extends PrankTestCase {
 		$this->assert_true(class_exists('Config'));
 		$this->assert_true(class_exists('Inflector'));
 		
-		$this->assert_true(function_exists('loader'));
+		$this->assert_true(function_exists('__autoload'));
 		$this->assert_true(function_exists('_'));
 		$this->assert_true(function_exists('d'));
 		$this->assert_true(function_exists('array_cleanup'));

@@ -3,8 +3,6 @@
 require_once dirname(dirname(dirname(dirname(dirname(__FILE__))))).DS.'core/model/adapter.php';
 require_once dirname(dirname(dirname(dirname(dirname(__FILE__))))).DS.'core/model/adapters/mysql.php';
 
-use Prank::Model::Connection;
-
 class ModelAdaptersMysqlTestCase extends PrankTestCase {
 	public $mysql    = null;
 	public $db       = null;
@@ -12,7 +10,7 @@ class ModelAdaptersMysqlTestCase extends PrankTestCase {
 	
 	public function setup() {
 		$this->setup_prank_spine();
-		$this->db = Connection::instance();
+		$this->db = ModelConnection::instance();
 		$this->db->exec("CREATE TABLE `users` ( 
 		`id` int(11) NOT NULL auto_increment, 
 		`email` varchar(255) default NULL, 
@@ -26,11 +24,11 @@ class ModelAdaptersMysqlTestCase extends PrankTestCase {
 		$this->db->exec("INSERT INTO `users` SET email='test1@email.com', password='testpassword1', name='test1', profile='test1 profile text', created_at=NOW();");
 		$this->db->exec("INSERT INTO `users` SET email='test2@email.com', password='testpassword2', name='test2', profile='test2 profile text', created_at=NOW();");
 		
-		$config = ::Config::instance();
+		$config = Config::instance();
 		require_once ::c('CONFIG').'db.php';
 		$params = $config->db[::c('state')];
 		
-		$adapter     = 'Prank::Model::Adapters::Mysql';
+		$adapter     = 'ModelAdaptersMysql';
 		$dsn         = $params['type'].':host='.$params['host'].';dbname='.$params['db'];
 		$this->mysql = new $adapter($dsn, $params['user'], $params['password']);
 		

@@ -18,9 +18,7 @@
  * @version    Prank 0.10
  */
 
-namespace Prank::Model;
-
-class Base {
+class ModelBase {
 	private $table           = null;
 	private $connection      = null;
 	private $columns         = null;
@@ -45,8 +43,8 @@ class Base {
  * @return void
  */	
 	public function __construct($data = null) {
-		$this->table      = ::Inflector::tabelize(get_called_class());
-		$this->connection = Connection::instance();
+		$this->table      = Inflector::tabelize(get_called_class());
+		$this->connection = ModelConnection::instance();
 		$this->columns    = $this->connection->columns($this->table);
 		
 		if ($data !== null && isset($data['id'])) {
@@ -184,13 +182,13 @@ class Base {
  * @return void
  */
 	public static function __callStatic($method, $arguments) {
-		$connection = Prank::Model::Connection::instance();
+		$connection = ModelConnection::instance();
 		$model      = get_called_class();
-		$table      = ::Inflector::tabelize(get_called_class());
+		$table      = Inflector::tabelize(get_called_class());
 
 
 		if (substr($method, 0, 8) == 'find_by_') {
-			$column = ::down(substr($method, 8));
+			$column = down(substr($method, 8));
 			if ($connection->is_column_of($column, $table)) {
 				$query  = 'select * from `'.$table.'` where `'.$column."`='".$arguments[0]."';";
 				return $connection->query_wrapped($query, $model);

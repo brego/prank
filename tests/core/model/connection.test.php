@@ -2,10 +2,8 @@
 
 require_once dirname(dirname(dirname(dirname(__FILE__)))).DS.'core/model/connection.php';
 
-use Prank::Model::Connection;
-
 if (!class_exists('User')) {
-	class User extends Prank::Model::Base {
+	class User extends ModelBase {
 	}	
 }
 
@@ -13,7 +11,7 @@ class ModelConnectionTestCase extends PrankTestCase {
 	
 	public function setup() {
 		$this->setup_prank_spine();
-		$this->db = Connection::instance();
+		$this->db = ModelConnection::instance();
 		$this->db->exec("CREATE TABLE `users` ( 
 		`id` int(11) NOT NULL auto_increment, 
 		`email` varchar(255) default NULL, 
@@ -35,12 +33,12 @@ class ModelConnectionTestCase extends PrankTestCase {
 	}	
 	
 	public function test_instance() {
-		$this->assert_identical(Connection::instance(), Connection::instance());
+		$this->assert_identical(ModelConnection::instance(), ModelConnection::instance());
 	}
 	
 	public function test_query_wrapped() {
 		$result = $this->db->query_wrapped('select * from users;', 'User');
-		$this->assert_is_a($result, 'Prank::Model::Set');
+		$this->assert_is_a($result, 'ModelSet');
 		$this->assert_equal($result->item_name(), 'user');
 	}
 

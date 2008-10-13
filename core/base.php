@@ -31,11 +31,11 @@
  * @return void
  * @param  string $class_name Name of the class to be loaded.
  **/
-function loader($class_name) {
+function __autoload($class_name) {
 	if (substr($class_name, -10, 10) !== 'Controller') {
 		
 		$class_name = Inflector::underscore($class_name);
-		$class_name = str_replace('::', c('DS'), $class_name);
+		$class_name = str_replace('_', c('DS'), $class_name);
 		$class_name = str_replace('prank'.c('DS'), '', $class_name);
 		
 		if(is_file(c('CORE').$class_name.'.php')) {
@@ -47,7 +47,6 @@ function loader($class_name) {
 		}
 	}
 }
-spl_autoload_register('loader');
 
 /**
  * Shortcut for print.

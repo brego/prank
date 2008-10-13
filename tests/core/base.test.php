@@ -12,11 +12,6 @@ class BaseTestCase extends PrankTestCase {
 		$this->teardown_prank_spine();
 	}
 	
-	public function test_loader() {
-		loader('Prank::Model::Base');
-		$this->assert_true(class_exists('Prank::Model::Base'));
-	}
-	
 	public function test__() {
 		$string = 'I am printing';
 		ob_start();

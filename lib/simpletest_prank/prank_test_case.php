@@ -65,7 +65,7 @@ class PrankTestCase extends UnitTestCase {
 		file_put_contents($this->db_config_file, $org_db_config_file);
 				
 		$default_controller_file = "<?php\n".
-			"class DefaultController extends Prank::Controller::Base {\n".
+			"class DefaultController extends ControllerBase {\n".
 			"public function index() { }\n".
 			"}";
 		file_put_contents($this->default_controller_file, $default_controller_file);

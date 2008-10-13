@@ -1,6 +1,6 @@
 <?php
 
-class DefaultController extends Prank::Controller::Base {
+class DefaultController extends ControllerBase {
 	public function index() {
 		
 		$this->posts = Post::find_all();

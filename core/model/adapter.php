@@ -15,9 +15,7 @@
  * @version    Prank 0.10
  */
 
-namespace Prank::Model;
-
-interface Adapter {
+interface ModelAdapter {
 	
 	public function is_column_of($column, $table);
 	

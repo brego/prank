@@ -18,9 +18,7 @@
  * @version    Prank 0.10
  */
 
-namespace Prank::Model;
-
-class Set extends ::Collection {
+class ModelSet extends Collection {
 	protected $item_name = 'model';
 	
 	public function item_name($name=null) {

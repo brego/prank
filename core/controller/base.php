@@ -18,9 +18,7 @@
  * @version    Prank 0.10
  */
 
-namespace Prank::Controller;
-
-class Base {
+class ControllerBase {
 	public $action         = null;
 	public $view           = null;
 	public $params         = array();
@@ -59,17 +57,17 @@ class Base {
 		
 		ob_start();
 
-		if (file_exists(::c('VIEWS').$this->shortname.::c('DS').$this->view.'.php') && $this->view !== false) {
-			require_once ::c('VIEWS').$this->shortname.::c('DS').$this->view.'.php';
+		if (file_exists(c('VIEWS').$this->shortname.c('DS').$this->view.'.php') && $this->view !== false) {
+			require_once c('VIEWS').$this->shortname.c('DS').$this->view.'.php';
 		}
 		
 		$content_for_layout = ob_get_clean();
 		
 		$content_for_layout = $this->before_layout($content_for_layout);
 			
-		if (file_exists(::c('VIEWS').'layouts'.::c('DS').$this->layout.'.php') && $this->layout !== false) {
+		if (file_exists(c('VIEWS').'layouts'.c('DS').$this->layout.'.php') && $this->layout !== false) {
 			ob_start();
-			require_once ::c('VIEWS').'layouts'.::c('DS').$this->layout.'.php';
+			require_once c('VIEWS').'layouts'.c('DS').$this->layout.'.php';
 			$output = ob_get_clean();
 		} else {
 			$output = $content_for_layout;

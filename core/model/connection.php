@@ -18,9 +18,7 @@
  * @version    Prank 0.10
  */
 
-namespace Prank::Model;
-
-class Connection {
+class ModelConnection {
 	private static $instance = null;  
 	private        $adapter  = null;
 
@@ -45,11 +43,11 @@ class Connection {
  * @return void
  */
 	private function __construct() {
-		$config = ::Config::instance();
-		require_once ::c('CONFIG').'db.php';
-		$params = $config->db[::c('state')];
+		$config = Config::instance();
+		require_once c('CONFIG').'db.php';
+		$params = $config->db[c('state')];
 		
-		$adapter_class = 'Prank::Model::Adapters::'.ucfirst($params['type']);
+		$adapter_class = 'ModelAdapters'.ucfirst($params['type']);
 		$dsn           = $params['type'].':host='.$params['host'].';dbname='.$params['db'];
 		
 		if (class_exists($adapter_class)) {
@@ -77,8 +75,8 @@ class Connection {
 		
 		if ($result !== false) {
 			if ($result->rowCount() > 1) {
-				$set = new Prank::Model::Set;
-				$set->item_name(::Inflector::underscore($model));
+				$set = new ModelSet;
+				$set->item_name(Inflector::underscore($model));
 				foreach($result as $row) {
 					$set->add(new $model($row));
 				}
@@ -108,8 +106,8 @@ class Connection {
 	public function __call($method, $params) {
 		if(method_exists($this->adapter, $method)) {
 			return call_user_func_array(array($this->adapter, $method), $params);
-		} elseif (method_exists($this->adapter, ::Inflector::camelback($method))) {
-			return call_user_func_array(array($this->adapter, ::Inflector::camelback($method)), $params);
+		} elseif (method_exists($this->adapter, Inflector::camelback($method))) {
+			return call_user_func_array(array($this->adapter, Inflector::camelback($method)), $params);
 		} else {
 			throw new Exception('Unknown method has been called - '.$method);
 		}

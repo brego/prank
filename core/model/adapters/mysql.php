@@ -18,9 +18,7 @@
  * @version    Prank 0.10
  */
 
-namespace Prank::Model::Adapters;
-
-class Mysql extends PDO implements Prank::Model::Adapter {
+class ModelAdaptersMysql extends PDO implements ModelAdapter {
 	private $columns = array();
 
 /**

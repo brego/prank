@@ -1,6 +1,6 @@
 <?php
 
-require_once dirname(dirname(dirname(__FILE__))).DS.'core/config.php';
+//require_once dirname(dirname(dirname(__FILE__))).DS.'core/config.php';
 
 class ConfigTestCase extends PrankTestCase {
 	public $instance = null;

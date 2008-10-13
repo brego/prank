@@ -2,7 +2,7 @@
 
 require_once dirname(dirname(dirname(dirname(__FILE__)))).DS.'core/controller/base.php';
 
-class TestController extends Prank::Controller::Base {
+class TestController extends ControllerBase {
 	public function action_one() {
 	}
 }
