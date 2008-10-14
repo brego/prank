@@ -30,6 +30,10 @@ interface ModelAdapter {
 	public function delete($table, $condition);
 	
 	public function now();
+	
+	public function has_many_query($table, $id_name, $id);
+	
+	public function belongs_to_query($table, $id);
 }
 
 ?>

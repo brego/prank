@@ -23,20 +23,36 @@ class ModelBase extends Object {
 	private $connection      = null;
 	private $columns         = null;
 	private $data            = array();
-	// private $relations       = array();
 	private $relational_data = array();
 	private $hollow          = true;
 	private $exists_in_table = false;
-	
 /**
- * Descirbes the one-to-many relationships
+ * If this model is lazy-loaded, contains the loader callable.
+ *
+ * @var mixed
+ */
+	private $loader          = null;	
+/**
+ * Describes the one-to-many relationships
+ * 
+ * An array or a string, containing names of models this model has a relation
+ * to. The names should be in plural, and lowercased.
+ * Names given will be used as names for local properties representing the
+ * collection of related models. The collection is lazy-loaded - the models
+ * will not be instantiated before the collection is called upon.
  *
  * @var mixed
  */
 	protected $has_many   = false;
 /**
- * 
+ * Describes the one-to-one (foreign) relationships
  *
+ * An array or a string, containing names of models this model has a relation
+ * to. The names should be in singular, and lowercased.
+ * Names given will be used as names for local properties representing the
+ * related model. The model is lazy-loaded - the data will not be fetched
+ * before the model is called upon.
+ * 
  * @var mixed
  */
 	protected $belongs_to = false;
@@ -76,22 +92,60 @@ class ModelBase extends Object {
 		$this->belongs_to();
 	}
 
+/**
+ * Registers a lazyload function
+ * 
+ * Function is expected to be a callable (lambda), accepting one parameter,
+ * which will be used to pass reference to the model. Loader function will
+ * run only once, and will be erased afterwards.
+ *
+ * @param  callable $callable 
+ * @return void
+ */
+	public function register_loader($callable) {
+		if (is_callable($callable)) {
+			$this->loader = $callable;
+		} else {
+			throw new Exception('Non-callable function passed as a loader: '.$callable);
+		}
+	}
+
+/**
+ * Runs the lazyload function
+ *
+ * @return void
+ */
+	private function load() {
+		if ($this->loader !== null) {
+			$loader = $this->loader;
+			$loader($this);
+			$this->loader = null;
+		}
+	}
+
+/**
+ * Registers the lazy-load collection as local property
+ *
+ * @return void
+ */
 	private function has_many() {
 		if ($this->has_many !== false) {
+			if (is_array($this->has_many) === false) {
+				$this->has_many = array($this->has_many);
+			}
 			foreach ($this->has_many as $relation) {
-				$external_model = Inflector::modelize($relation);
-				$external_table = Inflector::tabelize($relation);
-				$id_name        = Inflector::singularize($this->table).'_id';
-				$id             = $this->id;
+				$model      = Inflector::modelize($relation);
+				$table      = Inflector::tabelize($relation);
+				$id_name    = Inflector::singularize($this->table).'_id';
+				$id         = $this->id;
 				$collection = new Collection;
 				
-				$collection->register_loader(function($collection) use ($external_model, $external_table, $id_name, $id) {
+				$collection->register_loader(function($collection) use ($model, $table, $id_name, $id) {
 					$connection = ModelConnection::instance();
-					$query = "select * from `".$external_table."` where `".$id_name."`='".$id."';";
-					$result = $connection->query($query, PDO::FETCH_ASSOC);
+					$result     = $connection->has_many_query($table, $id_name, $id);
 					
 					foreach ($result as $object) {
-						$collection->add(new $external_model($object));
+						$collection->add(new $model($object));
 					}
 				});
 				
@@ -99,14 +153,37 @@ class ModelBase extends Object {
 			}
 		}
 	}
-	
-	// private function has_many_activate($relation) {
-	// 	// Link the data here, and fetch it...
-	// 	$this->relational_data[$relation] = new Collection;
-	// }
-	
+
+/**
+ * Registers the lazy-loaded model as local property
+ *
+ * @return void
+ */
 	private function belongs_to() {
-		
+		if ($this->belongs_to !== false) {
+			if (is_array($this->belongs_to) === false) {
+				$this->belongs_to = array($this->belongs_to);
+			}
+			foreach ($this->belongs_to as $relation) {
+				$model   = Inflector::modelize($relation);
+				$table   = Inflector::tabelize($relation);
+				$id_name = Inflector::singularize($relation).'_id';
+			 	$id      = $this->$id_name;
+				$model   = new $model;
+				
+				$model->register_loader(function($model) use ($table, $id) {
+					$connection = ModelConnection::instance();
+					$result     = $connection->belongs_to_query($table, $id);
+					$result     = $result->fetch();					
+					
+					foreach ($result as $variable => $value) {
+						$model->$variable = $value;
+					}
+				});
+				
+				$this->relational_data[$relation] = $model;
+			}
+		}
 	}
 
 /**
@@ -192,30 +269,32 @@ class ModelBase extends Object {
 /**
  * Property overloading - getter
  *
- * Returns value of the field.
+ * Returns value of the field. Be advised that __get calls on a model result in
+ * the lazy-load being run (if applicable).
  * 
  * @param  string $variable 
  * @return void
  */
 	public function __get($variable) {
+		$this->load();
 		if (isset($this->data[$variable])) {
 			return $this->data[$variable];
 		} elseif (isset($this->relational_data[$variable])) {
-			// if (isset($this->relational_data[$variable]) === false) {
-			// 	$method = $this->relations[$variable].'_activate';
-			// 	$this->$method($variable);	
-			// }
 			return $this->relational_data[$variable];
 		}
 	}
 
 /**
- * You can always check if a field is defined by isset.
+ * You can always check if a field is defined by isset
  *
+ * Be advised that isset calls on a model result in the lazy-load being run (if
+ * applicable).
+ * 
  * @param  string $variable 
  * @return void
  */
 	public function __isset($variable) {
+		$this->load();
 		if (isset($this->data[$variable]) || isset($this->relational_data[$variable])) {
 			return true;
 		} else {

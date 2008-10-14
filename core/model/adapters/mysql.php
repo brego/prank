@@ -114,9 +114,39 @@ class ModelAdaptersMysql extends PDO implements ModelAdapter {
 	public function delete($table, $condition) {
 		return $this->exec('delete from '.$table.' where '.$condition.';');
 	}
-	
+
+/**
+ * Returns current time in database-specific format
+ *
+ * @return string
+ */	
 	public function now() {
 		return date('Y-m-d H:i:s');
+	}
+	
+/**
+ * Warapper for a relational one-to-many query
+ *
+ * @param  string $table 
+ * @param  string $id_name 
+ * @param  string $id 
+ * @return PDOStatement
+ */
+	public function has_many_query($table, $id_name, $id) {
+		$query = "select * from `".$table."` where `".$id_name."`='".$id."';";
+		return $this->query($query, PDO::FETCH_ASSOC);
+	}
+
+/**
+ * Wrapper for a relational one-to-one (foreign) query
+ *
+ * @param  string $table
+ * @param  string $id 
+ * @return PDOStatement
+ */
+	public function belongs_to_query($table, $id) {
+		$query = "select * from `".$table."` where `id`='".$id."';";
+		return $this->query($query, PDO::FETCH_ASSOC);
 	}
 }
 

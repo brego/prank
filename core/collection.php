@@ -90,6 +90,8 @@ class Collection implements Iterator, Countable {
  *
  * This method iterates through the Collection, executing the lambda function
  * at each iteration.
+ * Be advised that each calls on a collection result in the lazy-load being run
+ * (if applicable).
  * 
  * Lambda can have a varied number of arguments, which names have significance
  * to what will be passed to them:
@@ -167,6 +169,9 @@ class Collection implements Iterator, Countable {
 /**
  * Implements the Countable interface
  * 
+ * Be advised that count calls on a collection result in the lazy-load being
+ * run (if applicable).
+ * 
  * @return integer Size of the collection
  */	
 	public function count() {
@@ -175,8 +180,11 @@ class Collection implements Iterator, Countable {
 	}
 
 /**
- * Part of the Iterator, returns current item.
+ * Part of the Iterator, returns current item
  *
+ * Be advised that current calls on a collection result in the lazy-load being
+ * run (if applicable).
+ * 
  * @return mixed Current item from the collection
  */
 	public function current() {
@@ -219,7 +227,7 @@ class Collection implements Iterator, Countable {
 /**
  * This reverses the internal array
  *
- * Array gets reversed, and internal pointer gets rewind'ed.
+ * Array gets reversed, and internal pointer gets rewinded.
  *
  * @return void
  */

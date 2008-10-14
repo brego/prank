@@ -45,6 +45,18 @@ class ModelBaseTestCase extends PrankTestCase {
 		}
 	}
 	
+	public function test_belongs_to() {
+		$car = Car::find_by_model('Ford1');
+		$this->assert_is_a($car, 'Car');
+		$this->assert_true(isset($car->user));
+		$this->assert_is_a($car->user, 'User');
+		$this->assert_equal($car->user->name, 'test1');
+		
+		$car = Car::find_by_model('Audi2');
+		$this->assert_true(isset($car->user->name));
+		$this->assert_equal($car->user->name, 'test2');
+	}
+	
 	public function test_hollow() {
 		$test = new User;
 		$this->assert_true($test->hollow());
