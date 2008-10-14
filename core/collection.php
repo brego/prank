@@ -24,6 +24,7 @@ class Collection implements Iterator, Countable {
 	private   $size      = 0;
 	private   $items     = array();
 	protected $item_name = 'item';
+	private   $loader    = null;
 
 /**
  * Constructor
@@ -36,6 +37,37 @@ class Collection implements Iterator, Countable {
 			foreach ($items as $item) {
 				$this->add($item);
 			}
+		}
+	}
+
+/**
+ * Registers a lazyload function
+ * 
+ * Function is expected to be a callable (lambda), accepting one parameter,
+ * which will be used to pass reference to the collection. Loader function will
+ * run only once, and will be erased afterwards.
+ *
+ * @param  callable $callable 
+ * @return void
+ */
+	public function register_loader($callable) {
+		if (is_callable($callable)) {
+			$this->loader = $callable;
+		} else {
+			throw new Exception('Non-callable function passed as a loader: '.$callable);
+		}
+	}
+
+/**
+ * Runs the lazyload function
+ *
+ * @return void
+ */
+	private function load() {
+		if ($this->loader !== null) {
+			$loader = $this->loader;
+			$loader($this);
+			$this->loader = null;
 		}
 	}
 
@@ -98,6 +130,9 @@ class Collection implements Iterator, Countable {
 			$parameter_names[] = $param->getName();
 		}
 		
+		// load eventual lazyload
+		$this->load();
+		
 		// loop through the collection
 		foreach ($this as $item) {
 			$parameters = array();
@@ -128,44 +163,51 @@ class Collection implements Iterator, Countable {
 		}
 		return (count($return)==0?null:$return);
 	}
-	
+
+/**
+ * Implements the Countable interface
+ * 
+ * @return integer Size of the collection
+ */	
 	public function count() {
+		$this->load();
 		return $this->size;
 	}
 
-	/**
-	 * Part of the Iterator, returns current item.
-	 *
-	 * @return mixed Current item from the collection
-	 */
+/**
+ * Part of the Iterator, returns current item.
+ *
+ * @return mixed Current item from the collection
+ */
 	public function current() {
+		$this->load();
 		return $this->items[$this->key];
 	}
 
-	/**
-	 * Part of the Iterator, moves the set one step forward
-	 *
-	 * @return void
-	 */
+/**
+ * Part of the Iterator, moves the set one step forward
+ *
+ * @return void
+ */
 	public function next() {
 		$this->key++;
 	}
 
-	/**
-	 * Part of the Iterator, moves the set to the beginning
-	 *
-	 * @return void
-	 */
+/**
+ * Part of the Iterator, moves the set to the beginning
+ *
+ * @return void
+ */
 	public function rewind() {
 		$this->key = 0;
 	}
 
-	/**
-	 * Part of the Iterator, checks if there are any more elements after the
-	 * current one
-	 *
-	 * @return boolean
-	 */
+/**
+ * Part of the Iterator, checks if there are any more elements after the
+ * current one
+ *
+ * @return boolean
+ */
 	public function valid() {
 		if ($this->key >= $this->size) {
 			return false;
@@ -174,40 +216,45 @@ class Collection implements Iterator, Countable {
 		}
 	}
 
-	/**
-	 * This reverses the internal array
-	 *
-	 * Array gets reversed, and internal pointer gets rewind'ed.
-	 *
-	 * @return void
-	 */
+/**
+ * This reverses the internal array
+ *
+ * Array gets reversed, and internal pointer gets rewind'ed.
+ *
+ * @return void
+ */
 	public function reverse() {
 		$this->items = array_reverse($this->items);
 		$this->rewind();
 	}
 
-	/**
-	 * Part of the Iterator, returns the current position in the set
-	 *
-	 * @return integer
-	 */
+/**
+ * Part of the Iterator, returns the current position in the set
+ *
+ * @return integer
+ */
 	public function key() {
 		return $this->key;
 	}
 
-	/**
-	 * Adds new item to the collection
-	 *
-	 * Adds new item to the collection and ++'s the size of it.
-	 *
-	 * @param  mixed $item
-	 * @return void
-	 */
+/**
+ * Adds new item to the collection
+ *
+ * Adds new item to the collection and ++'s the size of it.
+ *
+ * @param  mixed $item
+ * @return void
+ */
 	public function add($item) {
 		$this->items[] = $item;
 		$this->size++;
 	}
 
+/**
+ * Clears the collection
+ *
+ * @return void
+ */
 	public function clear() {
 		$this->items = array();
 		$this->key   = 0;

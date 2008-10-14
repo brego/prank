@@ -24,6 +24,37 @@ class CollectionTestCase extends PrankTestCase {
 		$this->assert_equal(count($test), 2);
 	}
 	
+	public function test_lazy_load() {
+		$test = new Collection;
+		$test->register_loader(function($collection){
+			$collection->add(new stdClass);
+			$collection->add(new stdClass);
+		});
+		$this->assert_equal(count($test), 2);
+		
+		$test2 = new Collection;
+		$test2->register_loader(function($collection){
+			$collection->add(new stdClass);
+			$collection->add(new stdClass);
+		});
+		foreach ($test2 as $object) {
+			$this->assert_is_a($object, 'stdClass');
+		}
+		
+		$test3 = new Collection;
+		$test3->register_loader(function($collection){
+			$collection->add(new stdClass);
+			$collection->add(new stdClass);
+		});
+		$return = $test3->each(function($object){
+			return $object;
+		});
+		foreach ($return as $object) {
+			$this->assert_is_a($object, 'stdClass');
+		}
+		
+	}
+	
 	public function test_each() {
 		$this->collection->each(function($item){$item->test = strtoupper($item->test);});
 		foreach ($this->collection as $object) {
