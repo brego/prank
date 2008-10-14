@@ -34,10 +34,15 @@ class ModelBaseTestCase extends PrankTestCase {
 	}
 	
 	public function test_has_many() {
-		$user = User::find_by_name('test1');
+		$user = User::find_by_name('test2');
 		$this->assert_is_a($user, 'User');
 		$this->assert_true(isset($user->cars));
 		$this->assert_is_a($user->cars, 'Collection');
+		
+		$this->assert_equal(count($user->cars), 5);
+		foreach ($user->cars as $car) {
+			$this->assert_is_a($car, 'Car');
+		}
 	}
 	
 	public function test_hollow() {

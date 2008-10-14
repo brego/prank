@@ -23,7 +23,7 @@ class ModelBase extends Object {
 	private $connection      = null;
 	private $columns         = null;
 	private $data            = array();
-	private $relations       = array();
+	// private $relations       = array();
 	private $relational_data = array();
 	private $hollow          = true;
 	private $exists_in_table = false;
@@ -79,15 +79,31 @@ class ModelBase extends Object {
 	private function has_many() {
 		if ($this->has_many !== false) {
 			foreach ($this->has_many as $relation) {
-				$this->relations[$relation] = 'has_many';
+				$external_model = Inflector::modelize($relation);
+				$external_table = Inflector::tabelize($relation);
+				$id_name        = Inflector::singularize($this->table).'_id';
+				$id             = $this->id;
+				$collection = new Collection;
+				
+				$collection->register_loader(function($collection) use ($external_model, $external_table, $id_name, $id) {
+					$connection = ModelConnection::instance();
+					$query = "select * from `".$external_table."` where `".$id_name."`='".$id."';";
+					$result = $connection->query($query, PDO::FETCH_ASSOC);
+					
+					foreach ($result as $object) {
+						$collection->add(new $external_model($object));
+					}
+				});
+				
+				$this->relational_data[$relation] = $collection;
 			}
 		}
 	}
 	
-	private function has_many_activate($relation) {
-		// Link the data here, and fetch it...
-		$this->relational_data[$relation] = new Collection;
-	}
+	// private function has_many_activate($relation) {
+	// 	// Link the data here, and fetch it...
+	// 	$this->relational_data[$relation] = new Collection;
+	// }
 	
 	private function belongs_to() {
 		
@@ -184,11 +200,11 @@ class ModelBase extends Object {
 	public function __get($variable) {
 		if (isset($this->data[$variable])) {
 			return $this->data[$variable];
-		} elseif (isset($this->relations[$variable])) {
-			if (isset($this->relational_data[$variable]) === false) {
-				$method = $this->relations[$variable].'_activate';
-				$this->$method($variable);	
-			}
+		} elseif (isset($this->relational_data[$variable])) {
+			// if (isset($this->relational_data[$variable]) === false) {
+			// 	$method = $this->relations[$variable].'_activate';
+			// 	$this->$method($variable);	
+			// }
 			return $this->relational_data[$variable];
 		}
 	}
@@ -200,7 +216,7 @@ class ModelBase extends Object {
  * @return void
  */
 	public function __isset($variable) {
-		if (isset($this->data[$variable]) || isset($this->relations[$variable])) {
+		if (isset($this->data[$variable]) || isset($this->relational_data[$variable])) {
 			return true;
 		} else {
 			return false;
