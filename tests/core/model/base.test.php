@@ -1,7 +1,9 @@
 <?php
 
+require_once dirname(dirname(dirname(dirname(__FILE__)))).DS.'core/object.php';
 require_once dirname(dirname(dirname(dirname(__FILE__)))).DS.'core/model/base.php';
 require_once '_user.model.php';
+require_once '_car.model.php';
 
 class ModelBaseTestCase extends PrankTestCase {
 	public $db = null;
@@ -10,11 +12,13 @@ class ModelBaseTestCase extends PrankTestCase {
 		$this->setup_prank_spine();
 		$this->db = ModelConnection::instance();
 		require '_users.table.php';
+		require '_cars.table.php';
 	}
 	
 	public function teardown() {
 		$this->teardown_prank_spine();
 		$this->db->exec('DROP TABLE `users`;');
+		$this->db->exec('DROP TABLE `cars`;');
 	}	
 	
 	public function test___construct() {
@@ -27,6 +31,13 @@ class ModelBaseTestCase extends PrankTestCase {
 		
 		$test = new User;
 		$this->assert_equal($test->fields(), $columns);
+	}
+	
+	public function test_has_many() {
+		$user = User::find_by_name('test1');
+		$this->assert_is_a($user, 'User');
+		$this->assert_true(isset($user->cars));
+		$this->assert_is_a($user->cars, 'Collection');
 	}
 	
 	public function test_hollow() {

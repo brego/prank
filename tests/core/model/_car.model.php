@@ -2,8 +2,8 @@
 
 require_once dirname(dirname(dirname(dirname(__FILE__)))).DS.'core/model/base.php';
 
-class User extends ModelBase {
-	protected $has_many = array('cars');
+class Car extends ModelBase {
+	protected $belongs_to = array('user');
 }
 
 ?>

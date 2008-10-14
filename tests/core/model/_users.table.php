@@ -11,7 +11,10 @@ $this->db->exec("CREATE TABLE `users` (
 `updated_at` datetime default NULL,
 PRIMARY KEY (`id`) 
 ) ENGINE=InnoDB");
+$ids = array();
 $this->db->exec("INSERT INTO `users` SET email='test1@email.com', password='testpassword1', name='test1', profile='test1 profile text', created_at=NOW();");
+$ids[] = $this->db->lastInsertId();
 $this->db->exec("INSERT INTO `users` SET email='test2@email.com', password='testpassword2', name='test2', profile='test2 profile text', created_at=NOW();");
+$ids[] = $this->db->lastInsertId();
 
 ?>

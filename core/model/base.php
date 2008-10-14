@@ -18,13 +18,28 @@
  * @version    Prank 0.10
  */
 
-class ModelBase {
+class ModelBase extends Object {
 	private $table           = null;
 	private $connection      = null;
 	private $columns         = null;
 	private $data            = array();
+	private $relations       = array();
+	private $relational_data = array();
 	private $hollow          = true;
 	private $exists_in_table = false;
+	
+/**
+ * Descirbes the one-to-many relationships
+ *
+ * @var mixed
+ */
+	protected $has_many   = false;
+/**
+ * 
+ *
+ * @var mixed
+ */
+	protected $belongs_to = false;
 
 /**
  * Constructor
@@ -56,6 +71,26 @@ class ModelBase {
 				$this->$column = $data[$column];
 			}
 		}
+		
+		$this->has_many();
+		$this->belongs_to();
+	}
+
+	private function has_many() {
+		if ($this->has_many !== false) {
+			foreach ($this->has_many as $relation) {
+				$this->relations[$relation] = 'has_many';
+			}
+		}
+	}
+	
+	private function has_many_activate($relation) {
+		// Link the data here, and fetch it...
+		$this->relational_data[$relation] = new Collection;
+	}
+	
+	private function belongs_to() {
+		
 	}
 
 /**
@@ -117,7 +152,7 @@ class ModelBase {
 		if ($method === 'delete' && $this->exists_in_table === true) {
 			return $this->connection->delete($this->table, 'id='.$this->id);
 		} else {
-			throw new Exception('Unknown method called.');
+			throw new Exception('Unknown method "'.$method.'" called.');
 		}
 	}
 
@@ -147,8 +182,14 @@ class ModelBase {
  * @return void
  */
 	public function __get($variable) {
-		if (isset($this->$variable)) {
+		if (isset($this->data[$variable])) {
 			return $this->data[$variable];
+		} elseif (isset($this->relations[$variable])) {
+			if (isset($this->relational_data[$variable]) === false) {
+				$method = $this->relations[$variable].'_activate';
+				$this->$method($variable);	
+			}
+			return $this->relational_data[$variable];
 		}
 	}
 
@@ -159,7 +200,7 @@ class ModelBase {
  * @return void
  */
 	public function __isset($variable) {
-		if (isset($this->data[$variable])) {
+		if (isset($this->data[$variable]) || isset($this->relations[$variable])) {
 			return true;
 		} else {
 			return false;
