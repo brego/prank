@@ -8,7 +8,7 @@ class PrankTestCollector extends SimpleCollector {
 			$file = $this->_removeTrailingSlash($file);
 	        if ($handle = opendir($file)) {
 	            while (($entry = readdir($handle)) !== false) {
-	                if ($this->_isHidden($entry)) {
+	                if ($this->_isHidden($entry) || (strncmp($entry, '_', 1) == 0)) {
 	                    continue;
 	                }
 	                $this->_handle($test, $file . DIRECTORY_SEPARATOR . $entry);
