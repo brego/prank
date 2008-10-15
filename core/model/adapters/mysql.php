@@ -138,7 +138,20 @@ class ModelAdaptersMysql extends PDO implements ModelAdapter {
 	}
 
 /**
- * Wrapper for a relational one-to-one (foreign) query
+ * Warapper for a relational one-to-one (foreign) query
+ *
+ * @param  string $table 
+ * @param  string $id_name 
+ * @param  string $id 
+ * @return PDOStatement
+ */
+	public function has_one_query($table, $id_name, $id) {
+		$query = "select * from `".$table."` where `".$id_name."`='".$id."' limit 1;";
+		return $this->query($query, PDO::FETCH_ASSOC);
+	}
+
+/**
+ * Wrapper for a relational one-to-one (local) query
  *
  * @param  string $table
  * @param  string $id 

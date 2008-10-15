@@ -24,8 +24,10 @@ class ModelBase extends Object {
 	private $columns         = null;
 	private $data            = array();
 	private $relational_data = array();
+	private $relationals_loaded = false;
 	private $hollow          = true;
 	private $exists_in_table = false;
+	private $registry        = null;
 /**
  * If this model is lazy-loaded, contains the loader callable.
  *
@@ -43,7 +45,7 @@ class ModelBase extends Object {
  *
  * @var mixed
  */
-	protected $has_many   = false;
+	protected $has_many      = false;
 /**
  * Describes the one-to-one (foreign) relationships
  *
@@ -55,7 +57,19 @@ class ModelBase extends Object {
  * 
  * @var mixed
  */
-	protected $belongs_to = false;
+	protected $has_one       = false;
+/**
+ * Describes the one-to-one (local) relationships
+ *
+ * An array or a string, containing names of models this model has a relation
+ * to. The names should be in singular, and lowercased.
+ * Names given will be used as names for local properties representing the
+ * related model. The model is lazy-loaded - the data will not be fetched
+ * before the model is called upon.
+ * 
+ * @var mixed
+ */
+	protected $belongs_to    = false;
 
 /**
  * Constructor
@@ -77,6 +91,9 @@ class ModelBase extends Object {
 		$this->table      = Inflector::tabelize(get_called_class());
 		$this->connection = ModelConnection::instance();
 		$this->columns    = $this->connection->columns($this->table);
+		$this->registry   = ModelRegistry::instance();
+		
+		// print 'new model '.get_called_class()."\n";
 		
 		if ($data !== null && isset($data['id'])) {
 			$this->exists_in_table = true;
@@ -88,9 +105,16 @@ class ModelBase extends Object {
 			}
 		}
 		
-		$this->has_many();
-		$this->belongs_to();
+		// if ($this->exists_in_table === true) {
+		// 	$model = strtolower(get_called_class());
+		// 	$this->registry->register($model, $this->id, &$this);
+		// }
+		
+		// $this->has_many();
+		// $this->belongs_to();
+		// $this->has_one();
 	}
+
 
 /**
  * Registers a lazyload function
@@ -121,6 +145,12 @@ class ModelBase extends Object {
 			$loader($this);
 			$this->loader = null;
 		}
+		if ($this->relationals_loaded === false) {
+			$this->has_many();
+			$this->has_one();
+			$this->belongs_to();
+			$this->relationals_loaded = true;
+		}
 	}
 
 /**
@@ -129,27 +159,64 @@ class ModelBase extends Object {
  * @return void
  */
 	private function has_many() {
-		if ($this->has_many !== false) {
+		if ($this->has_many !== false && $this->exists_in_table === true) {
 			if (is_array($this->has_many) === false) {
 				$this->has_many = array($this->has_many);
 			}
 			foreach ($this->has_many as $relation) {
-				$model      = Inflector::modelize($relation);
-				$table      = Inflector::tabelize($relation);
-				$id_name    = Inflector::singularize($this->table).'_id';
-				$id         = $this->id;
-				$collection = new Collection;
+				if (isset($this->relational_data[$relation]) === false) {
+					$model      = Inflector::modelize($relation);
+					$table      = Inflector::tabelize($relation);
+					$id_name    = Inflector::singularize($this->table).'_id';
+					$id         = $this->data['id'];
+					$collection = new Collection;
 				
-				$collection->register_loader(function($collection) use ($model, $table, $id_name, $id) {
-					$connection = ModelConnection::instance();
-					$result     = $connection->has_many_query($table, $id_name, $id);
+					$collection->register_loader(function($internal) use ($model, $table, $id_name, $id) {
+						$connection = ModelConnection::instance();
+						$result     = $connection->has_many_query($table, $id_name, $id);
 					
-					foreach ($result as $object) {
-						$collection->add(new $model($object));
-					}
-				});
+						foreach ($result as $object) {
+							$internal->add(new $model($object));
+						}
+					});
 				
-				$this->relational_data[$relation] = $collection;
+					$this->relational_data[$relation] = $collection;
+				}
+			}
+		}
+	}
+
+
+/**
+ * Registers the lazy-loaded model as local property
+ *
+ * @return void
+ */
+	private function has_one() {
+		if ($this->has_one !== false && $this->exists_in_table === true) {
+			if (is_array($this->has_one) === false) {
+				$this->has_one = array($this->has_one);
+			}
+			foreach ($this->has_one as $relation) {
+				if (isset($this->relational_data[$relation]) === false) {
+					$model   = Inflector::modelize($relation);
+					$table   = Inflector::tabelize($relation);
+					$id_name = Inflector::singularize($this->table).'_id';
+				 	$id      = $this->data['id'];
+					$model   = new $model;
+					
+					$model->register_loader(function($internal) use ($table, $id_name, $id) {
+						$connection = ModelConnection::instance();
+						$result     = $connection->has_one_query($table, $id_name, $id);
+						$result     = $result->fetch();
+											
+						foreach ($result as $variable => $value) {
+							$internal->$variable = $value;
+						}
+					});
+					
+					$this->relational_data[$relation] = $model;
+				}
 			}
 		}
 	}
@@ -160,28 +227,30 @@ class ModelBase extends Object {
  * @return void
  */
 	private function belongs_to() {
-		if ($this->belongs_to !== false) {
+		if ($this->belongs_to !== false && $this->exists_in_table === true) {
 			if (is_array($this->belongs_to) === false) {
 				$this->belongs_to = array($this->belongs_to);
 			}
 			foreach ($this->belongs_to as $relation) {
-				$model   = Inflector::modelize($relation);
-				$table   = Inflector::tabelize($relation);
-				$id_name = Inflector::singularize($relation).'_id';
-			 	$id      = $this->$id_name;
-				$model   = new $model;
+				if (isset($this->relational_data[$relation]) === false) {
+					$model   = Inflector::modelize($relation);
+					$table   = Inflector::tabelize($relation);
+					$id_name = Inflector::singularize($relation).'_id';
+				 	$id      = $this->data[$id_name];
+					$model   = new $model;
 				
-				$model->register_loader(function($model) use ($table, $id) {
-					$connection = ModelConnection::instance();
-					$result     = $connection->belongs_to_query($table, $id);
-					$result     = $result->fetch();					
+					$model->register_loader(function($internal) use ($table, $id) {
+						$connection = ModelConnection::instance();
+						$result     = $connection->belongs_to_query($table, $id);
+						$result     = $result->fetch();					
 					
-					foreach ($result as $variable => $value) {
-						$model->$variable = $value;
-					}
-				});
+						foreach ($result as $variable => $value) {
+							$internal->$variable = $value;
+						}
+					});
 				
-				$this->relational_data[$relation] = $model;
+					$this->relational_data[$relation] = $model;
+				}
 			}
 		}
 	}

@@ -4,6 +4,7 @@ require_once dirname(dirname(dirname(dirname(__FILE__)))).DS.'core/object.php';
 require_once dirname(dirname(dirname(dirname(__FILE__)))).DS.'core/model/base.php';
 require_once '_user.model.php';
 require_once '_car.model.php';
+require_once '_profile.model.php';
 
 class ModelBaseTestCase extends PrankTestCase {
 	public $db = null;
@@ -13,19 +14,21 @@ class ModelBaseTestCase extends PrankTestCase {
 		$this->db = ModelConnection::instance();
 		require '_users.table.php';
 		require '_cars.table.php';
+		require '_profiles.table.php';
 	}
 	
 	public function teardown() {
 		$this->teardown_prank_spine();
 		$this->db->exec('DROP TABLE `users`;');
 		$this->db->exec('DROP TABLE `cars`;');
+		$this->db->exec('DROP TABLE `profiles`;');
 	}	
 	
 	public function test___construct() {
 		$table = Inflector::tabelize('User');
 		$this->assert_equal($table, 'users');
 		
-		$columns = array('id', 'email', 'password', 'name', 'profile', 'admin', 'created_at');
+		$columns = array('id', 'email', 'password', 'name', 'admin', 'created_at');
 		$columns = $this->db->columns($table);
 		$this->assert_equal($columns, $columns);
 		
@@ -45,6 +48,17 @@ class ModelBaseTestCase extends PrankTestCase {
 		}
 	}
 	
+	public function test_has_one() {
+		$user = User::find_by_name('test1');
+		$this->assert_is_a($user, 'User');
+		$this->assert_true(isset($user->profile));
+		$this->assert_is_a($user->profile, 'Profile');
+		$this->assert_equal($user->profile->title, 'title1');
+		
+		$user = User::find_by_name('test2');
+		$this->assert_equal($user->profile->title, 'title2');
+	}
+	
 	public function test_belongs_to() {
 		$car = Car::find_by_model('Ford1');
 		$this->assert_is_a($car, 'Car');
@@ -55,6 +69,21 @@ class ModelBaseTestCase extends PrankTestCase {
 		$car = Car::find_by_model('Audi2');
 		$this->assert_true(isset($car->user->name));
 		$this->assert_equal($car->user->name, 'test2');
+	}
+	// 
+	// public function test_has_and_belongs_to_many() {
+	// 	
+	// }
+	
+	// public function test_relationship_references() {
+	// 	$user1 =& User::find_by_name('test1');
+	// 	$user2 =& User::find_by_name('test1');
+	// 	$this->assert_reference(&$user1, &$user2);
+	// }
+	
+	public function test_perpetuum_relations() {
+		$user = User::find_by_name('test1');
+		$this->assert_false(isset($user->profile->user));
 	}
 	
 	public function test_hollow() {

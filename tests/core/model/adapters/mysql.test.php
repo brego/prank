@@ -22,7 +22,7 @@ class ModelAdaptersMysqlTestCase extends PrankTestCase {
 		$dsn         = $params['type'].':host='.$params['host'].';dbname='.$params['db'];
 		$this->mysql = new $adapter($dsn, $params['user'], $params['password']);
 		
-		$this->collumns = array('id', 'email', 'password', 'name', 'profile', 'admin', 'created_at', 'updated_at');
+		$this->collumns = array('id', 'email', 'password', 'name', 'admin', 'created_at', 'updated_at');
 	}
 	
 	public function teardown() {
