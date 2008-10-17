@@ -26,7 +26,8 @@ class Object {
 /**
  * Extend - add a method to a class
  *
- * The $method's first param will be replaced with $this.
+ * The $method's first param will be replaced with $this or name of the called 
+ * class (get_called_class()) if called in a static context.
  * 
  * @param  string $name   Name the method will be called in class.
  * @param  string $method A callable function/method.
@@ -52,6 +53,20 @@ class Object {
 	}
 
 /**
+ * Prototype for __callStatic
+ * 
+ * If extending __callStatic locally, remember to use
+ * Object::register_static_extensions().
+ *
+ * @param  string $method 
+ * @param  string $args 
+ * @return mixed
+ */	
+	public static function __callStatic($method, $args) {
+		return self::register_static_extensions($method, $args);
+	}
+
+/**
  * Registers extension functions (mixins)
  * 
  * Useful when local __call needs to be defined. Remember to return the return
@@ -64,6 +79,26 @@ class Object {
 	private function register_extensions($method, $args) {
 		if (isset(self::$methods[$method])) {
 			array_unshift($args, $this);
+			return call_user_func_array(self::$methods[$method], $args);
+		} else {
+			throw new Exception('Unknown method');
+		}
+	}
+
+/**
+ * Registers static extension functions (mixins)
+ * 
+ * Useful when local __callStatic needs to be defined. Remember to return the
+ * return of this function. If $method is not registered, throws a new
+ * Exception.
+ *
+ * @param  string $method Method to be called (from self::$methods)
+ * @param  array  $args Arguments for the method
+ * @return mixed
+ */
+	private static function register_static_extensions($method, $args) {
+		if (isset(self::$methods[$method])) {
+			array_unshift($args, get_called_class());
 			return call_user_func_array(self::$methods[$method], $args);
 		} else {
 			throw new Exception('Unknown method');
