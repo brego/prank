@@ -36,6 +36,8 @@ interface ModelAdapter {
 	public function has_one_query($table, $id_name, $id);
 		
 	public function belongs_to_query($table, $id);
+	
+	public function has_and_belongs_to_many_query($local_table, $foreign_table, $join_table, $local_id, $foreign_id, $id);
 }
 
 ?>

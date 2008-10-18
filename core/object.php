@@ -45,11 +45,11 @@ class Object {
  * If extending __call locally, remember to use Object::register_extensions().
  *
  * @param  string $method 
- * @param  string $args 
+ * @param  string $arguments 
  * @return mixed
  */	
-	public function __call($method, $args) {
-		return $this->register_extensions($method, $args);
+	public function __call($method, $arguments) {
+		return $this->register_extensions($method, $arguments);
 	}
 
 /**
@@ -59,11 +59,11 @@ class Object {
  * Object::register_static_extensions().
  *
  * @param  string $method 
- * @param  string $args 
+ * @param  string $arguments 
  * @return mixed
  */	
-	public static function __callStatic($method, $args) {
-		return self::register_static_extensions($method, $args);
+	public static function __callStatic($method, $arguments) {
+		return self::register_static_extensions($method, $arguments);
 	}
 
 /**
@@ -72,16 +72,16 @@ class Object {
  * Useful when local __call needs to be defined. Remember to return the return
  * of this function. If $method is not registered, throws a new Exception.
  *
- * @param  string $method Method to be called (from self::$methods)
- * @param  array  $args Arguments for the method
+ * @param  string $method    Method to be called (from self::$methods)
+ * @param  array  $arguments Arguments for the method
  * @return mixed
  */	
-	private function register_extensions($method, $args) {
+	private function register_extensions($method, $arguments) {
 		if (isset(self::$methods[$method])) {
-			array_unshift($args, $this);
-			return call_user_func_array(self::$methods[$method], $args);
+			array_unshift($arguments, $this);
+			return call_user_func_array(self::$methods[$method], $arguments);
 		} else {
-			throw new Exception('Unknown method');
+			throw new Exception('Unknown method '.$method.' called.');
 		}
 	}
 
@@ -92,16 +92,16 @@ class Object {
  * return of this function. If $method is not registered, throws a new
  * Exception.
  *
- * @param  string $method Method to be called (from self::$methods)
- * @param  array  $args Arguments for the method
+ * @param  string $method    Method to be called (from self::$methods)
+ * @param  array  $arguments Arguments for the method
  * @return mixed
  */
-	private static function register_static_extensions($method, $args) {
+	private static function register_static_extensions($method, $arguments) {
 		if (isset(self::$methods[$method])) {
-			array_unshift($args, get_called_class());
-			return call_user_func_array(self::$methods[$method], $args);
+			array_unshift($arguments, get_called_class());
+			return call_user_func_array(self::$methods[$method], $arguments);
 		} else {
-			throw new Exception('Unknown method');
+			throw new Exception('Unknown method '.$method.' called.');
 		}
 	}
 }

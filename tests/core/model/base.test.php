@@ -2,9 +2,11 @@
 
 require_once dirname(dirname(dirname(dirname(__FILE__)))).DS.'core/object.php';
 require_once dirname(dirname(dirname(dirname(__FILE__)))).DS.'core/model/base.php';
-require_once '_user.model.php';
-require_once '_car.model.php';
-require_once '_profile.model.php';
+require_once 'mocks/_user.model.php';
+require_once 'mocks/_car.model.php';
+require_once 'mocks/_profile.model.php';
+require_once 'mocks/_author.model.php';
+require_once 'mocks/_article.model.php';
 
 class ModelBaseTestCase extends PrankTestCase {
 	public $db = null;
@@ -12,9 +14,10 @@ class ModelBaseTestCase extends PrankTestCase {
 	public function setup() {
 		$this->setup_prank_spine();
 		$this->db = ModelConnection::instance();
-		require '_users.table.php';
-		require '_cars.table.php';
-		require '_profiles.table.php';
+		require 'mocks/_users.table.php';
+		require 'mocks/_cars.table.php';
+		require 'mocks/_profiles.table.php';
+		require 'mocks/_habtm.tables.php';
 	}
 	
 	public function teardown() {
@@ -22,6 +25,9 @@ class ModelBaseTestCase extends PrankTestCase {
 		$this->db->exec('DROP TABLE `users`;');
 		$this->db->exec('DROP TABLE `cars`;');
 		$this->db->exec('DROP TABLE `profiles`;');
+		$this->db->exec('DROP TABLE `authors`;');
+		$this->db->exec('DROP TABLE `articles`;');
+		$this->db->exec('DROP TABLE `articles_authors`;');
 	}	
 	
 	public function test___construct() {
@@ -34,23 +40,27 @@ class ModelBaseTestCase extends PrankTestCase {
 		
 		$test = new User;
 		$this->assert_equal($test->fields(), $columns);
+		$this->assert_false($test->exists());
 	}
 	
 	public function test_has_many() {
 		$user = User::find_by_name('test2');
 		$this->assert_is_a($user, 'User');
+		$this->assert_true($user->exists());
 		$this->assert_true(isset($user->cars));
 		$this->assert_is_a($user->cars, 'Collection');
 		
 		$this->assert_equal(count($user->cars), 5);
 		foreach ($user->cars as $car) {
 			$this->assert_is_a($car, 'Car');
+			$this->assert_true($car->exists());
 		}
 	}
 	
 	public function test_has_one() {
 		$user = User::find_by_name('test1');
 		$this->assert_is_a($user, 'User');
+		$this->assert_true($user->exists());
 		$this->assert_true(isset($user->profile));
 		$this->assert_is_a($user->profile, 'Profile');
 		$this->assert_equal($user->profile->title, 'title1');
@@ -62,24 +72,40 @@ class ModelBaseTestCase extends PrankTestCase {
 	public function test_belongs_to() {
 		$car = Car::find_by_model('Ford1');
 		$this->assert_is_a($car, 'Car');
+		$this->assert_true($car->exists());
 		$this->assert_true(isset($car->user));
 		$this->assert_is_a($car->user, 'User');
 		$this->assert_equal($car->user->name, 'test1');
 		
 		$car = Car::find_by_model('Audi2');
+		$this->assert_true($car->exists());
 		$this->assert_true(isset($car->user->name));
 		$this->assert_equal($car->user->name, 'test2');
 	}
-	// 
-	// public function test_has_and_belongs_to_many() {
-	// 	
-	// }
 	
-	// public function test_relationship_references() {
-	// 	$user1 =& User::find_by_name('test1');
-	// 	$user2 =& User::find_by_name('test1');
-	// 	$this->assert_reference(&$user1, &$user2);
-	// }
+	public function test_has_and_belongs_to_many() {
+		$john = Author::find_by_name('John');
+		$this->assert_is_a($john, 'Author');
+		$this->assert_true($john->exists());
+		$this->assert_true(isset($john->articles));
+		$this->assert_is_a($john->articles, 'Collection');
+		$this->assert_equal(count($john->articles), 2);
+		$johns_articles = $john->articles->each(function($name) {
+			return $name;
+		});
+		$this->assert_equal($johns_articles, a('Fantasia', 'Robinson'));
+		
+		$fantasia = Article::find_by_name('Fantasia');
+		$this->assert_is_a($fantasia, 'Article');
+		$this->assert_true($fantasia->exists());
+		$this->assert_true(isset($fantasia->authors));
+		$this->assert_is_a($fantasia->authors, 'Collection');
+		$this->assert_equal(count($fantasia->authors), 2);
+		$fantasias_authors = $fantasia->authors->each(function($name) {
+			return $name;
+		});
+		$this->assert_equal($fantasias_authors, a('John', 'Patric'));
+	}
 	
 	public function test_perpetuum_relations() {
 		$user = User::find_by_name('test1');

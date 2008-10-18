@@ -161,6 +161,15 @@ class ModelAdaptersMysql extends PDO implements ModelAdapter {
 		$query = "select * from `".$table."` where `id`='".$id."';";
 		return $this->query($query, PDO::FETCH_ASSOC);
 	}
+	
+	public function has_and_belongs_to_many_query($local_table, $foreign_table, $join_table, $local_id, $foreign_id, $id) {
+		$query =  "SELECT * FROM `".$local_table."`, `".$foreign_table."`, `".$join_table."` WHERE ".$local_table.".id = '".$id."' AND ".$join_table.".".$local_id." = ".$local_table.".id AND ".$join_table.".".$foreign_id." = ".$foreign_table.".id;";
+		// print $query."\n\n";
+		$ret = $this->query($query, PDO::FETCH_ASSOC);
+		// var_dump($ret);
+		// var_dump($this->errorInfo());
+		return $ret;
+	}
 }
 
 ?>

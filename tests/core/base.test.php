@@ -47,6 +47,11 @@ class BaseTestCase extends PrankTestCase {
 		$this->assert_equal(a('one', 'two', 'three'), array('one', 'two', 'three'));
 	}
 	
+	public function test_s() {
+		$this->assert_equal(s(array('b', 'c', 'a')), array('a', 'b', 'c'));
+		$this->assert_equal(s('b', 'c', 'a'), array('a', 'b', 'c'));
+	}
+	
 	public function test_rm() {
 		$test_directory = ROOT.'tests'.DS.'tmp'.DS.'rm-test-dir'.DS;
 		mkdir($test_directory);

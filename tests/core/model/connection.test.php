@@ -1,14 +1,14 @@
 <?php
 
 require_once dirname(dirname(dirname(dirname(__FILE__)))).DS.'core/model/connection.php';
-require_once '_user.model.php';
+require_once 'mocks/_user.model.php';
 
 class ModelConnectionTestCase extends PrankTestCase {
 	
 	public function setup() {
 		$this->setup_prank_spine();
 		$this->db = ModelConnection::instance();
-		require '_users.table.php';
+		require 'mocks/_users.table.php';
 	}
 	
 	public function teardown() {

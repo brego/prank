@@ -12,7 +12,7 @@ class ModelAdaptersMysqlTestCase extends PrankTestCase {
 		$this->setup_prank_spine();
 		$this->db = ModelConnection::instance();
 		
-		require dirname(dirname(__FILE__)).DS.'_users.table.php';
+		require dirname(dirname(__FILE__)).DS.'mocks/_users.table.php';
 		
 		$config = Config::instance();
 		require_once ::c('CONFIG').'db.php';

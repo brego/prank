@@ -126,6 +126,23 @@ function a() {
 }
 
 /**
+ * Sorts an array and returns the result
+ * 
+ * Parameter can be either an array, or multiple parameers that'll be converted
+ * to an array.
+ *
+ * @return array
+ */
+function s() {
+	$array = func_get_args();
+	if (count($array) == 1 && is_array($array)) {
+		$array = $array[0];
+	}
+	sort($array);
+	return $array;
+}
+
+/**
  * Recursively delete a directory
  * 
  * Removes specified directory/files.
