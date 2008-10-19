@@ -2,22 +2,26 @@
 /**
  * Baseclass for all models.
  *
- * All models extend this base class. Contains methods basic CRUD, but also 
- * advnced finders and, in the future, assotiations.
- *
- * PHP version 5.3.
- *
  * @filesource
  * @copyright  Copyright (c) 2008, Kamil "Brego" Dzieliński
  * @license    http://opensource.org/licenses/mit-license.php The MIT License
  * @author     Kamil "Brego" Dzieliński <brego@brego.dk>
  * @link       http://prank.brego.dk Prank's project page
  * @package    Prank
- * @subpackage Core.Model
+ * @subpackage Model
  * @since      Prank 0.10
  * @version    Prank 0.10
  */
 
+/**
+ * Baseclass for all models.
+ *
+ * All models extend this base class. Contains methods basic CRUD, but also 
+ * advnced finders and assotiations.
+ *
+ * @package    Prank
+ * @subpackage Model
+ */
 class ModelBase extends Object {
 	private $table                     = null;
 	private $model                     = null;
@@ -28,49 +32,47 @@ class ModelBase extends Object {
 	private $relations_loaded          = false;
 	private $hollow                    = true;
 	private $exists                    = false;
-	private $registry                  = null;
 /**                                    
- * If this model is lazy-loadains e loaed, contthder callable.
- *                                     
+ * If this model is lazy-loaded, contains a callable loader function
+ *
  * @var mixed                          
  */                                    
 	private $loader                    = null; 
-/**                                    
- * Describes the one-to-many ships     relation
- *                                     
- * An array or a string, contames  modeaining nofls this model has a relation
- * to. The names should be in and werca plural,losed.
- * Names given will be used afor lal prs names ocoperties representing the
- * collection of related modecolleion ils. The cts lazy-loaded - the models
- * will not be instantiated be colctionefore thle is called upon.
- *                                     
- * @var mixed                          
- */                                    
+/**
+ * Describes the one-to-many relationships
+ *
+ * String or array of names of models this model have many of. This property
+ * will contain a Collection with all the coresponding objects.
+ * 
+ * @var mixed
+ */
 	protected $has_many                = false;
-/**                                    
- * Describes the one-to-one ( relaonshiforeign)tips
- *                                     
- * An array or a string, contames  modeaining nofls this model has a relation
- * to. The names should be inr, anlower singulad cased.
- * Names given will be used afor lal prs names ocoperties representing the
- * related model. The model ioaded the s lazy-l -data will not be fetched
- * before the model is called           upon.
- *                                     
- * @var mixed                          
- */                                    
+/**
+ * Describes the one-to-one local relationships
+ *
+ * String or array of names of models this model has one of. This property
+ * will contain the coresponding model.
+ * 
+ * @var mixed
+ */
 	protected $has_one                 = false;
-/**                                    
- * Describes the one-to-one (elatishipslocal) ron
- *                                     
- * An array or a string, contames  modeaining nofls this model has a relation
- * to. The names should be inr, anlower singulad cased.
- * Names given will be used afor lal prs names ocoperties representing the
- * related model. The model ioaded the s lazy-l -data will not be fetched
- * before the model is called           upon.
- *                                     
- * @var mixed                          
- */                                    
+/**
+ * Describes the one-to-one foreign relationships
+ *
+ * String or array of names of models this model belongs to. This property
+ * will contain the coresponding model.
+ * 
+ * @var mixed
+ */
 	protected $belongs_to              = false;
+/**
+ * Describes the many-to-many relationships
+ *
+ * String or array of names of models this model have many of. This property
+ * will contain a Collection with all the coresponding objects.
+ * 
+ * @var mixed
+ */
 	protected $has_and_belongs_to_many = false;
 
 /**
@@ -106,7 +108,6 @@ class ModelBase extends Object {
 		}
 	}
 
-
 /**
  * Registers a lazyload function
  * 
@@ -138,127 +139,24 @@ class ModelBase extends Object {
 		}
 	}
 
+/**
+ * Loads the relations
+ * 
+ * Uses ModelRelations class to load all the relations corresponding to this
+ * model - but without loading the data (sets lazyloads on collections/models).
+ *
+ * @return void
+ */
 	private function load_relations() {
 		if ($this->exists === true && $this->relations_loaded === false) {
-			$relation_types = array(
-				'has_many',
-				'has_one',
-				'belongs_to',
-				'has_and_belongs_to_many');
-			
-			foreach ($relation_types as $relation_type) {
-				if ($this->$relation_type !== false) {
-					if (is_array($this->$relation_type) === false) {
-						$this->$relation_type = array($this->$relation_type);
-					}
-					foreach ($this->$relation_type as $relation) {
-						if (isset($this->relational_data[$relation]) === false) {		
-							$this->$relation_type($relation);
-					
-						}
-					}
-				}			
-				$this->relations_loaded = true;
-			}
+			$relations = array(
+				'has_many' => $this->has_many,
+				'has_one'  => $this->has_one,
+				'belongs_to' => $this->belongs_to,
+				'has_and_belongs_to_many' => $this->has_and_belongs_to_many);
+			$this->relational_data  = ModelRelations::load($this, $this->data, $relations);
+			$this->relations_loaded = true;
 		}
-	}
-
-/**
- * Registers the lazy-load collection as local property
- *
- * @return void
- */
-	private function has_many($relation) {
-		$model      = Inflector::modelize($relation);
-		$table      = Inflector::tabelize($relation);
-		$id_name    = Inflector::singularize($this->table).'_id';
-		$id         = $this->data['id'];
-		$collection = new Collection;
-	
-		$collection->register_loader(function($internal) use ($model, $table, $id_name, $id) {
-			$connection = ModelConnection::instance();
-			$result     = $connection->has_many_query($table, $id_name, $id);
-		
-			foreach ($result as $object) {
-				$internal->add(new $model($object));
-			}
-		});
-	
-		$this->relational_data[$relation] = $collection;
-	}
-
-
-/**
- * Registers the lazy-loaded model as local property
- *
- * @return void
- */
-	private function has_one($relation) {
-		$model   = Inflector::modelize($relation);
-		$table   = Inflector::tabelize($relation);
-		$id_name = Inflector::singularize($this->table).'_id';
-	 	$id      = $this->data['id'];
-		$model   = new $model;
-		
-		$model->register_loader(function($internal) use ($table, $id_name, $id) {
-			$connection = ModelConnection::instance();
-			$result     = $connection->has_one_query($table, $id_name, $id);
-			$result     = $result->fetch();
-								
-			foreach ($result as $variable => $value) {
-				$internal->$variable = $value;
-			}
-		});
-		
-		$this->relational_data[$relation] = $model;
-	}
-
-/**
- * Registers the lazy-loaded model as local property
- *
- * @return void
- */
-	private function belongs_to($relation) {
-		$model   = Inflector::modelize($relation);
-		$table   = Inflector::tabelize($relation);
-		$id_name = Inflector::singularize($relation).'_id';
-	 	$id      = $this->data[$id_name];
-		$model   = new $model;
-	
-		$model->register_loader(function($internal) use ($table, $id) {
-			$connection = ModelConnection::instance();
-			$result     = $connection->belongs_to_query($table, $id);
-			$result     = $result->fetch();					
-		
-			foreach ($result as $variable => $value) {
-				$internal->$variable = $value;
-			}
-		});
-	
-		$this->relational_data[$relation] = $model;
-	}
-	
-	private function has_and_belongs_to_many($relation) {
-		$model         = Inflector::modelize($relation); 
-		$local_table   = $this->table;                   
-		$foreign_table = Inflector::tabelize($relation);
-		$join_table    = implode('_', s($local_table, $foreign_table));
-		$local_id      = Inflector::singularize($local_table).'_id';
-		$foreign_id    = Inflector::singularize($foreign_table).'_id';
-		$id            = $this->data['id'];
-		
-		$collection = new Collection;
-		
-		$collection->register_loader(function($internal) use ($model, $local_table, $foreign_table, $join_table, $local_id, $foreign_id, $id) {
-			$connection = ModelConnection::instance();
-			$result     = $connection->has_and_belongs_to_many_query($local_table, $foreign_table, $join_table, $local_id, $foreign_id, $id);
-		
-			foreach ($result as $object) {
-				$internal->add(new $model($object));
-			}
-		});
-		
-		$this->relational_data[$relation] = $collection;
 	}
 
 /**
@@ -282,8 +180,22 @@ class ModelBase extends Object {
 		return $this->columns;
 	}
 
+/**
+ * Does this Model exist in the table?
+ *
+ * @return boolean
+ */
 	public function exists() {
 		return $this->exists;
+	}
+
+/**
+ * Name of the table represented by this model
+ *
+ * @return string
+ */
+	public function table() {
+		return $this->table;
 	}
 
 /**
@@ -301,12 +213,14 @@ class ModelBase extends Object {
 				$this->updated_at = $this->connection->now();
 			}
 			$this->connection->update($this->table, $this->data, 'id='.$this->id);
+			$this->exists = true;
 		} else {
 			if ($this->connection->is_column_of('created_at', $this->table)) {
 				$this->created_at = $this->connection->now();
 			}
 			$this->connection->insert($this->table, $this->data);
-			$this->id = $this->connection->last_insert_id();
+			$this->id     = $this->connection->last_insert_id();
+			$this->exists = true;
 		}
 	}
 
@@ -314,16 +228,21 @@ class ModelBase extends Object {
 /**
  * Method overloading
  * 
- * Supports dynamic methods. Currently: delete (deletes current model from the
- * database).
+ * Supports dynamic methods:
+ *  - delete() - deletes current model from the database, returns number of
+ *    affected columns or false.
+ * 
+ * Also calls all the mixins (see the Object class).
  *
+ * If an unknown method is called, an exception is thrown.
+ * 
  * @param  string $method 
  * @param  string $arguments 
  * @return mixed
  */
 	public function __call($method, $arguments) {
 		if ($method === 'delete' && $this->exists === true) {
-			return $this->connection->delete($this->table, 'id='.$this->id);
+			return $this->connection->delete($this->table, 'id='.$this->data['id']);
 		} else {
 			return $this->register_extensions($method, $arguments);
 		}
@@ -342,7 +261,7 @@ class ModelBase extends Object {
  * @todo   Implement more dynamic finders (multiple arguments etc)
  * @param  string $method
  * @param  string $arguments
- * @return void
+ * @return mixed
  */
 	public static function __callStatic($method, $arguments) {
 		$connection = ModelConnection::instance();
@@ -421,7 +340,6 @@ class ModelBase extends Object {
 			return false;
 		}
 	}
-
 }
 
 ?>

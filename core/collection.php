@@ -2,12 +2,6 @@
 /**
  * Collection - used to collect items
  * 
- * Collection makes it easy to enclose multiple objects in one.
- *
- * Dev note: this could also be based of off ArrayObject.
- * 
- * PHP version 5.3.
- *
  * @filesource
  * @copyright  Copyright (c) 2008, Kamil "Brego" Dzieliński
  * @license    http://opensource.org/licenses/mit-license.php The MIT License
@@ -19,12 +13,26 @@
  * @version    Prank 0.10
  */
 
+/**
+* Collection - used to collect items
+* 
+* Collection makes it easy to enclose multiple objects in one.
+* Dev note: this could also be based on ArrayObject.
+*
+* @package    Prank
+* @subpackage Core
+ */
 class Collection implements Iterator, Countable {
 	private   $key       = 0;
 	private   $size      = 0;
 	private   $items     = array();
-	protected $item_name = 'item';
 	private   $loader    = null;
+/**
+ * Name of single item in the colection (used in each)
+ *
+ * @var string
+ */
+	protected $item_name = 'item';
 
 /**
  * Constructor
@@ -269,6 +277,5 @@ class Collection implements Iterator, Countable {
 		$this->size  = 0;
 	}
 }
-
 
 ?>

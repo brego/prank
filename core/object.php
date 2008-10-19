@@ -76,7 +76,7 @@ class Object {
  * @param  array  $arguments Arguments for the method
  * @return mixed
  */	
-	private function register_extensions($method, $arguments) {
+	protected function register_extensions($method, $arguments) {
 		if (isset(self::$methods[$method])) {
 			array_unshift($arguments, $this);
 			return call_user_func_array(self::$methods[$method], $arguments);
@@ -96,7 +96,7 @@ class Object {
  * @param  array  $arguments Arguments for the method
  * @return mixed
  */
-	private static function register_static_extensions($method, $arguments) {
+	protected static function register_static_extensions($method, $arguments) {
 		if (isset(self::$methods[$method])) {
 			array_unshift($arguments, get_called_class());
 			return call_user_func_array(self::$methods[$method], $arguments);

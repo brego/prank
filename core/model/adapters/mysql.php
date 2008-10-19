@@ -132,8 +132,8 @@ class ModelAdaptersMysql extends PDO implements ModelAdapter {
  * @param  string $id 
  * @return PDOStatement
  */
-	public function has_many_query($table, $id_name, $id) {
-		$query = "select * from `".$table."` where `".$id_name."`='".$id."';";
+	public function has_many_query($info) {
+		$query = "select * from `".$info['foreign']."` where `".$info['local_id']."`='".$info['id']."';";
 		return $this->query($query, PDO::FETCH_ASSOC);
 	}
 
@@ -143,11 +143,12 @@ class ModelAdaptersMysql extends PDO implements ModelAdapter {
  * @param  string $table 
  * @param  string $id_name 
  * @param  string $id 
- * @return PDOStatement
+ * @return array
  */
-	public function has_one_query($table, $id_name, $id) {
-		$query = "select * from `".$table."` where `".$id_name."`='".$id."' limit 1;";
-		return $this->query($query, PDO::FETCH_ASSOC);
+	public function has_one_query($info) {
+		$query = "select * from `".$info['foreign']."` where `".$info['local_id']."`='".$info['id']."' limit 1;";
+		$result = $this->query($query, PDO::FETCH_ASSOC);
+		return $result->fetch();
 	}
 
 /**
@@ -155,19 +156,20 @@ class ModelAdaptersMysql extends PDO implements ModelAdapter {
  *
  * @param  string $table
  * @param  string $id 
- * @return PDOStatement
+ * @return array
  */
-	public function belongs_to_query($table, $id) {
-		$query = "select * from `".$table."` where `id`='".$id."';";
-		return $this->query($query, PDO::FETCH_ASSOC);
+	public function belongs_to_query($info) {
+		$query = "select * from `".$info['foreign']."` where `id`='".$info['id']."';";
+		$result = $this->query($query, PDO::FETCH_ASSOC);
+		return $result->fetch();
 	}
 	
-	public function has_and_belongs_to_many_query($local_table, $foreign_table, $join_table, $local_id, $foreign_id, $id) {
-		$query =  "SELECT * FROM `".$local_table."`, `".$foreign_table."`, `".$join_table."` WHERE ".$local_table.".id = '".$id."' AND ".$join_table.".".$local_id." = ".$local_table.".id AND ".$join_table.".".$foreign_id." = ".$foreign_table.".id;";
-		// print $query."\n\n";
+	public function has_and_belongs_to_many_query($info) {
+		
+		
+		$query =  "SELECT * FROM `".$info['local']."`, `".$info['foreign']."`, `".$info['join']."` WHERE ".$info['local'].".id = '".$info['id']."' AND ".$info['join'].".".$info['local_id']." = ".$info['local'].".id AND ".$info['join'].".".$info['foreign_id']." = ".$info['foreign'].".id;";
+		
 		$ret = $this->query($query, PDO::FETCH_ASSOC);
-		// var_dump($ret);
-		// var_dump($this->errorInfo());
 		return $ret;
 	}
 }
