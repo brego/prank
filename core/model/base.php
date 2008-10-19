@@ -30,6 +30,7 @@ class ModelBase extends Object {
 	private $data                      = array();
 	private $relational_data           = array();
 	private $relations_loaded          = false;
+	private $relations                 = array();
 	private $hollow                    = true;
 	private $exists                    = false;
 /**                                    
@@ -104,6 +105,19 @@ class ModelBase extends Object {
 		foreach ($this->columns as $column) {
 			if (isset($data[$column])) {
 				$this->$column = $data[$column];
+			}
+		}
+		$this->setup_relational_properities();
+	}
+
+	public function setup_relational_properities() {
+		$types = array('has_many', 'has_one', 'belongs_to', 'has_and_belongs_to_many');
+		foreach ($types as $type) {
+			if ($this->$type !== false) {
+				if (is_array($this->$type) === false) {
+					$this->$type = array($this->$type);
+				}	
+				$this->relations = array_merge($this->relations, $this->$type);
 			}
 		}
 	}
@@ -268,7 +282,6 @@ class ModelBase extends Object {
 		$model      = get_called_class();
 		$table      = Inflector::tabelize(get_called_class());
 
-
 		if (substr($method, 0, 8) == 'find_by_') {
 			$column = down(substr($method, 8));
 			if ($connection->is_column_of($column, $table)) {
@@ -298,6 +311,10 @@ class ModelBase extends Object {
 		if ($this->connection->is_column_of($variable, $this->table)) {
 			$this->hollow = false;
 			$this->data[$variable] = $value;
+		} elseif (array_search($variable, $this->relations) !== false) {
+			$this->relational_data[$variable] = $value;
+		} else {
+			throw new Exception('Property '.$variable.' is not overloadable');
 		}
 	}
 
@@ -312,11 +329,13 @@ class ModelBase extends Object {
  */
 	public function __get($variable) {
 		$this->load();
-		$this->load_relations();
 		if (isset($this->data[$variable])) {
 			return $this->data[$variable];
-		} elseif (isset($this->relational_data[$variable])) {
-			return $this->relational_data[$variable];
+		} elseif (array_search($variable, $this->relations) !== false) {
+			$this->load_relations();
+			if (isset($this->relational_data[$variable])) {
+				return $this->relational_data[$variable];
+			}
 		}
 	}
 
@@ -331,11 +350,15 @@ class ModelBase extends Object {
  */
 	public function __isset($variable) {
 		$this->load();
-		$this->load_relations();
 		if (isset($this->data[$variable])) {
 			return true;
-		} elseif (isset($this->relational_data[$variable])) {
-			return true;
+		} elseif (array_search($variable, $this->relations) !== false) {
+			$this->load_relations();
+			if (isset($this->relational_data[$variable])) {
+				return true;
+			} else {
+				return false;
+			}
 		} else {
 			return false;
 		}

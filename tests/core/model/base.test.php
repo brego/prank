@@ -7,6 +7,7 @@ require_once 'mocks/_car.model.php';
 require_once 'mocks/_profile.model.php';
 require_once 'mocks/_author.model.php';
 require_once 'mocks/_article.model.php';
+require_once 'mocks/_editor.model.php';
 
 class ModelBaseTestCase extends PrankTestCase {
 	public $db = null;
@@ -18,6 +19,7 @@ class ModelBaseTestCase extends PrankTestCase {
 		require 'mocks/_cars.table.php';
 		require 'mocks/_profiles.table.php';
 		require 'mocks/_habtm.tables.php';
+		require 'mocks/_editors.table.php';
 	}
 	
 	public function teardown() {
@@ -28,6 +30,7 @@ class ModelBaseTestCase extends PrankTestCase {
 		$this->db->exec('DROP TABLE `authors`;');
 		$this->db->exec('DROP TABLE `articles`;');
 		$this->db->exec('DROP TABLE `articles_authors`;');
+		$this->db->exec('DROP TABLE `editors`;');
 	}	
 	
 	public function test___construct() {
@@ -105,6 +108,27 @@ class ModelBaseTestCase extends PrankTestCase {
 			return $name;
 		});
 		$this->assert_equal($fantasias_authors, a('John', 'Patric'));
+	}
+	
+	public function test_empty_relations() {
+		$author = Author::find_by_name('John');
+		$this->assert_is_a($author, 'Author');
+		$this->assert_true(isset($author->editor));
+		$this->assert_is_a($author->editor, 'Editor');
+		$this->assert_false($author->editor->exists());
+	}
+	
+	public function test_filling_empty_relations() {
+		$author = Author::find_by_name('John');
+		$this->assert_false($author->editor->exists());
+		$this->assert_true($author->editor->hollow());
+		$editor = new Editor;
+		$editor->name = 'Edward Johnson';
+		$author->editor = $editor;
+		$this->assert_equal($author->editor->name, 'Edward Johnson');
+		$this->assert_false($author->editor->exists());
+		$this->assert_false($author->editor->hollow());
+		
 	}
 	
 	public function test_perpetuum_relations() {

@@ -10,7 +10,7 @@ define('DS',   DIRECTORY_SEPARATOR);
 define('ROOT', dirname(dirname(__FILE__)).DS);
 
 $cwd         = getcwd();
-$methods     = array('add', 'test', 'help');
+$methods     = array('add', 'test', 'help', 'test_mate');
 $description = array(
 	'add'  => 'Adds a file',
 	'test' => 'Runs the test suite',
@@ -98,7 +98,11 @@ function add_test($file, $force=false) {
 	}
 }
 
-function test($case=false, $method=false) {
+function test_mate() {
+	return test(false, false, 'mate');
+}
+
+function test($case=false, $method=false, $mate=false) {
 	// SimpleTest has it's issues. But we still love it :P
 	error_reporting(E_ALL ^ E_NOTICE ^ E_DEPRECATED);
 	
@@ -114,7 +118,13 @@ function test($case=false, $method=false) {
 	$test = new PrankTestSuite('[Prank Test Suite] '.($case?:'').' '.($method?:''));
 	$test->collect(ROOT.'tests/', new PrankTestCollector);
 
-	$result = $test->run(new SelectiveReporter(new TextReporter, $case, $method));
+	if ($mate == 'mate') {
+		$reporter = new HtmlReporter;
+	} else {
+		$reporter = new DefaultReporter;
+	}
+
+	$result = $test->run(new SelectiveReporter($reporter, $case, $method));
 	
 	return ($result ? 0 : 1);
 }
