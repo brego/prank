@@ -37,14 +37,19 @@ class Collection implements Iterator, Countable {
 /**
  * Constructor
  *
+ * If $items is not an array, it will be cast to one.
+ * 
  * @param  array $items Items to initially create the collection
  * @return void
  */
 	public function __construct($items = null) {
-		if (is_array($items)) {
+		if ($items !== null) {
+			if (is_array($items) === false) {
+				$items = array($items);
+			}
 			foreach ($items as $item) {
 				$this->add($item);
-			}
+			}	
 		}
 	}
 

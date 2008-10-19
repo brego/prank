@@ -116,6 +116,7 @@ class ModelBaseTestCase extends PrankTestCase {
 		$this->assert_true(isset($author->editor));
 		$this->assert_is_a($author->editor, 'Editor');
 		$this->assert_false($author->editor->exists());
+		$this->assert_true($author->editor->hollow());
 	}
 	
 	public function test_filling_empty_relations() {
@@ -128,7 +129,23 @@ class ModelBaseTestCase extends PrankTestCase {
 		$this->assert_equal($author->editor->name, 'Edward Johnson');
 		$this->assert_false($author->editor->exists());
 		$this->assert_false($author->editor->hollow());
+
+		// TEST SAVING RELATIONS
+	}
+	
+	public function test_no_overwriting_user_set_relations() {
+		$author = Author::find_by_name('John');
+		$article = new Article;
+		$article->name = 'Lybris';
+		$article->body = 'Amazing article';
+		$articles = new Collection($article);
+		$author->articles = $articles;
+		$this->assert_is_a($author->articles, 'Collection');
+		$this->assert_equal(count($articles), 1);
+		$this->assert_equal(count($author->articles), 1);
 		
+		$return = $author->articles->each(function($name) {return $name;});
+		$this->assert_equal($return, array('Lybris'));
 	}
 	
 	public function test_perpetuum_relations() {
@@ -152,11 +169,10 @@ class ModelBaseTestCase extends PrankTestCase {
 		
 		$test = new User;
 		$test->name = 'john doe';
-		$id = $test->id;
-		$this->assert_equal($id, '');
+		$this->assert_false(isset($test->id));
 		$test->save();
 		$time = $this->db->now();
-		$this->assert_true(is_numeric($test->id));
+		$this->assert_true(isset($test->id));
 		
 		$result = $this->db->query("select * from users where name='john doe';");
 		$this->assert_equal($result->rowCount(), 1);

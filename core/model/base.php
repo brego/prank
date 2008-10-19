@@ -33,6 +33,12 @@ class ModelBase extends Object {
 	private $relations                 = array();
 	private $hollow                    = true;
 	private $exists                    = false;
+/**
+ * Is this model modified (has any data been set)
+ *
+ * @var boolean
+ */
+	private $modified                  = false;
 /**                                    
  * If this model is lazy-loaded, contains a callable loader function
  *
@@ -168,7 +174,8 @@ class ModelBase extends Object {
 				'has_one'  => $this->has_one,
 				'belongs_to' => $this->belongs_to,
 				'has_and_belongs_to_many' => $this->has_and_belongs_to_many);
-			$this->relational_data  = ModelRelations::load($this, $this->data, $relations);
+			$loaded = ModelRelations::load($this, $this->data, $relations);
+			$this->relational_data  = array_merge($loaded, $this->relational_data);
 			$this->relations_loaded = true;
 		}
 	}
@@ -238,7 +245,6 @@ class ModelBase extends Object {
 		}
 	}
 
-
 /**
  * Method overloading
  * 
@@ -302,6 +308,12 @@ class ModelBase extends Object {
  * 
  * Sets value of a Model field to the specified value - if the field exists.
  * Setting a field this way makes the model non-hollow.
+ * 
+ * You can set a value for a relation here - but be aware that in the event of
+ * saving, the model will overwrite the relation in the database with the
+ * provided one. Also, be aware that if you simply want to add an object to a
+ * Collection representing a plural relation, you can use Collection's add
+ * method.
  *
  * @param  string $variable 
  * @param  string $value
@@ -309,7 +321,8 @@ class ModelBase extends Object {
  */	
 	public function __set($variable, $value) {
 		if ($this->connection->is_column_of($variable, $this->table)) {
-			$this->hollow = false;
+			$this->hollow          = false;
+			$this->modified        = true;
 			$this->data[$variable] = $value;
 		} elseif (array_search($variable, $this->relations) !== false) {
 			$this->relational_data[$variable] = $value;
@@ -336,6 +349,8 @@ class ModelBase extends Object {
 			if (isset($this->relational_data[$variable])) {
 				return $this->relational_data[$variable];
 			}
+		} else {
+			throw new Exception('Unknown property '.$variable);
 		}
 	}
 
