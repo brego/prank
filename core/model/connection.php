@@ -44,7 +44,7 @@ class ModelConnection {
  */
 	private function __construct() {
 		$config = Config::instance();
-		require_once c('CONFIG').'db.php';
+		require c('CONFIG').'db.php';
 		$params = $config->db[c('state')];
 		
 		$adapter_class = 'ModelAdapters'.ucfirst($params['type']);

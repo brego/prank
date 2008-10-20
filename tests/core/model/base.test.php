@@ -119,21 +119,31 @@ class ModelBaseTestCase extends PrankTestCase {
 		$this->assert_true($author->editor->hollow());
 	}
 	
-	public function test_filling_empty_relations() {
+	public function test_filling_empty_singular_relations() {
 		$author = Author::find_by_name('John');
 		$this->assert_false($author->editor->exists());
 		$this->assert_true($author->editor->hollow());
+		$this->assert_false($author->modified());
 		$editor = new Editor;
 		$editor->name = 'Edward Johnson';
 		$author->editor = $editor;
 		$this->assert_equal($author->editor->name, 'Edward Johnson');
 		$this->assert_false($author->editor->exists());
 		$this->assert_false($author->editor->hollow());
+		$this->assert_true($author->editor->modified());
+		
+		/**
+		 * Here we need to loop through the Model->relations, and check if
+		 * they're modifed.
+		 * 
+		 * What need s to be done is extending the collection, so that it has
+		 * a modified status. Also, do we really need N queries for N objects?
+		 */
 
 		// TEST SAVING RELATIONS
 	}
 	
-	public function test_no_overwriting_user_set_relations() {
+	public function test_no_overwriting_user_set_singular_relations() {
 		$author = Author::find_by_name('John');
 		$article = new Article;
 		$article->name = 'Lybris';
@@ -178,6 +188,7 @@ class ModelBaseTestCase extends PrankTestCase {
 		$this->assert_equal($result->rowCount(), 1);
 		$result = $result->fetch();
 		$this->assert_equal($result['created_at'], $time);
+		$this->assert_equal($result['updated_at'], $time);
 		
 		$test = User::find_by_name('test1');
 		$this->assert_is_a($test, 'User');
@@ -197,7 +208,13 @@ class ModelBaseTestCase extends PrankTestCase {
 		$test = User::find_by_name('test1');
 		$this->assert_is_a($test, 'User');
 		$this->assert_false($test->hollow());
+		$test->delete();
+		$this->assert_false($test->hollow());
+		$this->assert_false($test->exists());
+		$this->assert_true($test->modified());
 		
+		$result = $this->db->query("select * from users where name='test1';");
+		$this->assert_equal($result->rowCount(), 0);
 	}
 
 	public function test___isset() {

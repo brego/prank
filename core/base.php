@@ -34,28 +34,30 @@
 function __autoload($class_name) {
 	if (substr($class_name, -10, 10) !== 'Controller') {
 		
-		$class_name = Inflector::underscore($class_name);
-		$class_name = str_replace('_', c('DS'), $class_name);
-		$class_name = str_replace('prank'.c('DS'), '', $class_name);
+		if (class_exists($class_name) === false) {			
+			$class_name = Inflector::underscore($class_name);
+			$class_name = str_replace('_', c('DS'), $class_name);
+			$class_name = str_replace('prank'.c('DS'), '', $class_name);
 		
-		if(is_file(c('CORE').$class_name.'.php')) {
-			require_once c('CORE').$class_name.'.php';
-		}
+			if(is_file(c('CORE').$class_name.'.php')) {
+				require c('CORE').$class_name.'.php';
+			}
 		
-		if(is_file(c('MODELS').$class_name.'.model.php')) {
-			require_once c('MODELS').$class_name.'.model.php';
+			if(is_file(c('MODELS').$class_name.'.model.php')) {
+				require c('MODELS').$class_name.'.model.php';
+			}
 		}
 	}
 }
 
 /**
- * Shortcut for print.
+ * Shortcut for echo
  *
  * @return void
- * @param  string $string String to be printed to the screen.
+ * @param  string $string String to be echoed to the screen.
  **/
 function _($string) {
-	print $string;
+	echo $string;
 }
 
 /**
@@ -69,9 +71,9 @@ function _($string) {
 function d() {
 	$args = func_get_args();
 	foreach ($args as $arg) {
-		print '<pre>';
+		echo '<pre>';
 		var_dump($arg);
-		print '</pre>';
+		echo '</pre>';
 	}
 }
 
@@ -248,11 +250,13 @@ function is_controller($name) {
  * @param  string  $name Shortname of the controller.
  **/
 function load_controller($name) {
-	if (is_controller($name)) {
-		require_once c('CONTROLLERS').down($name).'.controller.php';
-		return true;
-	} else {
-		return false;
+	if (class_exists(ucfirst($name).'Controller') === false) {
+		if (is_controller($name)) {
+			require c('CONTROLLERS').down($name).'.controller.php';
+			return true;
+		} else {
+			return false;
+		}
 	}
 }
 
@@ -286,10 +290,10 @@ function is_action_of($action, $controller) {
  **/
 function url($file_or_action) {
 	if (isset($_GET['url'])) {
-		$request = explode('/', $_SERVER['REQUEST_URI']);
+		$request = split('/', $_SERVER['REQUEST_URI']);
 		$request = array_cleanup($request);	
 	
-		$url = explode('/', $_GET['url']);
+		$url = split('/', $_GET['url']);
 		$url = array_cleanup($url);
 	
 		$result = array_diff($request, $url);
@@ -342,7 +346,7 @@ function css() {
 function _css() {
 	$args   = func_get_args();
 	$output = call_user_func_array('css', $args);
-	print $output;
+	echo $output;
 }
 
 
@@ -423,7 +427,7 @@ function javascript() {
 function _javascript() {
 	$args   = func_get_args();
 	$output = call_user_func_array('javascript', $args);
-	print $output;
+	echo $output;
 }
 
 /**

@@ -58,7 +58,7 @@ class ControllerBase {
 		ob_start();
 
 		if (file_exists(c('VIEWS').$this->shortname.c('DS').$this->view.'.php') && $this->view !== false) {
-			require_once c('VIEWS').$this->shortname.c('DS').$this->view.'.php';
+			require c('VIEWS').$this->shortname.c('DS').$this->view.'.php';
 		}
 		
 		$content_for_layout = ob_get_clean();
@@ -67,7 +67,7 @@ class ControllerBase {
 			
 		if (file_exists(c('VIEWS').'layouts'.c('DS').$this->layout.'.php') && $this->layout !== false) {
 			ob_start();
-			require_once c('VIEWS').'layouts'.c('DS').$this->layout.'.php';
+			require c('VIEWS').'layouts'.c('DS').$this->layout.'.php';
 			$output = ob_get_clean();
 		} else {
 			$output = $content_for_layout;
@@ -130,7 +130,7 @@ class ControllerBase {
  * @return void
  */
 	public function after_render($content=null) {
-		print $content;
+		echo $content;
 	}
 }
 

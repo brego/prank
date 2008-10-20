@@ -1,7 +1,7 @@
 <?php
 
 if (count($argv) < 2) {
-	print "You need to provide at least one valid option\n";
+	echo "You need to provide at least one valid option\n";
 	return 0;
 	die();
 }
@@ -21,7 +21,7 @@ if (array_search($argv[1], $methods) !== false) {
 	unset($argv[0], $argv[1]);
 	call_user_func_array($method, $argv);
 } else {
-	print "You need to provide a valid option.\n";
+	echo "You need to provide a valid option.\n";
 }
 
 function add() {
@@ -29,14 +29,14 @@ function add() {
 	if (count($args) >= 2) {
 		$method = 'add_'.$args[0];
 		if (function_exists($method)) {
-			print 'Adding new '.$args[0]." - ".$args[1]."\n";
+			echo 'Adding new '.$args[0]." - ".$args[1]."\n";
 			unset($args[0]);
 			call_user_func_array($method, $args);
 		} else {
-			print "Add method ".$args[0]." not found.\n";
+			echo "Add method ".$args[0]." not found.\n";
 		}
 	} else {
-		print "Add needs at least two parameters.\n";
+		echo "Add needs at least two parameters.\n";
 	}
 }
 
@@ -92,9 +92,9 @@ function add_test($file, $force=false) {
 		
 		file_put_contents($test_file, $template);
 		
-		print "Test file created at $file\n";
+		echo "Test file created at $file\n";
 	} else {
-		print "Test file already exists - run with 'force' parameter to overwrite\n";
+		echo "Test file already exists - run with 'force' parameter to overwrite\n";
 	}
 }
 
@@ -130,10 +130,10 @@ function test($case=false, $method=false, $mate=false) {
 }
 
 function help() {
-	print "You can always run 'prank [option] help' for aditional info.\n";
-	print "Valid options are:\n";
+	echo "You can always run 'prank [option] help' for aditional info.\n",	
+		"Valid options are:\n";
 	foreach($GLOBALS['methods'] as $option) {
-		print " ".$option.":\t".$GLOBALS['description'][$option]."\n";
+		echo " ".$option.":\t".$GLOBALS['description'][$option]."\n";
 	}
 }
 

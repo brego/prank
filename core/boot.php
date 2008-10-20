@@ -54,7 +54,9 @@ class Boot {
 		c('APP',  dirname(dirname($start_point)).c('DS'));
 		c('CORE', dirname(__FILE__).c('DS'));
 		
-		require_once c('APP').'config'.c('DS').'app.php';
+		ini_set('include_path', c('CORE').':'.c('APP').':.');
+		
+		require c('APP').'config'.c('DS').'app.php';
 		
 		$this->set_error_reporting(c('state'));
 		$this->parse_url(isset($_GET['url']) ? $_GET['url'] : null);
@@ -67,9 +69,15 @@ class Boot {
  * @return void
  */
 	private function load_base_libs() {
-		require_once 'config.php';
-		require_once 'inflector.php';
-		require_once 'base.php';
+		if (class_exists('Config') === false) {
+			require 'config.php';
+		}
+		if (class_exists('Inflector') === false) {
+			require 'inflector.php';
+		}
+		if (function_exists('__autoload') === false) {
+			require 'base.php';
+		}
 	}
 
 /**
@@ -111,7 +119,7 @@ class Boot {
 		
 		// Parsing the URL
 		if ($url != null) {
-			$url  = explode('/', $url);
+			$url  = split('/', $url);
 			$path = array_cleanup($url);
 
 		// URL parsed, saved to $path
@@ -164,7 +172,7 @@ class Boot {
  */	
 	private function run_controller() {
 		function partial($name) {
-			require_once c('VIEWS').Boot::$controller.c('DS').'_'.$name.'.php';
+			require c('VIEWS').Boot::$controller.c('DS').'_'.$name.'.php';
 		}
 
 		try {
@@ -178,8 +186,8 @@ class Boot {
 
 			$controller_object->run();
 		} catch (Exception $e) {
-			print '<p>Exception: '.$e->getMessage().' in '.$e->getFile().' on line '.$e->getLine().".</p>\n";
-			print str_replace("\n", '<br />', $e->getTraceAsString());
+			echo '<p>Exception: '.$e->getMessage().' in '.$e->getFile().' on line '.$e->getLine().".</p>\n",
+				str_replace("\n", "\n<br />", $e->getTraceAsString());
 		}
 	}
 }

@@ -10,9 +10,9 @@ class DefaultController extends ControllerBase {
 	{
 		$this->view   = false;
 		$this->layout = false;
-		print 'I am the default controller, and the do_some_thing function...';
+		echo 'I am the default controller, and the do_some_thing function...';
 		if ($string != '') {
-			print ' And we need to say '.$string.'!';
+			echo ' And we need to say '.$string.'!';
 		}
 	}
 }

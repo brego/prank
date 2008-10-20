@@ -4,6 +4,6 @@
 		<title>Default layout</title>
 	</head>
 	<body>
-		<?php print $content_for_layout ?>
+		<?php echo $content_for_layout ?>
 	</body>
 </html>

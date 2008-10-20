@@ -104,13 +104,16 @@ class ModelBase extends Object {
 		$this->connection = ModelConnection::instance();
 		$this->columns    = $this->connection->columns($this->table);
 		
-		if ($data !== null && isset($data['id'])) {
-			$this->exists = true;
+		if ($data !== null) {
+			$this->hollow = false;
+			if (isset($data['id'])) {
+				$this->exists = true;
+			}
 		}
 		
 		foreach ($this->columns as $column) {
 			if (isset($data[$column])) {
-				$this->$column = $data[$column];
+				$this->data[$column] = $data[$column];
 			}
 		}
 		$this->setup_relational_properities();
@@ -220,40 +223,64 @@ class ModelBase extends Object {
 	}
 
 /**
+ * Is this model modified - does it need to be saved
+ *
+ * @return boolean
+ */
+	public function modified() {
+		return $this->modified;
+	}
+
+/**
  * Saves current Model in the table
  * 
  * If the Model represents a new data set, it will be added as a new row to the
  * table. If, on the other hand it represents an existing row, the existing row
- * will be updated. Upon insertion, the id field gets filled.
+ * will be updated. Upon insertion, the id, created_at and updated_at fields
+ * get filled. Upon update, only the updated_at field gets filled.
+ * 
+ * If insertion/update is succesfull, the exists property is set to true, and
+ * the modified property is set to false - so you need to modify the model
+ * again to be able to perform a save.
  *
- * @return void
+ * @return boolean
  */
 	public function save() {
-		if ($this->exists === true) {
+		if ($this->exists === true && $this->modified === true) {
 			if ($this->connection->is_column_of('updated_at', $this->table)) {
 				$this->updated_at = $this->connection->now();
 			}
-			$this->connection->update($this->table, $this->data, 'id='.$this->id);
-			$this->exists = true;
-		} else {
+			$result = $this->connection->update($this->table, $this->data, 'id='.$this->id);
+		} elseif ($this->modified === true) {
 			if ($this->connection->is_column_of('created_at', $this->table)) {
 				$this->created_at = $this->connection->now();
 			}
-			$this->connection->insert($this->table, $this->data);
-			$this->id     = $this->connection->last_insert_id();
-			$this->exists = true;
+			if ($this->connection->is_column_of('updated_at', $this->table)) {
+				$this->updated_at = $this->connection->now();
+			}
+			$result   = $this->connection->insert($this->table, $this->data);
+			$this->id = $this->connection->last_insert_id();
 		}
+		
+		if ($result !== false) {
+			$this->exists   = true;
+			$this->modified = false;
+			$result = true;
+		}
+		
+		return $result;
 	}
 
 /**
  * Method overloading
  * 
  * Supports dynamic methods:
- *  - delete() - deletes current model from the database, returns number of
- *    affected columns or false.
+ *  - delete() - deletes current model from the database, returns boolean true
+ *    or false. Upon succesfull deletion the exists property is set to false,
+ *    and the modified property to true - no data is deleted from the model
+ *    though.
  * 
  * Also calls all the mixins (see the Object class).
- *
  * If an unknown method is called, an exception is thrown.
  * 
  * @param  string $method 
@@ -262,7 +289,13 @@ class ModelBase extends Object {
  */
 	public function __call($method, $arguments) {
 		if ($method === 'delete' && $this->exists === true) {
-			return $this->connection->delete($this->table, 'id='.$this->data['id']);
+			$result = $this->connection->delete($this->table, 'id='.$this->data['id']);
+			if ($result !== false) {
+				$this->exists   = false;
+				$this->modified = true;
+				$result         = true;
+			}
+			return $result;
 		} else {
 			return $this->register_extensions($method, $arguments);
 		}
@@ -276,6 +309,7 @@ class ModelBase extends Object {
  * - find_all()
  * - delete(id)
  *
+ * Also calls all the mixins (see the Object class).
  * If an unknown method is called, an exception is thrown.
  * 
  * @todo   Implement more dynamic finders (multiple arguments etc)
