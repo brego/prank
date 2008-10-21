@@ -40,44 +40,33 @@ class Object {
 	}
 
 /**
- * Prototype for __call
+ * Registers extension functions (mixins)
  * 
- * If extending __call locally, remember to use Object::register_extensions().
+ * Remember to return the return of this function. If $method is not
+ * registered, throws a new Exception.
  *
+ * Also registers 'responds' method (checks if the class responds publicly to
+ * a method).
+ * 
  * @param  string $method 
  * @param  string $arguments 
  * @return mixed
  */	
 	public function __call($method, $arguments) {
-		return $this->register_extensions($method, $arguments);
-	}
-
-/**
- * Prototype for __callStatic
- * 
- * If extending __callStatic locally, remember to use
- * Object::register_static_extensions().
- *
- * @param  string $method 
- * @param  string $arguments 
- * @return mixed
- */	
-	public static function __callStatic($method, $arguments) {
-		return self::register_static_extensions($method, $arguments);
-	}
-
-/**
- * Registers extension functions (mixins)
- * 
- * Useful when local __call needs to be defined. Remember to return the return
- * of this function. If $method is not registered, throws a new Exception.
- *
- * @param  string $method    Method to be called (from self::$methods)
- * @param  array  $arguments Arguments for the method
- * @return mixed
- */	
-	protected function register_extensions($method, $arguments) {
-		if (isset(self::$methods[$method])) {
+		if ($method == 'responds') {
+			
+			$class = new ReflectionClass(get_class($this));
+			try {
+				$method = $class->getMethod($arguments[0]);
+				if ($method->isPublic() === false || $method->isAbstract() === true) {
+				    return false;
+				}
+			} catch (ReflectionException $e) {
+				return false;
+			}
+			return true;
+			
+		} elseif (isset(self::$methods[$method])) {
 			array_unshift($arguments, $this);
 			return call_user_func_array(self::$methods[$method], $arguments);
 		} else {
@@ -88,20 +77,36 @@ class Object {
 /**
  * Registers static extension functions (mixins)
  * 
- * Useful when local __callStatic needs to be defined. Remember to return the
- * return of this function. If $method is not registered, throws a new
- * Exception.
+ * Remember to return the return of this function. If $method is not
+ * registered, throws a new Exception.
+ * 
+ * Also registers 'responds' method (checks if the object responds publicly to
+ * a method).
  *
- * @param  string $method    Method to be called (from self::$methods)
- * @param  array  $arguments Arguments for the method
+ * @param  string $method 
+ * @param  string $arguments 
  * @return mixed
- */
-	protected static function register_static_extensions($method, $arguments) {
-		if (isset(self::$methods[$method])) {
+ */	
+	public static function __callStatic($method, $arguments) {
+		if ($method == 'responds') {
+			
+			$class = new ReflectionClass(get_called_class());
+			try {
+				$method = $class->getMethod($arguments[0]);
+				if ($method->isPublic() === false || $method->isAbstract() === true) {
+				    return false;
+				}
+			} catch (ReflectionException $e) {
+				return false;
+			}
+			return true;
+			
+		} elseif (isset(self::$methods[$method])) {
 			array_unshift($arguments, get_called_class());
 			return call_user_func_array(self::$methods[$method], $arguments);
 		} else {
 			throw new Exception('Unknown method '.$method.' called.');
 		}
 	}
+
 }
