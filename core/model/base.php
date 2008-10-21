@@ -23,17 +23,17 @@
  * @subpackage Model
  */
 class ModelBase extends Object {
-	private $table                     = null;
-	private $model                     = null;
-	private $connection                = null;
-	private $columns                   = null;
-	private $data                      = array();
-	private $relational_data           = array();
-	private $relations_loaded          = false;
-	private $relations                 = array();
-	private $hollow                    = true;
-	private $exists                    = false;
-	private $relation_type             = false;
+	private   $table                   = null;
+	private   $model                   = null;
+	private   $connection              = null;
+	private   $columns                 = null;
+	private   $data                    = array();
+	private   $relational_data         = array();
+	private   $relations_loaded        = false;
+	private   $relations               = array();
+	protected $hollow                  = true;
+	protected $exists                  = false;  
+	private   $relation_type           = false;
 /**
  * Is this model modified (has any data been set)
  *
@@ -99,24 +99,13 @@ class ModelBase extends Object {
  * @param  string $data 
  * @return void
  */	
-	public function __construct($data = null) {
+	public function __construct($data = false) {
 		$this->table      = Inflector::tabelize(get_called_class());
 		$this->model      = get_called_class();
 		$this->connection = ModelConnection::instance();
 		$this->columns    = $this->connection->columns($this->table);
 		
-		if ($data !== null) {
-			$this->hollow = false;
-			if (isset($data['id'])) {
-				$this->exists = true;
-			}
-		}
-		
-		foreach ($this->columns as $column) {
-			if (isset($data[$column])) {
-				$this->data[$column] = $data[$column];
-			}
-		}
+		$this->set_data($data);
 		
 		foreach (array('has_many', 'has_one', 'belongs_to', 'has_and_belongs_to_many') as $type) {
 			if ($this->$type !== false) {
@@ -128,6 +117,22 @@ class ModelBase extends Object {
 				}
 			}
 		}
+	}
+	
+	public function set_data($data = false) {
+		if ($data !== false && is_array($data) === true) {
+			// d($data);
+			$this->hollow = false;
+			if (isset($data['id'])) {
+				$this->exists = true;
+			}
+			foreach ($this->columns as $column) {
+				if (isset($data[$column])) {
+					$this->data[$column] = $data[$column];
+				}
+			}
+		}
+		
 	}
 
 /**
@@ -188,7 +193,20 @@ class ModelBase extends Object {
  * @return boolean
  */
 	public function hollow() {
+		$this->load();
 		return $this->hollow;
+	}
+	
+	public function data() {
+		return $this->data;
+	}
+	
+	public function loaded() {
+		if ($this->loader === null) {
+			return false;
+		} else {
+			return true;
+		}
 	}
 
 /**
@@ -209,6 +227,7 @@ class ModelBase extends Object {
  * @return boolean
  */
 	public function exists() {
+		$this->load();
 		return $this->exists;
 	}
 
@@ -273,6 +292,14 @@ class ModelBase extends Object {
 	public function save($related_model = null) {
 		$result = true;
 		
+		foreach ($this->relations as $relation => $type) {
+			if (isset($this->relational_data[$relation])) {
+				if ($this->relational_data[$relation]->modified() === true) {
+					$result = $this->relational_data[$relation]->save($this);
+				}	
+			}
+		}
+		
 		if ($this->exists === true && $this->modified === true) {
 			if ($this->connection->is_column_of('updated_at', $this->table)) {
 				$this->updated_at = $this->connection->now();
@@ -302,18 +329,10 @@ class ModelBase extends Object {
 			$this->id = $this->connection->last_insert_id();
 		}
 		
-		foreach ($this->relations as $relation => $type) {
-			if (isset($this->relational_data[$relation])) {
-				if ($this->relational_data[$relation]->modified() === true) {
-					$result = $this->relational_data[$relation]->save($this);
-				}	
-			}
-		}
-		
 		if ($result !== false) {
 			$this->exists   = true;
 			$this->modified = false;
-			$result = true;
+			$result         = true;
 		}
 		
 		return $result;
@@ -407,11 +426,11 @@ class ModelBase extends Object {
 			$this->modified        = true;
 			$this->data[$variable] = $value;
 		} elseif (array_search($variable, array_keys($this->relations)) !== false) {
-			if ($this->relations[$variable] == 'has_one') {
+			if ($this->relations[$variable] == 'has_one' && $this->exists() === true) {
 				$id_name = Inflector::singularize($this->table).'_id';
 				$value->$id_name = $this->id;
 			}
-			if ($this->relations[$variable] == 'belongs_to') {
+			if ($this->relations[$variable] == 'belongs_to' && $this->exists() === true) {
 				$id_name = Inflector::singularize($value->table()).'_id';
 				$this->$id_name = $value->id;
 			}

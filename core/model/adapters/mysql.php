@@ -22,6 +22,39 @@ class ModelAdaptersMysql extends PDO implements ModelAdapter {
 	private $columns = array();
 
 /**
+ * Execute PDO::exec, with error detection
+ *
+ * @param  string $query 
+ * @return mixed
+ */
+	public function exec($query) {
+		$result = parent::exec($query);
+		if ($result === false) {
+			$error = $this->errorInfo();
+			throw new Exception('Database error: '.$error[2]);
+		}
+		return $result;
+	}
+
+/**
+ * Execute PDO::query, with error detection
+ *
+ * @return mixed
+ */
+	public function query() {
+		$arguments = func_get_args();
+		$result = parent::query($arguments[0]);
+		if ($result === false) {
+			$error = $this->errorInfo();
+			throw new Exception('Database error: '.$error[2]);
+		} else {
+			unset($arguments[0]);
+			call_user_func_array(array($result, 'setFetchMode'), $arguments);
+		}
+		return $result;
+	}
+
+/**
  * Checks if $column belongs to $table
  *
  * @param  string  $column 
@@ -127,9 +160,7 @@ class ModelAdaptersMysql extends PDO implements ModelAdapter {
 /**
  * Warapper for a relational one-to-many query
  *
- * @param  string $table 
- * @param  string $id_name 
- * @param  string $id 
+ * @param  array $info 
  * @return PDOStatement
  */
 	public function has_many_query($info) {
@@ -140,9 +171,7 @@ class ModelAdaptersMysql extends PDO implements ModelAdapter {
 /**
  * Warapper for a relational one-to-one (foreign) query
  *
- * @param  string $table 
- * @param  string $id_name 
- * @param  string $id 
+ * @param  array $info 
  * @return array
  */
 	public function has_one_query($info) {
@@ -154,8 +183,7 @@ class ModelAdaptersMysql extends PDO implements ModelAdapter {
 /**
  * Wrapper for a relational one-to-one (local) query
  *
- * @param  string $table
- * @param  string $id 
+ * @param  array $info 
  * @return array
  */
 	public function belongs_to_query($info) {
@@ -163,10 +191,14 @@ class ModelAdaptersMysql extends PDO implements ModelAdapter {
 		$result = $this->query($query, PDO::FETCH_ASSOC);
 		return $result->fetch();
 	}
-	
+
+/**
+ * Wrapper for a relational many-to-many query
+ *
+ * @param  array $info 
+ * @return mixed
+ */
 	public function has_and_belongs_to_many_query($info) {
-		
-		
 		$query =  "SELECT * FROM `".$info['local']."`, `".$info['foreign']."`, `".$info['join']."` WHERE ".$info['local'].".id = '".$info['id']."' AND ".$info['join'].".".$info['local_id']." = ".$info['local'].".id AND ".$info['join'].".".$info['foreign_id']." = ".$info['foreign'].".id;";
 		
 		$ret = $this->query($query, PDO::FETCH_ASSOC);
@@ -174,12 +206,57 @@ class ModelAdaptersMysql extends PDO implements ModelAdapter {
 	}
 	
 	
+	public function has_many_insert($table, $data, $relation) {
+		return true;
+	}
+	
 	public function has_one_insert($table, $data, $relation) {
+		$foreign = Inflector::singularize($relation->table()).'_id';
+		if (!isset($data[$foreign])) {
+			$data[$foreign] = $relation->id;
+		}
+		$prepared_data = array();
+		foreach ($data as $column => $value) {
+			$prepared_data[] = $column."='".$value."'";
+		}
+		
+		return $this->exec('insert into '.$table.' set '.implode(', ', $prepared_data).';');
+	}
+	
+	public function belongs_to_insert($table, $data, $relation) {
 		$prepared_data = array();
 		foreach ($data as $column => $value) {
 			$prepared_data[] = $column." = '".$value."'";
 		}
-		return $this->exec('insert into '.$table.' set '.implode(', ', $prepared_data).';');
+		$return = $this->exec('insert into '.$table.' set '.implode(', ', $prepared_data).';');
+		
+		$foreign = Inflector::singularize($table).'_id';
+		if (!isset($relation->$foreign)) {
+			$relation->$foreign = $this->lastInsertId();
+		}
+		
+		return $return;
+	}
+	
+	public function has_and_belongs_to_many_insert($table, $data, $relation) {
+		return true;
+	}
+	
+	
+	public function has_many_update($table, $data, $relation) {
+		return true;
+	}
+	
+	public function has_one_update($table, $data, $relation) {
+		return true;
+	}
+	
+	public function belongs_to_update($table, $data, $relation) {
+		return true;
+	}
+	
+	public function has_and_belongs_to_many_update($table, $data, $relation) {
+		return true;
 	}
 }
 

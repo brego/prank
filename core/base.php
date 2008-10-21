@@ -71,9 +71,9 @@ function _($string) {
 function d() {
 	$args = func_get_args();
 	foreach ($args as $arg) {
-		echo '<pre>';
+		echo "<pre>\n";
 		var_dump($arg);
-		echo '</pre>';
+		echo "</pre>\n";
 	}
 }
 

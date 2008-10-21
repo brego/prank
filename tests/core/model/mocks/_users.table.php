@@ -1,6 +1,6 @@
 <?php
 
-$this->db->exec("CREATE TABLE `users` ( 
+$this->db->exec("CREATE TABLE IF NOT EXISTS `users` ( 
 `id` int(11) NOT NULL auto_increment, 
 `email` varchar(255) default NULL, 
 `password` varchar(40) default NULL, 

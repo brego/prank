@@ -35,9 +35,10 @@ class ModelRelations {
 									$internal->add(new $config['model']($object));
 								}
 							} else {
-								foreach ($result as $variable => $value) {
-									$internal->$variable = $value;
-								}								
+								$internal->set_data($result);
+								// foreach ($result as $variable => $value) {
+								// 	$internal->$variable = $value;
+								// }
 							}
 						});
 						

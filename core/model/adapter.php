@@ -32,14 +32,19 @@ interface ModelAdapter {
 	public function now();
 	
 	public function has_many_query($info);
-	
 	public function has_one_query($info);
-		
 	public function belongs_to_query($info);
-	
 	public function has_and_belongs_to_many_query($info);
 	
+	public function has_many_insert($table, $data, $relation);
 	public function has_one_insert($table, $data, $relation);
+	public function belongs_to_insert($table, $data, $relation);
+	public function has_and_belongs_to_many_insert($table, $data, $relation);
+	
+	public function has_many_update($table, $data, $relation);
+	public function has_one_update($table, $data, $relation);
+	public function belongs_to_update($table, $data, $relation);
+	public function has_and_belongs_to_many_update($table, $data, $relation);
 }
 
 ?>

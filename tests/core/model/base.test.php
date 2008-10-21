@@ -122,7 +122,7 @@ class ModelBaseTestCase extends PrankTestCase {
 	public function test_filling_empty_has_one_relations() {
 		$author = Author::find_by_name('John');
 		$this->assert_false($author->editor->exists());
-		$this->assert_true ($author->editor->hollow());
+		$this->assert_true($author->editor->hollow());
 		$this->assert_false($author->modified());
 		
 		$editor = new Editor;
@@ -151,6 +151,44 @@ class ModelBaseTestCase extends PrankTestCase {
 		$this->assert_equal($editor->author->name, 'John');
 	}
 	
+	public function test_filling_empty_belongs_to_relations() {
+		// belongs_to author
+		$editor = new Editor;
+		$editor->name = 'Eric';
+		
+		// has_one editor
+		$author = new Author;
+		$author->name = 'Albert';
+		
+		$this->assert_false(isset($editor->author));
+		$editor->author = $author;
+		$this->assert_true(isset($editor->author));
+		
+		$this->assert_false(isset($editor->id));
+		$this->assert_false(isset($editor->author_id));
+		$this->assert_false(isset($author->id));
+		
+		$this->assert_true($editor->save());
+		
+		$this->assert_true(isset($editor->id));
+		$this->assert_true(isset($editor->author_id));
+		$this->assert_true(isset($author->id));
+		$this->assert_equal($editor->author_id, $author->id);
+		
+		$this->assert_true($editor->exists());
+		$this->assert_true($author->exists());
+		$this->assert_true($editor->author->exists());
+		
+		unset($author, $editor);
+		
+		$author = Author::find_by_name('Albert');
+		$this->assert_false($author->hollow());
+		$this->assert_true (isset($author->editor));
+		$this->assert_true ($author->editor->exists());
+		$this->assert_false($author->editor->hollow());
+		$this->assert_equal($author->editor->name, 'Eric');
+	}
+	
 	public function test_no_overwriting_user_set_singular_relations() {
 		$author = Author::find_by_name('John');
 		$article = new Article;
@@ -168,7 +206,7 @@ class ModelBaseTestCase extends PrankTestCase {
 	
 	public function test_perpetuum_relations() {
 		$user = User::find_by_name('test1');
-		$this->assert_false(isset($user->profile->user));
+		$this->assert_true(isset($user->profile->user->profile));
 	}
 	
 	public function test_hollow() {

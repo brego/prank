@@ -25,7 +25,7 @@ class BaseTestCase extends PrankTestCase {
 		ob_start();
 		d($string);
 		$result = ob_get_clean();
-		$this->assert_equal($result, '<pre>string(13) "'.$string.'"'."\n".'</pre>');
+		$this->assert_equal($result, "<pre>\nstring(13) \"$string\"\n</pre>\n");
 	}
 
 	public function test_array_cleanup() {
