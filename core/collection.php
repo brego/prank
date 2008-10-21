@@ -25,7 +25,7 @@
 class Collection implements Iterator, Countable {
 	private   $key       = 0;
 	private   $size      = 0;
-	private   $items     = array();
+	protected $items     = array();
 	private   $loader    = null;
 /**
  * Name of single item in the colection (used in each)

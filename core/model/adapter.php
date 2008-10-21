@@ -38,6 +38,8 @@ interface ModelAdapter {
 	public function belongs_to_query($info);
 	
 	public function has_and_belongs_to_many_query($info);
+	
+	public function has_one_insert($table, $data, $relation);
 }
 
 ?>

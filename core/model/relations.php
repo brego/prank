@@ -16,12 +16,16 @@ class ModelRelations {
 				}
 				foreach ($relations[$relation_type] as $relation) {
 					if (isset($this->relational_data[$relation]) === false) {
+						
 						$config = $this->config($relation, $data, $model, $relation_type);
 						if ($relation_type == 'has_many' || $relation_type == 'has_and_belongs_to_many') {
-							$output = new Collection;
+							$output = new ModelCollection;
 						} else {
 							$output = new $config['model'];
 						}
+						
+						$output->relation_type($relation_type);
+						
 						$output->register_loader(function($internal) use($config) {
 							$connection = ModelConnection::instance();
 							$method     = $config['type'].'_query';

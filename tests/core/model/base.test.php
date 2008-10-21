@@ -51,7 +51,7 @@ class ModelBaseTestCase extends PrankTestCase {
 		$this->assert_is_a($user, 'User');
 		$this->assert_true($user->exists());
 		$this->assert_true(isset($user->cars));
-		$this->assert_is_a($user->cars, 'Collection');
+		$this->assert_is_a($user->cars, 'ModelCollection');
 		
 		$this->assert_equal(count($user->cars), 5);
 		foreach ($user->cars as $car) {
@@ -91,7 +91,7 @@ class ModelBaseTestCase extends PrankTestCase {
 		$this->assert_is_a($john, 'Author');
 		$this->assert_true($john->exists());
 		$this->assert_true(isset($john->articles));
-		$this->assert_is_a($john->articles, 'Collection');
+		$this->assert_is_a($john->articles, 'ModelCollection');
 		$this->assert_equal(count($john->articles), 2);
 		$johns_articles = $john->articles->each(function($name) {
 			return $name;
@@ -102,7 +102,7 @@ class ModelBaseTestCase extends PrankTestCase {
 		$this->assert_is_a($fantasia, 'Article');
 		$this->assert_true($fantasia->exists());
 		$this->assert_true(isset($fantasia->authors));
-		$this->assert_is_a($fantasia->authors, 'Collection');
+		$this->assert_is_a($fantasia->authors, 'ModelCollection');
 		$this->assert_equal(count($fantasia->authors), 2);
 		$fantasias_authors = $fantasia->authors->each(function($name) {
 			return $name;
@@ -119,28 +119,36 @@ class ModelBaseTestCase extends PrankTestCase {
 		$this->assert_true($author->editor->hollow());
 	}
 	
-	public function test_filling_empty_singular_relations() {
+	public function test_filling_empty_has_one_relations() {
 		$author = Author::find_by_name('John');
 		$this->assert_false($author->editor->exists());
-		$this->assert_true($author->editor->hollow());
+		$this->assert_true ($author->editor->hollow());
 		$this->assert_false($author->modified());
+		
 		$editor = new Editor;
 		$editor->name = 'Edward Johnson';
+		$this->assert_false(isset($editor->author_id));
+		
 		$author->editor = $editor;
+		$this->assert_true (isset($editor->author_id));
+		$this->assert_equal($author->id, $editor->author_id);
+		
 		$this->assert_equal($author->editor->name, 'Edward Johnson');
 		$this->assert_false($author->editor->exists());
 		$this->assert_false($author->editor->hollow());
-		$this->assert_true($author->editor->modified());
+		$this->assert_true ($author->editor->modified());
 		
-		/**
-		 * Here we need to loop through the Model->relations, and check if
-		 * they're modifed.
-		 * 
-		 * What need s to be done is extending the collection, so that it has
-		 * a modified status. Also, do we really need N queries for N objects?
-		 */
-
-		// TEST SAVING RELATIONS
+		$this->assert_true ($author->exists());
+		$this->assert_false($author->hollow());
+		$this->assert_false($author->modified());
+		
+		
+		$this->assert_true($author->save());
+		$this->assert_true($author->editor->exists());
+		
+		$editor = Editor::find_by_name('Edward Johnson');
+		$this->assert_true ($editor->exists());
+		$this->assert_equal($editor->author->name, 'John');
 	}
 	
 	public function test_no_overwriting_user_set_singular_relations() {
@@ -148,9 +156,9 @@ class ModelBaseTestCase extends PrankTestCase {
 		$article = new Article;
 		$article->name = 'Lybris';
 		$article->body = 'Amazing article';
-		$articles = new Collection($article);
+		$articles = new ModelCollection($article);
 		$author->articles = $articles;
-		$this->assert_is_a($author->articles, 'Collection');
+		$this->assert_is_a($author->articles, 'ModelCollection');
 		$this->assert_equal(count($articles), 1);
 		$this->assert_equal(count($author->articles), 1);
 		
@@ -229,7 +237,7 @@ class ModelBaseTestCase extends PrankTestCase {
 
 	public function test___callStatic() {
 		$test = User::find_all();
-		$this->assert_is_a($test, 'Collection');
+		$this->assert_is_a($test, 'ModelCollection');
 		$this->assert_equal(count($test), 2);
 		
 		$test = User::find_by_name('test1');

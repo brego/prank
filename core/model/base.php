@@ -33,6 +33,7 @@ class ModelBase extends Object {
 	private $relations                 = array();
 	private $hollow                    = true;
 	private $exists                    = false;
+	private $relation_type             = false;
 /**
  * Is this model modified (has any data been set)
  *
@@ -116,17 +117,15 @@ class ModelBase extends Object {
 				$this->data[$column] = $data[$column];
 			}
 		}
-		$this->setup_relational_properities();
-	}
-
-	public function setup_relational_properities() {
-		$types = array('has_many', 'has_one', 'belongs_to', 'has_and_belongs_to_many');
-		foreach ($types as $type) {
+		
+		foreach (array('has_many', 'has_one', 'belongs_to', 'has_and_belongs_to_many') as $type) {
 			if ($this->$type !== false) {
 				if (is_array($this->$type) === false) {
 					$this->$type = array($this->$type);
-				}	
-				$this->relations = array_merge($this->relations, $this->$type);
+				}
+				foreach ($this->$type as $name) {
+					$this->relations[$name] = $type;
+				}
 			}
 		}
 	}
@@ -232,6 +231,32 @@ class ModelBase extends Object {
 	}
 
 /**
+ * What type of a relation is this model
+ *
+ * @param  string $relation_type 
+ * @return string
+ */
+	public function relation_type($relation_type = null) {
+		if ($relation_type !== null) {
+			$this->relation_type = $relation_type;
+		}
+		return $this->relation_type;
+	}
+	
+/**
+ * Is this model a relation
+ *
+ * @return boolean
+ */
+	public function relation() {
+		if ($this->relation_type !== false) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+/**
  * Saves current Model in the table
  * 
  * If the Model represents a new data set, it will be added as a new row to the
@@ -245,12 +270,20 @@ class ModelBase extends Object {
  *
  * @return boolean
  */
-	public function save() {
+	public function save($related_model = null) {
+		$result = true;
+		
 		if ($this->exists === true && $this->modified === true) {
 			if ($this->connection->is_column_of('updated_at', $this->table)) {
 				$this->updated_at = $this->connection->now();
 			}
-			$result = $this->connection->update($this->table, $this->data, 'id='.$this->id);
+		
+			if ($related_model !== null && $this->relation() === true) {
+				$method = $this->relation_type().'_update';
+				$result = $this->connection->$method($this->table, $this->data, $related_model);
+			} else {
+				$result = $this->connection->update($this->table, $this->data, 'id='.$this->id);
+			}
 		} elseif ($this->modified === true) {
 			if ($this->connection->is_column_of('created_at', $this->table)) {
 				$this->created_at = $this->connection->now();
@@ -258,8 +291,23 @@ class ModelBase extends Object {
 			if ($this->connection->is_column_of('updated_at', $this->table)) {
 				$this->updated_at = $this->connection->now();
 			}
-			$result   = $this->connection->insert($this->table, $this->data);
+		
+			if ($related_model !== null && $this->relation() === true) {
+				$method = $this->relation_type().'_insert';
+				$result = $this->connection->$method($this->table, $this->data, $related_model);
+			} else {
+				$result = $this->connection->insert($this->table, $this->data);
+			}
+		
 			$this->id = $this->connection->last_insert_id();
+		}
+		
+		foreach ($this->relations as $relation => $type) {
+			if (isset($this->relational_data[$relation])) {
+				if ($this->relational_data[$relation]->modified() === true) {
+					$result = $this->relational_data[$relation]->save($this);
+				}	
+			}
 		}
 		
 		if ($result !== false) {
@@ -297,7 +345,7 @@ class ModelBase extends Object {
 			}
 			return $result;
 		} else {
-			return $this->register_extensions($method, $arguments);
+			return parent::__call($method, $arguments);
 		}
 	}
 
@@ -333,7 +381,7 @@ class ModelBase extends Object {
 		} elseif ($method === 'delete') {
 			return $connection->delete($table, 'id='.$arguments[0]);
 		} else {
-			return self::register_static_extensions($method, $arguments);
+			return parent::__callStatic($method, $arguments);
 		}
 	}
 
@@ -358,7 +406,16 @@ class ModelBase extends Object {
 			$this->hollow          = false;
 			$this->modified        = true;
 			$this->data[$variable] = $value;
-		} elseif (array_search($variable, $this->relations) !== false) {
+		} elseif (array_search($variable, array_keys($this->relations)) !== false) {
+			if ($this->relations[$variable] == 'has_one') {
+				$id_name = Inflector::singularize($this->table).'_id';
+				$value->$id_name = $this->id;
+			}
+			if ($this->relations[$variable] == 'belongs_to') {
+				$id_name = Inflector::singularize($value->table()).'_id';
+				$this->$id_name = $value->id;
+			}
+			$value->relation_type($this->relations[$variable]);
 			$this->relational_data[$variable] = $value;
 		} else {
 			throw new Exception('Property '.$variable.' is not overloadable');
@@ -378,7 +435,7 @@ class ModelBase extends Object {
 		$this->load();
 		if (isset($this->data[$variable])) {
 			return $this->data[$variable];
-		} elseif (array_search($variable, $this->relations) !== false) {
+		} elseif (array_search($variable, array_keys($this->relations)) !== false) {
 			$this->load_relations();
 			if (isset($this->relational_data[$variable])) {
 				return $this->relational_data[$variable];
@@ -401,7 +458,7 @@ class ModelBase extends Object {
 		$this->load();
 		if (isset($this->data[$variable])) {
 			return true;
-		} elseif (array_search($variable, $this->relations) !== false) {
+		} elseif (array_search($variable, array_keys($this->relations)) !== false) {
 			$this->load_relations();
 			if (isset($this->relational_data[$variable])) {
 				return true;

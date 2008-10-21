@@ -172,6 +172,15 @@ class ModelAdaptersMysql extends PDO implements ModelAdapter {
 		$ret = $this->query($query, PDO::FETCH_ASSOC);
 		return $ret;
 	}
+	
+	
+	public function has_one_insert($table, $data, $relation) {
+		$prepared_data = array();
+		foreach ($data as $column => $value) {
+			$prepared_data[] = $column." = '".$value."'";
+		}
+		return $this->exec('insert into '.$table.' set '.implode(', ', $prepared_data).';');
+	}
 }
 
 ?>
