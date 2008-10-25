@@ -2,44 +2,53 @@
 /**
  * Basic interaction methods interface
  *
- * PHP version 5.3.
- *
  * @filesource
  * @copyright  Copyright (c) 2008, Kamil "Brego" Dzieliński
  * @license    http://opensource.org/licenses/mit-license.php The MIT License
  * @author     Kamil "Brego" Dzieliński <brego@brego.dk>
  * @link       http://prank.brego.dk Prank's project page
  * @package    Prank
- * @subpackage Core.Model
+ * @subpackage Model
  * @since      Prank 0.10
  * @version    Prank 0.10
  */
 
+/**
+ * Basic interaction methods interface
+ * 
+ * @package    Prank
+ * @subpackage Model
+ */
 interface ModelAdapter {
 	
+	public function exec($query);
+	public function query();
+	
+	public function last_id();
+	
 	public function is_column_of($column, $table);
-	
 	public function fetch_columns($table);
-
 	public function columns($table);
+	
+	public function multiple_create();
 
-	public function insert($table, $data);
-	
+	public function create($table, $data);
 	public function update($table, $data, $condition);
-	
 	public function delete($table, $condition);
 	
 	public function now();
 	
-	public function has_many_query($info);
-	public function has_one_query($info);
-	public function belongs_to_query($info);
-	public function has_and_belongs_to_many_query($info);
+	public function has_many_read($info);
+	public function has_one_read($info);
+	public function belongs_to_read($info);
+	public function has_and_belongs_to_many_read($info);
 	
-	public function has_many_insert($table, $data, $relation);
-	public function has_one_insert($table, $data, $relation);
-	public function belongs_to_insert($table, $data, $relation);
-	public function has_and_belongs_to_many_insert($table, $data, $relation);
+	public function has_many_create($table, $data, $relation);
+	public function has_one_create($table, $data, $relation);
+	public function belongs_to_create($table, $data, $relation);
+	public function has_and_belongs_to_many_create($table, $data, $relation);
+	
+	// public function has_many_multiple_create
 	
 	public function has_many_update($table, $data, $relation);
 	public function has_one_update($table, $data, $relation);

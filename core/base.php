@@ -34,7 +34,7 @@
 function __autoload($class_name) {
 	if (substr($class_name, -10, 10) !== 'Controller') {
 		
-		if (class_exists($class_name) === false) {			
+		if (class_exists($class_name) === false) {
 			$class_name = Inflector::underscore($class_name);
 			$class_name = str_replace('_', c('DS'), $class_name);
 			$class_name = str_replace('prank'.c('DS'), '', $class_name);

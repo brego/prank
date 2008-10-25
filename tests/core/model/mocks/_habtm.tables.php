@@ -1,19 +1,19 @@
 <?php
 
-$this->db->exec("CREATE TABLE `authors` (
+$this->db->exec("CREATE TABLE IF NOT EXISTS `authors` (
 `id` int(11) NOT NULL auto_increment,
 `name` varchar(75) default NULL,
 PRIMARY KEY (`id`) 
 ) ENGINE=InnoDB");
 
-$this->db->exec("CREATE TABLE `articles` (
+$this->db->exec("CREATE TABLE IF NOT EXISTS `articles` (
 `id` int(11) NOT NULL auto_increment,
 `name` varchar(75) default NULL,
 `body` text,
 PRIMARY KEY (`id`) 
 ) ENGINE=InnoDB");
 
-$this->db->exec("CREATE TABLE `articles_authors` (
+$this->db->exec("CREATE TABLE IF NOT EXISTS `articles_authors` (
 `author_id` int(11),
 `article_id` int(11)
 ) ENGINE=InnoDB");

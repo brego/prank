@@ -51,8 +51,8 @@ class ModelAdaptersMysqlTestCase extends PrankTestCase {
 		$this->assert_equal($this->mysql->columns('users'), $this->collumns);
 	}
 
-	public function test_insert() {
-		$this->mysql->insert('users', array('name'=>'joe'));
+	public function test_create() {
+		$this->mysql->create('users', array('name'=>'joe'));
 		$result = $this->db->query("select * from users where name='joe';");
 		$this->assert_equal($result->rowCount(), 1);
 	}

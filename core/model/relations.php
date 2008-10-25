@@ -1,5 +1,7 @@
 <?php
 
+// DO SOMETHING WITH THIS CRAP
+
 class ModelRelations {
 	private $relational_data = array();
 	
@@ -28,7 +30,7 @@ class ModelRelations {
 						
 						$output->register_loader(function($internal) use($config) {
 							$connection = ModelConnection::instance();
-							$method     = $config['type'].'_query';
+							$method     = $config['type'].'_read';
 							$result     = $connection->$method($config);
 							if ($config['type'] == 'has_many' || $config['type'] == 'has_and_belongs_to_many') {
 								foreach ($result as $object) {

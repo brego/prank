@@ -45,10 +45,11 @@ class Collection implements Iterator, Countable {
 	public function __construct($items = null) {
 		if ($items !== null) {
 			if (is_array($items) === false) {
-				$items = array($items);
-			}
-			foreach ($items as $item) {
-				$this->add($item);
+				$this->add($items);
+			} else {
+				foreach ($items as $item) {
+					$this->add($item);
+				}
 			}	
 		}
 	}

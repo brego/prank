@@ -1,6 +1,6 @@
 <?php
 /**
- * Baseclass for all models.
+ * Baseclass for all models
  *
  * @filesource
  * @copyright  Copyright (c) 2008, Kamil "Brego" Dzieliński
@@ -14,7 +14,7 @@
  */
 
 /**
- * Baseclass for all models.
+ * Baseclass for all models
  *
  * All models extend this base class. Contains methods basic CRUD, but also 
  * advnced finders and assotiations.
@@ -115,229 +115,12 @@ class ModelBase extends Object {
 				foreach ($this->$type as $name) {
 					$this->relations[$name] = $type;
 				}
-			}
-		}
-	}
-	
-	public function set_data($data = false) {
-		if ($data !== false && is_array($data) === true) {
-			// d($data);
-			$this->hollow = false;
-			if (isset($data['id'])) {
-				$this->exists = true;
-			}
-			foreach ($this->columns as $column) {
-				if (isset($data[$column])) {
-					$this->data[$column] = $data[$column];
-				}
-			}
-		}
-		
-	}
-
-/**
- * Registers a lazyload function
- * 
- * Function is expected to be a callable (lambda), accepting one parameter,
- * which will be used to pass reference to the model. Loader function will
- * run only once, and will be erased afterwards.
- *
- * @param  callable $callable 
- * @return void
- */
-	public function register_loader($callable) {
-		if (is_callable($callable)) {
-			$this->loader = $callable;
-		} else {
-			throw new Exception('Non-callable function passed as a loader: '.$callable);
-		}
-	}
-
-/**
- * Runs the lazyload function
- *
- * @return void
- */
-	private function load() {
-		if ($this->loader !== null) {
-			$loader = $this->loader;
-			$loader($this);
-			$this->loader = null;
-		}
-	}
-
-/**
- * Loads the relations
- * 
- * Uses ModelRelations class to load all the relations corresponding to this
- * model - but without loading the data (sets lazyloads on collections/models).
- *
- * @return void
- */
-	private function load_relations() {
-		if ($this->exists === true && $this->relations_loaded === false) {
-			$relations = array(
-				'has_many' => $this->has_many,
-				'has_one'  => $this->has_one,
-				'belongs_to' => $this->belongs_to,
-				'has_and_belongs_to_many' => $this->has_and_belongs_to_many);
-			$loaded = ModelRelations::load($this, $this->data, $relations);
-			$this->relational_data  = array_merge($loaded, $this->relational_data);
-			$this->relations_loaded = true;
-		}
-	}
-
-/**
- * Is the Model empty?
- *
- * @return boolean
- */
-	public function hollow() {
-		$this->load();
-		return $this->hollow;
-	}
-	
-	public function data() {
-		return $this->data;
-	}
-	
-	public function loaded() {
-		if ($this->loader === null) {
-			return false;
-		} else {
-			return true;
-		}
-	}
-
-/**
- * Returns fields of a Model 
- * 
- * Returns the names of the fields of this Model (which correspond to the
- * columns of the table it represents).
- *
- * @return array
- */
-	public function fields() {
-		return $this->columns;
-	}
-
-/**
- * Does this Model exist in the table?
- *
- * @return boolean
- */
-	public function exists() {
-		$this->load();
-		return $this->exists;
-	}
-
-/**
- * Name of the table represented by this model
- *
- * @return string
- */
-	public function table() {
-		return $this->table;
-	}
-
-/**
- * Is this model modified - does it need to be saved
- *
- * @return boolean
- */
-	public function modified() {
-		return $this->modified;
-	}
-
-/**
- * What type of a relation is this model
- *
- * @param  string $relation_type 
- * @return string
- */
-	public function relation_type($relation_type = null) {
-		if ($relation_type !== null) {
-			$this->relation_type = $relation_type;
-		}
-		return $this->relation_type;
-	}
-	
-/**
- * Is this model a relation
- *
- * @return boolean
- */
-	public function relation() {
-		if ($this->relation_type !== false) {
-			return true;
-		} else {
-			return false;
-		}
-	}
-
-/**
- * Saves current Model in the table
- * 
- * If the Model represents a new data set, it will be added as a new row to the
- * table. If, on the other hand it represents an existing row, the existing row
- * will be updated. Upon insertion, the id, created_at and updated_at fields
- * get filled. Upon update, only the updated_at field gets filled.
- * 
- * If insertion/update is succesfull, the exists property is set to true, and
- * the modified property is set to false - so you need to modify the model
- * again to be able to perform a save.
- *
- * @return boolean
- */
-	public function save($related_model = null) {
-		$result = true;
-		
-		foreach ($this->relations as $relation => $type) {
-			if (isset($this->relational_data[$relation])) {
-				if ($this->relational_data[$relation]->modified() === true) {
-					$result = $this->relational_data[$relation]->save($this);
-				}	
-			}
-		}
-		
-		if ($this->exists === true && $this->modified === true) {
-			if ($this->connection->is_column_of('updated_at', $this->table)) {
-				$this->updated_at = $this->connection->now();
-			}
-		
-			if ($related_model !== null && $this->relation() === true) {
-				$method = $this->relation_type().'_update';
-				$result = $this->connection->$method($this->table, $this->data, $related_model);
 			} else {
-				$result = $this->connection->update($this->table, $this->data, 'id='.$this->id);
+				$this->$type = array();
 			}
-		} elseif ($this->modified === true) {
-			if ($this->connection->is_column_of('created_at', $this->table)) {
-				$this->created_at = $this->connection->now();
-			}
-			if ($this->connection->is_column_of('updated_at', $this->table)) {
-				$this->updated_at = $this->connection->now();
-			}
-		
-			if ($related_model !== null && $this->relation() === true) {
-				$method = $this->relation_type().'_insert';
-				$result = $this->connection->$method($this->table, $this->data, $related_model);
-			} else {
-				$result = $this->connection->insert($this->table, $this->data);
-			}
-		
-			$this->id = $this->connection->last_insert_id();
 		}
-		
-		if ($result !== false) {
-			$this->exists   = true;
-			$this->modified = false;
-			$result         = true;
-		}
-		
-		return $result;
 	}
-
+	
 /**
  * Method overloading
  * 
@@ -426,18 +209,26 @@ class ModelBase extends Object {
 			$this->modified        = true;
 			$this->data[$variable] = $value;
 		} elseif (array_search($variable, array_keys($this->relations)) !== false) {
+			if ($this->relations[$variable] == 'has_many') {
+				if (is_a($value, 'ModelCollection') !== true) {
+					$value = new ModelCollection($value);
+					$value->relation_type('has_many');
+				}
+			}
 			if ($this->relations[$variable] == 'has_one' && $this->exists() === true) {
 				$id_name = Inflector::singularize($this->table).'_id';
 				$value->$id_name = $this->id;
+				$value->relation_type('has_one');
 			}
 			if ($this->relations[$variable] == 'belongs_to' && $this->exists() === true) {
 				$id_name = Inflector::singularize($value->table()).'_id';
 				$this->$id_name = $value->id;
+				$value->relation_type('belongs_to');
 			}
 			$value->relation_type($this->relations[$variable]);
 			$this->relational_data[$variable] = $value;
 		} else {
-			throw new Exception('Property '.$variable.' is not overloadable');
+			throw new ModelExceptionsUnknownproperty($variable, $this);
 		}
 	}
 
@@ -460,7 +251,7 @@ class ModelBase extends Object {
 				return $this->relational_data[$variable];
 			}
 		} else {
-			throw new Exception('Unknown property '.$variable);
+			throw new ModelExceptionsUnknownproperty($variable, $this);
 		}
 	}
 
@@ -487,6 +278,262 @@ class ModelBase extends Object {
 		} else {
 			return false;
 		}
+	}
+
+/**
+ * Is the Model empty?
+ *
+ * Triggers lazyload.
+ * 
+ * @return boolean
+ */
+	public function hollow() {
+		$this->load();
+		return $this->hollow;
+	}
+
+/**
+ * Does this Model exist in the table?
+ *
+ * Triggers lazyload.
+ *
+ * @return boolean
+ */
+	public function exists() {
+		$this->load();
+		return $this->exists;
+	}
+
+/**
+ * Is this model modified - does it need to be saved
+ *
+ * @return boolean
+ */
+	public function modified() {
+		return $this->modified;
+	}
+
+/**
+ * Returns an array of this model's data
+ *
+ * @return array
+ */
+	public function data() {
+		return $this->data;
+	}
+
+/**
+ * Has the lazyload run?
+ *
+ * Be aware that if this model is not lazyloaded, this will return false.
+ * 
+ * @return boolean
+ */
+	public function loaded() {
+		if ($this->loader === null) {
+			return false;
+		} else {
+			return true;
+		}
+	}
+
+/**
+ * Returns fields of a Model 
+ * 
+ * Returns the names of the fields of this Model (which correspond to the
+ * columns of the table it represents).
+ *
+ * @return array
+ */
+	public function fields() {
+		return $this->columns;
+	}
+
+/**
+ * Name of the table represented by this model
+ *
+ * @return string
+ */
+	public function table() {
+		return $this->table;
+	}
+
+/**
+ * What type of a relation is this model?
+ *
+ * Provide a type to set it (intended for internal use).
+ * 
+ * @param  string $relation_type 
+ * @return string
+ */
+	public function relation_type($relation_type = null) {
+		if ($relation_type !== null) {
+			$this->relation_type = $relation_type;
+		}
+		return $this->relation_type;
+	}
+
+/**
+ * Is this model a relation?
+ *
+ * @return boolean
+ */
+	public function relation() {
+		if ($this->relation_type !== false) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+/**
+ * Sets the data of this model
+ *
+ * Sets the given data of this Model. It will only work if the model has no
+ * data yet. Sets the hollowness and existance accordingly (see
+ * ModelBase::hollow() and ModelBase::exists()).
+ * 
+ * @param  array   $data
+ * @return boolean
+ */	
+	public function set_data($data) {
+		if (is_array($data) === true && empty($this->data) === true) {
+			$this->hollow = false;
+			if (isset($data['id'])) {
+				$this->exists = true;
+			}
+			foreach ($this->columns as $column) {
+				if (isset($data[$column])) {
+					$this->data[$column] = $data[$column];
+				}
+			}
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+/**
+ * Registers a lazyload function
+ * 
+ * Function is expected to be a callable (lambda), accepting one parameter,
+ * which will be used to pass reference to the model. Loader function will
+ * run only once, and will be erased afterwards.
+ *
+ * @param  callable $callable 
+ * @return void
+ */
+	public function register_loader($callable) {
+		if (is_callable($callable)) {
+			$this->loader = $callable;
+		} else {
+			throw new Exception('Non-callable function passed as a loader: '.$callable);
+		}
+	}
+
+/**
+ * Runs the lazyload function
+ *
+ * @return void
+ */
+	private function load() {
+		if ($this->loader !== null) {
+			$loader = $this->loader;
+			$loader($this);
+			$this->loader = null;
+		}
+	}
+
+/**
+ * Loads the relations
+ * 
+ * Uses ModelRelations class to load all the relations corresponding to this
+ * model - but without loading the data (sets lazyloads on collections/models).
+ *
+ * @return void
+ */
+	private function load_relations() {
+		if ($this->exists === true && $this->relations_loaded === false) {
+			$relations = array(
+				'has_many' => $this->has_many,
+				'has_one'  => $this->has_one,
+				'belongs_to' => $this->belongs_to,
+				'has_and_belongs_to_many' => $this->has_and_belongs_to_many);
+			$loaded = ModelRelations::load($this, $this->data, $relations);
+			$this->relational_data  = array_merge($loaded, $this->relational_data);
+			$this->relations_loaded = true;
+		}
+	}
+
+/**
+ * Saves current Model in the table
+ * 
+ * If the Model represents a new data set, it will be added as a new row to the
+ * table. If, on the other hand it represents an existing row, the existing row
+ * will be updated. Upon insertion, the id, created_at and updated_at fields
+ * get filled. Upon update, only the updated_at field gets filled.
+ * 
+ * If insertion/update is succesfull, the exists property is set to true, and
+ * the modified property is set to false - so you need to modify the model
+ * again to be able to perform a save.
+ *
+ * @return boolean
+ */
+	public function save($related_model = null) {
+		$result = true;
+		
+		foreach (array_merge($this->has_one, $this->belongs_to) as $type => $relation) {
+			if (isset($this->relational_data[$relation])) {
+				if ($this->relational_data[$relation]->modified() === true) {
+					$result = $this->relational_data[$relation]->save($this);
+				}	
+			}
+		}
+		
+		if ($this->exists === true && $this->modified === true) {
+			if ($this->connection->is_column_of('updated_at', $this->table)) {
+				$this->updated_at = $this->connection->now();
+			}
+		
+			if ($related_model !== null && $this->relation() === true) {
+				$method = $this->relation_type.'_update';
+				$result = $this->connection->$method($this->table, $this->data, $related_model);
+			} else {
+				$result = $this->connection->update($this->table, $this->data, 'id='.$this->id);
+			}
+		} elseif ($this->modified === true) {
+			if ($this->connection->is_column_of('created_at', $this->table)) {
+				$this->created_at = $this->connection->now();
+			}
+			if ($this->connection->is_column_of('updated_at', $this->table)) {
+				$this->updated_at = $this->connection->now();
+			}
+		
+			if ($related_model !== null && $this->relation() === true) {
+				$method = $this->relation_type.'_create';
+				$result = $this->connection->$method($this->table, $this->data, $related_model);
+			} else {
+				$result = $this->connection->create($this->table, $this->data);
+			}
+		
+			$this->id = $this->connection->last_id();
+		}
+		
+		foreach (array_merge($this->has_many, $this->has_and_belongs_to_many) as $type => $relation) {
+			if (isset($this->relational_data[$relation])) {
+				if ($this->relational_data[$relation]->modified() === true) {
+					$result = $this->relational_data[$relation]->save($this);
+				}	
+			}
+		}
+		
+		if ($result !== false) {
+			$this->exists   = true;
+			$this->modified = false;
+			$result         = true;
+		}
+		
+		return $result;
 	}
 }
 

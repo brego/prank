@@ -120,11 +120,13 @@ class ModelBaseTestCase extends PrankTestCase {
 	}
 	
 	public function test_filling_empty_has_one_relations() {
+		// has_one editor
 		$author = Author::find_by_name('John');
 		$this->assert_false($author->editor->exists());
 		$this->assert_true($author->editor->hollow());
 		$this->assert_false($author->modified());
 		
+		// belongs_to author
 		$editor = new Editor;
 		$editor->name = 'Edward Johnson';
 		$this->assert_false(isset($editor->author_id));
@@ -145,6 +147,8 @@ class ModelBaseTestCase extends PrankTestCase {
 		
 		$this->assert_true($author->save());
 		$this->assert_true($author->editor->exists());
+		
+		unset($editor);
 		
 		$editor = Editor::find_by_name('Edward Johnson');
 		$this->assert_true ($editor->exists());
@@ -187,6 +191,32 @@ class ModelBaseTestCase extends PrankTestCase {
 		$this->assert_true ($author->editor->exists());
 		$this->assert_false($author->editor->hollow());
 		$this->assert_equal($author->editor->name, 'Eric');
+	}
+	
+	public function test_filling_empty_has_many_relations() {
+		// has_many cars
+		$user = new User;
+		$user->name = 'Ulric';
+		
+		// belongs_to user
+		$car_one = new Car;
+		$car_one->model = 'Lamborgini';
+		
+		$this->assert_false(isset($user->cars));
+		$user->cars = $car_one;
+		$this->assert_true (isset($user->cars));
+		$this->assert_is_a ($user->cars, 'ModelCollection');
+		$this->assert_equal($user->cars->relation_type(), 'has_many');
+		foreach ($user->cars as $car) {
+			$this->assert_equal($car->relation_type(), 'has_many');
+		}
+		
+		$this->assert_true ($user->save());
+		
+		$user = User::find_by_name('Ulric');
+		$this->assert_true ($user->exists());
+		$this->assert_equal(count($user->cars), 1);
+		$this->assert_true ($user->cars->exists());
 	}
 	
 	public function test_no_overwriting_user_set_singular_relations() {

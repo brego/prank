@@ -1,6 +1,6 @@
 <?php
 
-$this->db->exec("CREATE TABLE `profiles` (
+$this->db->exec("CREATE TABLE IF NOT EXISTS `profiles` (
 `id` int(11) NOT NULL auto_increment,
 `user_id` int(11) NOT NULL,
 `title` varchar(255) default NULL,

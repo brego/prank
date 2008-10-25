@@ -2,22 +2,26 @@
 /**
  * Facilitates the communication with database.
  *
- * Singelton. Establishes a connection with the database, and is responsible 
- * for all communication with it (through adapters).
- *
- * PHP version 5.3.
- *
  * @filesource
  * @copyright  Copyright (c) 2008, Kamil "Brego" Dzieliński
  * @license    http://opensource.org/licenses/mit-license.php The MIT License
  * @author     Kamil "Brego" Dzieliński <brego@brego.dk>
  * @link       http://prank.brego.dk Prank's project page
  * @package    Prank
- * @subpackage Core.Model
+ * @subpackage Model
  * @since      Prank 0.10
  * @version    Prank 0.10
  */
 
+/**
+ * Facilitates the communication with database.
+ *
+ * Singelton. Establishes a connection with the database, and is responsible 
+ * for all communication with it (through adapters).
+ *
+ * @package    Prank
+ * @subpackage Model
+ */
 class ModelConnection {
 	private static $instance = null;  
 	private        $adapter  = null;
