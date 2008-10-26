@@ -539,7 +539,7 @@ class ModelBase extends Object {
 	public function save($related_model = null) {
 		$result = true;
 		
-		foreach (array_merge($this->has_one, $this->belongs_to) as $type => $relation) {
+		foreach ($this->belongs_to as $type => $relation) {
 			if (isset($this->relational_data[$relation])) {
 				if ($this->relational_data[$relation]->modified() === true) {
 					$result = $this->relational_data[$relation]->save($this);
@@ -576,7 +576,7 @@ class ModelBase extends Object {
 			$this->id = $this->connection->last_id();
 		}
 		
-		foreach (array_merge($this->has_many, $this->has_and_belongs_to_many) as $type => $relation) {
+		foreach (array_merge($this->has_one, $this->has_many, $this->has_and_belongs_to_many) as $type => $relation) {
 			if (isset($this->relational_data[$relation])) {
 				if ($this->relational_data[$relation]->modified() === true) {
 					$result = $this->relational_data[$relation]->save($this);
