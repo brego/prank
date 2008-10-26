@@ -25,7 +25,7 @@
 class ModelBase extends Object {
 	private   $table                   = null;
 	private   $model                   = null;
-	private   $connection              = null;
+	protected $connection              = null;
 	private   $columns                 = null;
 	private   $data                    = array();
 	private   $relational_data         = array();
@@ -146,15 +146,19 @@ class ModelBase extends Object {
 /**
  * Dynamic static methods go here.
  *
- * Supported methods:
- * - find_by_*(arg)
+ * Supported methods (where name and email are examples of column names):
+ * - find(id)
+ * - find_by_name(name)
+ * - find_by_name_and_order_by_email(name)
+ * - find_by_name_and_email(name, email)
  * - find_all()
+ * - find_all_and_order_by_name()
+ * - find_all_and_order_by_name_and_email_desc()
  * - delete(id)
  *
  * Also calls all the mixins (see the Object class).
  * If an unknown method is called, an exception is thrown.
  * 
- * @todo   Implement more dynamic finders (multiple arguments etc)
  * @param  string $method
  * @param  string $arguments
  * @return mixed
@@ -163,15 +167,37 @@ class ModelBase extends Object {
 		$connection = ModelConnection::instance();
 		$model      = get_called_class();
 		$table      = Inflector::tabelize(get_called_class());
-
-		if (substr($method, 0, 8) == 'find_by_') {
-			$column = down(substr($method, 8));
-			if ($connection->is_column_of($column, $table)) {
-				$query  = 'select * from `'.$table.'` where `'.$column."`='".$arguments[0]."';";
-				return $connection->query_wrapped($query, $model);
+		$order      = '';
+		
+		if (strpos($method, 'order_by') !== false) {
+			$order = substr($method, strpos($method, 'order_by_')+9);
+			if (strpos($order, '_and_') !== false) {
+				$order = split('_and_', $order);
+				$order = array_map(function($item) {return str_replace('_desc', ' desc', $item);}, $order);
+				$order = implode(', ', $order);
+			} else {
+				$order = str_replace('_desc', ' desc', $order);	
 			}
-		} elseif ($method === 'find_all') {
-			return $connection->query_wrapped('select * from `'.$table.'`;', $model);
+		}
+
+		if ($method === 'find' && is_numeric($arguments[0]) === true) {
+			return $connection->read($table, $model, "id='".$arguments[0]."'");
+		} elseif (substr($method, 0, 8) === 'find_by_') {
+			$column = down(substr($method, 8));
+			if (strpos($column, '_and_') !== false) {
+				$columns = split('_and_', $column);
+				if ($connection->are_columns_of($columns, $table)) {
+					$arguments = array_map(function($key, $item) {
+						return $key."='".$item."'";
+						}, $columns, $arguments);
+					$condition = implode(' and ', $arguments);
+					return $connection->read($table, $model, $condition, $order);
+				}
+			} elseif ($connection->is_column_of($column, $table)) {
+				return $connection->read($table, $model, $column."='".$arguments[0]."'");
+			}
+		} elseif (substr($method, 0, 8) === 'find_all') {
+			return $connection->read($table, $model, '', $order);
 		} elseif ($method === 'delete') {
 			return $connection->delete($table, 'id='.$arguments[0]);
 		} else {

@@ -62,39 +62,20 @@ class ModelConnection {
 	}
 
 /**
- * Returns a query result wrapped in a specified model or a set
+ * Wrapper around the adapters is_column_of for multiple collumns
  *
- * Executes the $query, and if the result is a single row, a new $model is
- * returned with that row's data. If the result contains more than one row,
- * a Model::Set is created, and filled with new $model's corresponding to the
- * returned rows.
- * If the result is empty, false is returned.
- * 
- * @param  string $query 
- * @param  string $model 
- * @return mixed
- */	
-	public function query_wrapped($query, $model) {
-		$result = $this->query($query, PDO::FETCH_ASSOC);
-		
-		if ($result !== false) {
-			if ($result->rowCount() > 1) {
-				$set = new ModelCollection;
-				$set->item_name(Inflector::underscore($model));
-				foreach($result as $row) {
-					$set->add(new $model($row));
-				}
-				return $set;
-			} elseif ($result->rowCount() == 1) {
-				return new $model($result->fetch());
-			} elseif ($result->rowCount() == 0) {
+ * @param  array   $columns 
+ * @param  string  $table 
+ * @return boolean
+ */
+	public function are_columns_of($columns, $table) {
+		foreach ($columns as $column) {
+			if ($this->is_column_of($column, $table) === false) {
 				return false;
-			} else {
-				throw new Exception('Illogical count of rows returned: '.$result->rowCount());
+				break;
 			}
-		} else {
-			return false;
 		}
+		return true;
 	}
 
 /**

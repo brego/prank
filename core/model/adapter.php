@@ -33,6 +33,7 @@ interface ModelAdapter {
 	public function multiple_create();
 
 	public function create($table, $data);
+	public function read($table, $model, $condition = '');
 	public function update($table, $data, $condition);
 	public function delete($table, $condition);
 	

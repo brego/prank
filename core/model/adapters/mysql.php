@@ -143,6 +143,28 @@ class ModelAdaptersMysql extends PDO implements ModelAdapter {
 		return $this->exec('insert into '.$table.' set '.implode(', ', $prepared_data).';');
 	}
 
+	public function read($table, $model, $condition = '', $order = '') {
+		$query = 'select * from '.$table;
+		if ($condition !== '') {
+			$query .=' where '.$condition;
+		}
+		if ($order !== '') {
+			$query .=' order by '.$order;
+		}
+		$query .= ';';
+		$result = $this->query($query, PDO::FETCH_ASSOC);
+		if ($result->rowCount() == 1) {
+			$result = new $model($result->fetch());
+		} else {
+			$collection = new ModelCollection;
+			foreach ($result as $row) {
+				$collection->add(new $model($row));
+			}
+			$result = $collection;
+		}
+		return $result;
+	}
+
 /**
  * Updates a record in the table
  *

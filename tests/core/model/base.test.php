@@ -136,14 +136,12 @@ class ModelBaseTestCase extends PrankTestCase {
 		$this->assert_true ($author->editor->modified());
 		
 		$this->assert_true($author->save());
-		// $this->assert_true($author->exists());
-		// $this->assert_true($author->editor->exists());
+		$this->assert_true($author->exists());
+		$this->assert_true($author->editor->exists());
 		
-		unset($editor);
-		
-		// $editor = Editor::find_by_name('Edward Johnson');
-		// $this->assert_true ($editor->exists());
-		// $this->assert_equal($editor->author->name, 'Judith');
+		$editor = Editor::find_by_name('Edward Johnson');
+		$this->assert_true ($editor->exists());
+		$this->assert_equal($editor->author->name, 'Judith');
 	}
 	
 	public function test_filling_empty_belongs_to_relations() {
@@ -156,7 +154,6 @@ class ModelBaseTestCase extends PrankTestCase {
 		$author->name = 'Albert';
 		
 		$editor->author = $author;
-
 		
 		$this->assert_true($editor->save());
 		
@@ -310,9 +307,25 @@ class ModelBaseTestCase extends PrankTestCase {
 	}
 
 	public function test___callStatic() {
+		$test = User::find(1);
+		$this->assert_is_a($test, 'User');
+		$this->assert_equal($test->name, 'test1');
+		
 		$test = User::find_all();
 		$this->assert_is_a($test, 'ModelCollection');
 		$this->assert_equal(count($test), 2);
+		
+		$test = User::find_all_and_order_by_name_desc();
+		$this->assert_is_a($test, 'ModelCollection');
+		$this->assert_equal(count($test), 2);
+		$result = $test->each(function($name) {return $name;});
+		$this->assert_equal($result, a('test2', 'test1'));
+		
+		$test = User::find_all_and_order_by_name_desc_and_email();
+		$this->assert_is_a($test, 'ModelCollection');
+		$this->assert_equal(count($test), 2);
+		$result = $test->each(function($name) {return $name;});
+		$this->assert_equal($result, a('test2', 'test1'));
 		
 		$test = User::find_by_name('test1');
 		$this->assert_is_a($test, 'User');
@@ -320,6 +333,11 @@ class ModelBaseTestCase extends PrankTestCase {
 		
 		$test = User::find_by_email('test1@email.com');
 		$this->assert_is_a($test, 'User');
+		$this->assert_equal($test->name, 'test1');
+		
+		$test = User::find_by_email_and_name('test1@email.com', 'test1');
+		$this->assert_is_a($test, 'User');
+		$this->assert_equal($test->email, 'test1@email.com');
 		$this->assert_equal($test->name, 'test1');
 		
 		$result = $this->db->query("select * from users where name='test1';");
