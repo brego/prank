@@ -270,23 +270,37 @@ class ModelAdaptersMysql extends PDO implements ModelAdapter {
 	}
 	
 	public function has_and_belongs_to_many_create($table, $data, $relation) {
-		return true;
+		foreach ($data as $column => $value) {
+			$prepared_data[] = $column." = '".$value."'";
+		}
+		$return = $this->exec('insert into '.$table.' set '.implode(', ', $prepared_data).';');
+		
+		$relation_table = implode('_', s($table, $relation->table()));
+		$local          = Inflector::singularize($table).'_id';
+		$local_id       = $this->last_id();
+		$foreign        = Inflector::singularize($relation->table()).'_id';
+		$foreign_id     = $relation->id;
+		
+		$query = "insert into ".$relation_table." set ".$foreign."='".$foreign_id."', ".$local."='".$local_id."';";
+		
+		$return = $this->exec($query);
+		return $return;
 	}
 	
 	public function has_many_update($table, $data, $relation) {
-		return true;
+		return false;
 	}
 	
 	public function has_one_update($table, $data, $relation) {
-		return true;
+		return false;
 	}
 	
 	public function belongs_to_update($table, $data, $relation) {
-		return true;
+		return false;
 	}
 	
 	public function has_and_belongs_to_many_update($table, $data, $relation) {
-		return true;
+		return false;
 	}
 }
 

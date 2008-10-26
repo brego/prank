@@ -107,18 +107,10 @@ class ModelBase extends Object {
 		
 		$this->set_data($data);
 		
-		foreach (array('has_many', 'has_one', 'belongs_to', 'has_and_belongs_to_many') as $type) {
-			if ($this->$type !== false) {
-				if (is_array($this->$type) === false) {
-					$this->$type = array($this->$type);
-				}
-				foreach ($this->$type as $name) {
-					$this->relations[$name] = $type;
-				}
-			} else {
-				$this->$type = array();
-			}
-		}
+		$this->setup_relation('has_many');
+		$this->setup_relation('has_one');
+		$this->setup_relation('belongs_to');
+		$this->setup_relation('has_and_belongs_to_many');
 	}
 	
 /**
@@ -224,6 +216,12 @@ class ModelBase extends Object {
 				$id_name = Inflector::singularize($value->table()).'_id';
 				$this->$id_name = $value->id;
 				$value->relation_type('belongs_to');
+			}
+			if ($this->relations[$variable] == 'has_and_belongs_to_many') {
+				if (is_a($value, 'ModelCollection') !== true) {
+					$value = new ModelCollection($value);
+					$value->relation_type('has_many');
+				}
 			}
 			$value->relation_type($this->relations[$variable]);
 			$this->relational_data[$variable] = $value;
@@ -412,6 +410,27 @@ class ModelBase extends Object {
 			return false;
 		}
 	}
+	
+/**
+ * Sets up the relations table of given relation type
+ *
+ * @param  string $type 
+ * @return void
+ */
+	private function setup_relation($type) {
+		if ($this->$type !== false) {
+			if (is_array($this->$type) === false) {
+				$this->relations[$this->$type] = $type;
+				$this->$type                   = array($this->$type);
+			} else {
+				foreach ($this->$type as $name) {
+					$this->relations[$name] = $type;
+				}
+			}
+		} else {
+			$this->$type = array();
+		}
+	}
 
 /**
  * Registers a lazyload function
@@ -449,18 +468,56 @@ class ModelBase extends Object {
  * 
  * Uses ModelRelations class to load all the relations corresponding to this
  * model - but without loading the data (sets lazyloads on collections/models).
+ * 
+ * Be aware of the fact that any existing relation data will not be overwritten
+ * by the loaded data!
  *
  * @return void
  */
 	private function load_relations() {
 		if ($this->exists === true && $this->relations_loaded === false) {
-			$relations = array(
-				'has_many' => $this->has_many,
-				'has_one'  => $this->has_one,
-				'belongs_to' => $this->belongs_to,
-				'has_and_belongs_to_many' => $this->has_and_belongs_to_many);
-			$loaded = ModelRelations::load($this, $this->data, $relations);
-			$this->relational_data  = array_merge($loaded, $this->relational_data);
+			
+			$relational_data = array();
+			
+			foreach ($this->relations as $relation => $relation_type) {
+				$config = array(
+					'model'   => Inflector::modelize($relation),
+					'local'   => $this->table(),
+					'foreign' => Inflector::tabelize($relation),
+					'id'      => $this->data['id'],
+					'type'    => $relation_type);
+				$config['local_id']   = Inflector::singularize($config['local']).'_id';
+				$config['foreign_id'] = Inflector::singularize($config['foreign']).'_id';
+				$config['join']       = implode('_', s($config['local'], $config['foreign']));
+				if ($relation_type == 'belongs_to') {
+					$config['id'] = $this->data[$config['foreign_id']];
+				}
+				
+				if ($relation_type == 'has_many' || $relation_type == 'has_and_belongs_to_many') {
+					$output = new ModelCollection;
+				} else {
+					$output = new $config['model'];
+				}
+
+				$output->relation_type($relation_type);
+
+				$output->register_loader(function($internal) use($config) {
+					$connection = ModelConnection::instance();
+					$method     = $config['type'].'_read';
+					$result     = $connection->$method($config);
+					if ($config['type'] == 'has_many' || $config['type'] == 'has_and_belongs_to_many') {
+						foreach ($result as $object) {
+							$internal->add(new $config['model']($object));
+						}
+					} else {
+						$internal->set_data($result);
+					}
+				});
+
+				$relational_data[$relation] = $output;
+			}
+			
+			$this->relational_data  = array_merge($relational_data, $this->relational_data);
 			$this->relations_loaded = true;
 		}
 	}

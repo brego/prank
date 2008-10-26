@@ -22,6 +22,16 @@ class CollectionTestCase extends PrankTestCase {
 	public function test___construct() {
 		$test = new Collection(array(new stdClass, new stdClass));
 		$this->assert_equal(count($test), 2);
+		
+		unset($test);
+		
+		$test = new Collection(new stdClass, new stdClass);
+		$this->assert_equal(count($test), 2);
+		
+		unset($test);
+		
+		$test = new Collection(new stdClass);
+		$this->assert_equal(count($test), 1);
 	}
 	
 	public function test_lazy_load() {

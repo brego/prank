@@ -219,6 +219,31 @@ class ModelBaseTestCase extends PrankTestCase {
 		$this->assert_true ($user->cars->exists());
 	}
 	
+	public function test_filling_empty_has_and_belongs_to_many_relations() {
+		$author = new Author;
+		$author->name = 'Archibald';
+		
+		$article_1 = new Article;
+		$article_1->name = 'Anachronysms';
+		$article_2 = new Article;
+		$article_2->name = 'Antichrist';
+		
+		$author->articles = new ModelCollection($article_1, $article_2);
+		
+		$this->assert_false($author->exists());
+		$this->assert_false($author->articles->exists());
+		
+		$this->assert_true($author->save());
+		unset($author, $article_1, $article_2);
+		
+		$author = Author::find_by_name('Archibald');
+		$this->assert_true($author->exists());
+		$this->assert_true($author->articles->exists());
+		
+		$articles = $author->articles->each(function($name) {return $name;});
+		$this->assert_equal($articles, a('Anachronysms', 'Antichrist'));
+	}
+	
 	public function test_no_overwriting_user_set_singular_relations() {
 		$author = Author::find_by_name('John');
 		$article = new Article;

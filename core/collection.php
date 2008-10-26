@@ -37,15 +37,20 @@ class Collection implements Iterator, Countable {
 /**
  * Constructor
  *
- * If $items is not an array, it will be cast to one.
+ * Takes a variable number of parameters, which will be added to the initial
+ * collection with Collection::add().
  * 
- * @param  array $items Items to initially create the collection
  * @return void
  */
-	public function __construct($items = null) {
-		if ($items !== null) {
-			if (is_array($items) === false) {
-				$this->add($items);
+	public function __construct() {
+		$items = func_get_args();
+		if (count($items) > 0) {
+			if (is_array($items[0]) !== false && count($items) === 1) {
+				foreach ($items[0] as $item) {
+					$this->add($item);
+				}
+			} elseif (count($items) === 1) {
+				$this->add($items[0]);
 			} else {
 				foreach ($items as $item) {
 					$this->add($item);
