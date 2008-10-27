@@ -143,6 +143,15 @@ class ModelAdaptersMysql extends PDO implements ModelAdapter {
 		return $this->exec('insert into '.$table.' set '.implode(', ', $prepared_data).';');
 	}
 
+/**
+ * Reads a from the table
+ *
+ * @param  string $table 
+ * @param  string $model 
+ * @param  string $condition 
+ * @param  string $order 
+ * @return void
+ */
 	public function read($table, $model, $condition = '', $order = '') {
 		$query = 'select * from '.$table;
 		if ($condition !== '') {
@@ -155,12 +164,14 @@ class ModelAdaptersMysql extends PDO implements ModelAdapter {
 		$result = $this->query($query, PDO::FETCH_ASSOC);
 		if ($result->rowCount() == 1) {
 			$result = new $model($result->fetch());
-		} else {
+		} elseif ($result->rowCount() > 1) {
 			$collection = new ModelCollection;
 			foreach ($result as $row) {
 				$collection->add(new $model($row));
 			}
 			$result = $collection;
+		} else {
+			return false;
 		}
 		return $result;
 	}
@@ -307,22 +318,6 @@ class ModelAdaptersMysql extends PDO implements ModelAdapter {
 		
 		$return = $this->exec($query);
 		return $return;
-	}
-	
-	public function has_many_update($table, $data, $relation) {
-		return false;
-	}
-	
-	public function has_one_update($table, $data, $relation) {
-		return false;
-	}
-	
-	public function belongs_to_update($table, $data, $relation) {
-		return false;
-	}
-	
-	public function has_and_belongs_to_many_update($table, $data, $relation) {
-		return false;
 	}
 }
 

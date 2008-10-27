@@ -223,15 +223,17 @@ class ModelBase extends Object {
  */	
 	public function __set($variable, $value) {
 		if ($this->connection->is_column_of($variable, $this->table)) {
+			$this->load();
 			$this->hollow          = false;
 			$this->modified        = true;
 			$this->data[$variable] = $value;
 		} elseif (array_search($variable, array_keys($this->relations)) !== false) {
+			$this->load_relations();
 			if ($this->relations[$variable] == 'has_many') {
 				if (is_a($value, 'ModelCollection') !== true) {
 					$value = new ModelCollection($value);
-					$value->relation_type('has_many');
-				}
+				}	
+				$value->relation_type('has_many');
 			}
 			if ($this->relations[$variable] == 'has_one' && $this->exists() === true) {
 				$id_name = Inflector::singularize($this->table).'_id';
@@ -246,8 +248,8 @@ class ModelBase extends Object {
 			if ($this->relations[$variable] == 'has_and_belongs_to_many') {
 				if (is_a($value, 'ModelCollection') !== true) {
 					$value = new ModelCollection($value);
-					$value->relation_type('has_many');
-				}
+				}	
+				$value->relation_type('has_many');
 			}
 			$value->relation_type($this->relations[$variable]);
 			$this->relational_data[$variable] = $value;
@@ -273,6 +275,8 @@ class ModelBase extends Object {
 			$this->load_relations();
 			if (isset($this->relational_data[$variable])) {
 				return $this->relational_data[$variable];
+			} else {
+				throw new Exception('A relation was not loaded? Name is '.$variable.' in model '.get_class($this).'...');
 			}
 		} else {
 			throw new ModelExceptionsUnknownproperty($variable, $this);
@@ -478,6 +482,8 @@ class ModelBase extends Object {
 
 /**
  * Runs the lazyload function
+ * 
+ * This will effectively load the data into this Model.
  *
  * @return void
  */
@@ -518,7 +524,7 @@ class ModelBase extends Object {
 				if ($relation_type == 'belongs_to') {
 					$config['id'] = $this->data[$config['foreign_id']];
 				}
-				
+			
 				if ($relation_type == 'has_many' || $relation_type == 'has_and_belongs_to_many') {
 					$output = new ModelCollection;
 				} else {
@@ -544,6 +550,19 @@ class ModelBase extends Object {
 			}
 			
 			$this->relational_data  = array_merge($relational_data, $this->relational_data);
+			$this->relations_loaded = true;
+			
+		} elseif ($this->exists === false && $this->relations_loaded === false) {
+			foreach ($this->relations as $relation => $relation_type) {
+				if ($relation_type == 'has_many' || $relation_type == 'has_and_belongs_to_many') {
+					$this->relational_data[$relation] = new ModelCollection;
+					$this->relational_data[$relation]->relation_type($relation_type);
+				} else {
+					$model = Inflector::modelize($relation);
+					$this->relational_data[$relation] = new $model;
+					$this->relational_data[$relation]->relation_type($relation_type);
+				}
+			}
 			$this->relations_loaded = true;
 		}
 	}
@@ -577,13 +596,7 @@ class ModelBase extends Object {
 			if ($this->connection->is_column_of('updated_at', $this->table)) {
 				$this->updated_at = $this->connection->now();
 			}
-		
-			if ($related_model !== null && $this->relation() === true) {
-				$method = $this->relation_type.'_update';
-				$result = $this->connection->$method($this->table, $this->data, $related_model);
-			} else {
-				$result = $this->connection->update($this->table, $this->data, 'id='.$this->id);
-			}
+			$result = $this->connection->update($this->table, $this->data, 'id='.$this->id);
 		} elseif ($this->modified === true) {
 			if ($this->connection->is_column_of('created_at', $this->table)) {
 				$this->created_at = $this->connection->now();

@@ -25,7 +25,7 @@
 class ModelCollection extends Collection {
 	private $modified      = false;
 	private $relation_type = false;
-	private $exists        = true;
+	private $exists        = false;
 	
 /**
  * Check if any of the models is modified
@@ -45,6 +45,7 @@ class ModelCollection extends Collection {
  * @return boolean
  */	
 	public function exists() {
+		$this->load();
 		$this->check_exists();
 		return $this->exists;
 	}
@@ -153,18 +154,18 @@ class ModelCollection extends Collection {
 	}
 
 /**
- * Checks if any of the Models does not exist in the database
+ * Checks if any of the Models exist in the database
  * 
- * If any of the Models in this Collection does not exist in database, the
- * Collection counts as not existing.
+ * If any of the Models in this Collection exists in database, the Collection
+ * counts as existing.
  *
  * @return void
  */
 	private function check_exists() {
-		if ($this->exists === true) {
+		if ($this->exists === false) {
 			foreach ($this->items as $model) {
-				if ($model->exists() === false) {
-					$this->exists = false;
+				if ($model->exists() === true) {
+					$this->exists = true;
 					break;
 				}
 			}

@@ -48,13 +48,6 @@ interface ModelAdapter {
 	public function has_one_create($table, $data, $relation);
 	public function belongs_to_create($table, $data, $relation);
 	public function has_and_belongs_to_many_create($table, $data, $relation);
-	
-	// public function has_many_multiple_create
-	
-	public function has_many_update($table, $data, $relation);
-	public function has_one_update($table, $data, $relation);
-	public function belongs_to_update($table, $data, $relation);
-	public function has_and_belongs_to_many_update($table, $data, $relation);
 }
 
 ?>

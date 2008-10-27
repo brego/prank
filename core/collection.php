@@ -82,7 +82,7 @@ class Collection implements Iterator, Countable {
  *
  * @return void
  */
-	private function load() {
+	protected function load() {
 		if ($this->loader !== null) {
 			$loader = $this->loader;
 			$loader($this);
@@ -217,6 +217,7 @@ class Collection implements Iterator, Countable {
  * @return void
  */
 	public function next() {
+		$this->load();
 		$this->key++;
 	}
 
@@ -226,6 +227,7 @@ class Collection implements Iterator, Countable {
  * @return void
  */
 	public function rewind() {
+		$this->load();
 		$this->key = 0;
 	}
 
@@ -236,6 +238,7 @@ class Collection implements Iterator, Countable {
  * @return boolean
  */
 	public function valid() {
+		$this->load();
 		if ($this->key >= $this->size) {
 			return false;
 		} else {
@@ -251,6 +254,7 @@ class Collection implements Iterator, Countable {
  * @return void
  */
 	public function reverse() {
+		$this->load();
 		$this->items = array_reverse($this->items);
 		$this->rewind();
 	}
@@ -261,6 +265,7 @@ class Collection implements Iterator, Countable {
  * @return integer
  */
 	public function key() {
+		$this->load();
 		return $this->key;
 	}
 
