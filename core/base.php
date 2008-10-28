@@ -118,7 +118,7 @@ function c() {
 }
 
 /**
- * Returns an array composed of given arguments.
+ * Returns an array composed of given arguments
  *
  * @return array
  */
@@ -180,6 +180,40 @@ function rm($target) {
 			}
 		}
 		return false;
+	}
+}
+
+/******************************************************************************
+ * File format functions
+ *****************************************************************************/
+
+function to_json($variable) {
+	return json_encode($variable);
+}
+
+function from_json($json) {
+	return json_decode($json, true);
+}
+
+function to_yaml($variable) {
+	if (function_exists('syck_dump')) {
+		return syck_dump($variable);
+	} else {
+		if (class_exists('Spyc') === false) {
+			require dirname(c('CORE')).c('DS').'lib'.c('DS').'spyc'.c('DS').'spyc.php';
+		}
+		return Spyc::YAMLDump($variable);
+	}
+}
+
+function from_yaml($yaml) {
+	if (function_exists('syck_load')) {
+		return syck_load($variable);
+	} else {
+		if (class_exists('Spyc') === false) {
+			require dirname(c('CORE')).c('DS').'lib'.c('DS').'spyc'.c('DS').'spyc.php';
+		}
+		return Spyc::YAMLLoad($yaml);
 	}
 }
 

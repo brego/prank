@@ -365,7 +365,7 @@ class ModelBase extends Object {
  * @return string
  */
 	public function to_json() {
-		return json_encode($this->data);
+		return to_json($this->data);
 	}
 
 /**

@@ -60,6 +60,24 @@ class BaseTestCase extends PrankTestCase {
 		$this->assert_false(is_dir($test_directory));
 	}
 	
+	public function test_to_json() {
+		$this->assert_equal(to_json(array('a'=>'b')), '{"a":"b"}');
+	}
+	
+	public function test_from_json() {
+		$this->assert_equal(from_json('{"a":"b"}'), array('a'=>'b'));
+	}
+	
+	public function test_to_yaml() {
+		$string = "---\na: \n  one: two\n";
+		$this->assert_equal(to_yaml(array('a'=>array('one'=>'two'))), $string);
+	}
+	
+	public function test_from_yaml() {
+		$string = "a: \n  one: two \n";
+		$this->assert_equal(from_yaml($string), array('a'=>array('one'=>'two')));
+	}
+	
 	public function test_up() {
 		$this->assert_equal(up('someSmallText'), 'SOMESMALLTEXT');
 	}
