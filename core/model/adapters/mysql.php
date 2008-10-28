@@ -26,15 +26,19 @@ class ModelAdaptersMysql extends PDO implements ModelAdapter {
 	private $columns    = array();
 	private $data_types = array(
 		'binary'    => 'blob',
-		'boolean'   => 'tinyint', //(1)
+		'boolean'   => 'tinyint',
 		'date'      => 'date',
 		'datetime'  => 'datetime',
 		'decimal'   => 'decimal',
 		'float'     => 'float',
-		'integer'   => 'int', //(11)
-		'string'    => 'varchar', //(255)
+		'integer'   => 'int',
+		'string'    => 'varchar',
 		'text'      => 'text',
 		'time'      => 'time');
+	private $default_data_sizes = array(
+		'boolean' => 1,
+		'integer' => 11,
+		'string'  => 255);
 
 /**
  * This Adapter supports multiple create statements.
@@ -77,7 +81,32 @@ class ModelAdaptersMysql extends PDO implements ModelAdapter {
 		}
 		return $result;
 	}
+
+/**
+ * Prepares a data array for sql use
+ * 
+ * Returns an array of column='value' items for sql insertion/update.
+ *
+ * @param  array $data 
+ * @return array
+ */
+	private function prepare_data($data) {
+		$prepare_data = array();
+		foreach ($data as $column => $value) {
+			$prepared_data[] = $column." = '".$value."'";
+		}
+		return $prepared_data;
+	}
 	
+/**
+ * Returns current time in database-specific format
+ *
+ * @return string
+ */	
+	public function now() {
+		return date('Y-m-d H:i:s');
+	}
+
 /**
  * Returns last inserted id field
  *
@@ -116,7 +145,6 @@ class ModelAdaptersMysql extends PDO implements ModelAdapter {
 		$this->columns[$table] = array();
 		$types = array_flip($this->data_types);
 		foreach ($this->query('show columns from '.$table.';', PDO::FETCH_ASSOC) as $row) {
-			// $this->columns[$table][] = $row[0];
 			$type  = explode('(', $row['Type']);
 			$limit = '';
 			if (count($type) === 2) {
@@ -171,11 +199,7 @@ class ModelAdaptersMysql extends PDO implements ModelAdapter {
  * @return mixed  Number of affected collumns, or false
  */
 	public function create($table, $data) {
-		$prepared_data = array();
-		foreach ($data as $column => $value) {
-			$prepared_data[] = $column." = '".$value."'";
-		}
-		return $this->exec('insert into '.$table.' set '.implode(', ', $prepared_data).';');
+		return $this->exec('insert into '.$table.' set '.implode(', ', $this->prepare_data($data)).';');
 	}
 
 /**
@@ -220,11 +244,7 @@ class ModelAdaptersMysql extends PDO implements ModelAdapter {
  * @return mixed  Number of affected collumns, or false
  */
 	public function update($table, $data, $condition) {
-		$prepared_data = array();
-		foreach ($data as $column => $value) {
-			$prepared_data[] = $column." = '".$value."'";
-		}
-		return $this->exec('update '.$table.' set '.implode(', ', $prepared_data).' where '.$condition.';');
+		return $this->exec('update '.$table.' set '.implode(', ', $this->prepare_data($data)).' where '.$condition.';');
 	}
 
 /**
@@ -236,15 +256,6 @@ class ModelAdaptersMysql extends PDO implements ModelAdapter {
  */
 	public function delete($table, $condition) {
 		return $this->exec('delete from '.$table.' where '.$condition.';');
-	}
-
-/**
- * Returns current time in database-specific format
- *
- * @return string
- */	
-	public function now() {
-		return date('Y-m-d H:i:s');
 	}
 	
 /**
@@ -265,7 +276,7 @@ class ModelAdaptersMysql extends PDO implements ModelAdapter {
  * @return array
  */
 	public function has_one_read($info) {
-		$query = "select * from `".$info['foreign']."` where `".$info['local_id']."`='".$info['id']."' limit 1;";
+		$query  = "select * from `".$info['foreign']."` where `".$info['local_id']."`='".$info['id']."' limit 1;";
 		$result = $this->query($query, PDO::FETCH_ASSOC);
 		return $result->fetch();
 	}
@@ -277,7 +288,7 @@ class ModelAdaptersMysql extends PDO implements ModelAdapter {
  * @return array
  */
 	public function belongs_to_read($info) {
-		$query = "select * from `".$info['foreign']."` where `id`='".$info['id']."';";
+		$query  = "select * from `".$info['foreign']."` where `id`='".$info['id']."' limit 1;";
 		$result = $this->query($query, PDO::FETCH_ASSOC);
 		return $result->fetch();
 	}
@@ -289,59 +300,71 @@ class ModelAdaptersMysql extends PDO implements ModelAdapter {
  * @return mixed
  */
 	public function has_and_belongs_to_many_read($info) {
-		$query =  "SELECT * FROM `".$info['local']."`, `".$info['foreign']."`, `".$info['join']."` WHERE ".$info['local'].".id = '".$info['id']."' AND ".$info['join'].".".$info['local_id']." = ".$info['local'].".id AND ".$info['join'].".".$info['foreign_id']." = ".$info['foreign'].".id;";
-		
-		$ret = $this->query($query, PDO::FETCH_ASSOC);
-		return $ret;
+		$query = "SELECT * FROM `".$info['local']."`, `".$info['foreign']."`, `".$info['join']."` WHERE ".$info['local'].".id = '".$info['id']."' AND ".$info['join'].".".$info['local_id']." = ".$info['local'].".id AND ".$info['join'].".".$info['foreign_id']." = ".$info['foreign'].".id;";
+		return $this->query($query, PDO::FETCH_ASSOC);
 	}
-	
-	
+
+/**
+ * Creates a new has_many relation
+ *
+ * @param  string $table 
+ * @param  string $data 
+ * @param  string $relation 
+ * @return void
+ */
 	public function has_many_create($table, $data, $relation) {
 		$foreign = Inflector::singularize($relation->table()).'_id';
 		if (!isset($data[$foreign])) {
 			$data[$foreign] = $relation->id;
 		}
-		$prepared_data = array();
-		foreach ($data as $column => $value) {
-			$prepared_data[] = $column."='".$value."'";
-		}
-		
-		return $this->exec('insert into '.$table.' set '.implode(', ', $prepared_data).';');
+		return $this->exec('insert into '.$table.' set '.implode(', ', $this->prepare_data($data)).';');
 	}
-	
+
+/**
+ * Create a new has_one relation
+ *
+ * @param  string $table 
+ * @param  string $data 
+ * @param  string $relation 
+ * @return void
+ */
 	public function has_one_create($table, $data, $relation) {
 		$foreign = Inflector::singularize($relation->table()).'_id';
 		if (!isset($data[$foreign])) {
 			$data[$foreign] = $relation->id;
 		}
-		$prepared_data = array();
-		foreach ($data as $column => $value) {
-			$prepared_data[] = $column."='".$value."'";
-		}
-		
-		return $this->exec('insert into '.$table.' set '.implode(', ', $prepared_data).';');
+		return $this->exec('insert into '.$table.' set '.implode(', ', $this->prepare_data($data)).';');
 	}
-	
+
+/**
+ * Create a new belongs_to relation
+ *
+ * @param  string $table 
+ * @param  string $data 
+ * @param  string $relation 
+ * @return void
+ */
 	public function belongs_to_create($table, $data, $relation) {
-		$prepared_data = array();
-		foreach ($data as $column => $value) {
-			$prepared_data[] = $column." = '".$value."'";
-		}
-		$return = $this->exec('insert into '.$table.' set '.implode(', ', $prepared_data).';');
+		$return = $this->exec('insert into '.$table.' set '.implode(', ', $this->prepare_data($data)).';');
 		
 		$foreign = Inflector::singularize($table).'_id';
 		if (!isset($relation->$foreign)) {
-			$relation->$foreign = $this->lastInsertId();
+			$relation->$foreign = $this->last_id();
 		}
 		
 		return $return;
 	}
-	
+
+/**
+ * Create a new has_and_belongs_to_many relation
+ *
+ * @param  string $table 
+ * @param  string $data 
+ * @param  string $relation 
+ * @return void
+ */
 	public function has_and_belongs_to_many_create($table, $data, $relation) {
-		foreach ($data as $column => $value) {
-			$prepared_data[] = $column." = '".$value."'";
-		}
-		$return = $this->exec('insert into '.$table.' set '.implode(', ', $prepared_data).';');
+		$return = $this->exec('insert into '.$table.' set '.implode(', ', $this->prepare_data($data)).';');
 		
 		$relation_table = implode('_', s($table, $relation->table()));
 		$local          = Inflector::singularize($table).'_id';
