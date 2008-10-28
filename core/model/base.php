@@ -360,6 +360,15 @@ class ModelBase extends Object {
 	}
 
 /**
+ * Returns a JSON representation of this models data
+ *
+ * @return string
+ */
+	public function to_json() {
+		return json_encode($this->data);
+	}
+
+/**
  * Has the lazyload run?
  *
  * Be aware that if this model is not lazyloaded, this will return false.

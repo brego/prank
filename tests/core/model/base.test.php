@@ -438,6 +438,15 @@ class ModelBaseTestCase extends PrankTestCase {
 		$test = User::find_by_name('test1');
 		$this->assert_false($test->hollow());
 	}
+	
+	public function test_to_json() {
+		$test = new User;
+		$test->name  = 'Jack';
+		$test->email = 'jack@jack.com';
+		$test->admin = false;
+		
+		$this->assert_equal($test->to_json(), '{"name":"Jack","email":"jack@jack.com","admin":false}');
+	}
 
 	public function test_save() {
 		$result = $this->db->query("select * from users where name='john doe';");
@@ -469,20 +478,6 @@ class ModelBaseTestCase extends PrankTestCase {
 		$this->assert_equal($new_find->id, $id);
 		$this->assert_equal($new_find->updated_at, $time);
 	}
-	
-	// public function test_validation_setup() {
-	// 	$article = new Article;
-	// 	$validations = array(
-	// 		'name' => array(
-	// 			'validates_presence_of' => array(),
-	// 			'validates_length_of'   => array(
-	// 				'min'=>2,
-	// 				'max'=>40
-	// 				)
-	// 			)
-	// 		);
-	// 	$this->assert_equal($article->validations(), $validations);
-	// }
 
 	public function test___call() {
 		$test = User::find_by_name('test1');
