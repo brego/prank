@@ -70,6 +70,9 @@ class BaseTestCase extends PrankTestCase {
 	
 	public function test_to_yaml() {
 		$string = "---\na: \n  one: two\n";
+		if (function_exists('syck_dump')) {
+			$string = "--- %YAML:1.0 \n\"a\": {\"one\": \"two\"}\n";
+		}
 		$this->assert_equal(to_yaml(array('a'=>array('one'=>'two'))), $string);
 	}
 	

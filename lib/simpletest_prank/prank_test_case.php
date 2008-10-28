@@ -42,7 +42,7 @@ class PrankTestCase extends UnitTestCase {
 		$this->controllers_dir         = $this->app_dir.'controllers'.DS;
 		
 		$this->config_file             = $this->config_dir.'app.php';
-		$this->db_config_file          = $this->config_dir.'db.php';
+		$this->db_config_file          = $this->config_dir.'db.yml';
 		$this->index_file              = $this->webroot_dir.'index.php';
 		$this->default_controller_file = $this->controllers_dir.'default.controller.php';
 		
@@ -61,7 +61,7 @@ class PrankTestCase extends UnitTestCase {
 			"?>";
 		file_put_contents($this->config_file, $sample_app_config);
 		
-		$org_db_config_file = file_get_contents(ROOT.'app'.DS.'config'.DS.'db.php');
+		$org_db_config_file = file_get_contents(ROOT.'app'.DS.'config'.DS.'db.yml');
 		file_put_contents($this->db_config_file, $org_db_config_file);
 				
 		$default_controller_file = "<?php\n".

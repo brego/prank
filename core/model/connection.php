@@ -47,9 +47,8 @@ class ModelConnection {
  * @return void
  */
 	private function __construct() {
-		$config = Config::instance();
-		require c('CONFIG').'db.php';
-		$params = $config->db[c('state')];
+		$config = from_yaml(file_get_contents(c('CONFIG').'db.yml'));
+		$params = $config[c('state')];
 		
 		$adapter_class = 'ModelAdapters'.ucfirst($params['type']);
 		$dsn           = $params['type'].':host='.$params['host'].';dbname='.$params['db'];

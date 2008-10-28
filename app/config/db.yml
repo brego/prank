@@ -1,4 +1,3 @@
-
 development:
     type:     mysql
     host:     localhost

@@ -208,7 +208,7 @@ function to_yaml($variable) {
 
 function from_yaml($yaml) {
 	if (function_exists('syck_load')) {
-		return syck_load($variable);
+		return syck_load($yaml);
 	} else {
 		if (class_exists('Spyc') === false) {
 			require dirname(c('CORE')).c('DS').'lib'.c('DS').'spyc'.c('DS').'spyc.php';

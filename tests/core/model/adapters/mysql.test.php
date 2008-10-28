@@ -14,9 +14,8 @@ class ModelAdaptersMysqlTestCase extends PrankTestCase {
 		
 		require dirname(dirname(__FILE__)).DS.'mocks/_users.table.php';
 		
-		$config = Config::instance();
-		require_once ::c('CONFIG').'db.php';
-		$params = $config->db[::c('state')];
+		$config = from_yaml(file_get_contents(c('CONFIG').'db.yml'));
+		$params = $config[c('state')];
 		
 		$adapter     = 'ModelAdaptersMysql';
 		$dsn         = $params['type'].':host='.$params['host'].';dbname='.$params['db'];
