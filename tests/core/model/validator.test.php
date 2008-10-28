@@ -21,17 +21,17 @@ class ModelValidatorTestCase extends PrankTestCase {
 	public function test_validate() {
 		$animal = new Animal;
 		$animal->name = 'Alfred';
-		$this->assert_true ($animal->valid());
+		$this->assert_true ($animal->validates());
 		$this->assert_equal($animal->errors(), array());
 		
 		$animal = new Animal;
-		$this->assert_false($animal->valid());
+		$this->assert_false($animal->validates());
 		$this->assert_equal($animal->errors(), array('name'=>array('validate_presence_of', 'validate_length_of')));
 		$animal->name = 'LongNameAbove10Characters';
-		$this->assert_false($animal->valid());
+		$this->assert_false($animal->validates());
 		$this->assert_equal($animal->errors(), array('name'=>array('validate_length_of')));
 		$animal->name = 1;
-		$this->assert_false($animal->valid());
+		$this->assert_false($animal->validates());
 		$this->assert_equal($animal->errors(), array('name'=>array('validate_length_of')));
 	}
 

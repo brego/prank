@@ -437,12 +437,12 @@ class ModelBase extends Object {
  * Validate the model
  *
  * If this model has a method called 'validate', model will be passed to
- * ModelValidator::valid() and the validations will be checked, and boolean
+ * ModelValidator::validate() and the validations will be checked, and boolean
  * result returned. Otherwise, returns true.
  * 
  * @return boolean
  */
-	public function valid() {
+	public function validates() {
 		if (method_exists($this, 'validate') === true) {
 			$result = ModelValidator::validate($this);
 			if ($result === true) {
@@ -638,52 +638,58 @@ class ModelBase extends Object {
  */
 	public function save($related_model = null) {
 		$result = true;
-		
-		foreach ($this->belongs_to as $type => $relation) {
-			if (isset($this->relational_data[$relation])) {
-				if ($this->relational_data[$relation]->modified() === true) {
-					$result = $this->relational_data[$relation]->save($this);
-				}	
+		if ($this->validates() === true) {		
+			foreach ($this->belongs_to as $type => $relation) {
+				if (isset($this->relational_data[$relation])) {
+					if ($this->relational_data[$relation]->modified() === true) {
+						if ($this->relational_data[$relation]->validates() === true) {
+							$result = $this->relational_data[$relation]->save($this);
+						}
+					}	
+				}
 			}
+		
+			if ($this->exists === true && $this->modified === true) {
+				if ($this->connection->is_column_of('updated_at', $this->table)) {
+					$this->updated_at = $this->connection->now();
+				}
+				$result = $this->connection->update($this->table, $this->data, 'id='.$this->id);
+			} elseif ($this->modified === true) {
+				if ($this->connection->is_column_of('created_at', $this->table)) {
+					$this->created_at = $this->connection->now();
+				}
+				if ($this->connection->is_column_of('updated_at', $this->table)) {
+					$this->updated_at = $this->connection->now();
+				}
+		
+				if ($related_model !== null && $this->relation() === true) {
+					$method = $this->relation_type.'_create';
+					$result = $this->connection->$method($this->table, $this->data, $related_model);
+				} else {
+					$result = $this->connection->create($this->table, $this->data);
+				}
+		
+				$this->id = $this->connection->last_id();
+			}
+		
+			foreach (array_merge($this->has_one, $this->has_many, $this->has_and_belongs_to_many) as $type => $relation) {
+				if (isset($this->relational_data[$relation])) {
+					if ($this->relational_data[$relation]->modified() === true) {
+						if ($this->relational_data[$relation]->validates() === true) {
+							$result = $this->relational_data[$relation]->save($this);
+						}
+					}	
+				}
+			}
+		
+			if ($result !== false) {
+				$this->exists   = true;
+				$this->modified = false;
+				$result         = true;
+			}
+		} else {
+			$result = false;
 		}
-		
-		if ($this->exists === true && $this->modified === true) {
-			if ($this->connection->is_column_of('updated_at', $this->table)) {
-				$this->updated_at = $this->connection->now();
-			}
-			$result = $this->connection->update($this->table, $this->data, 'id='.$this->id);
-		} elseif ($this->modified === true) {
-			if ($this->connection->is_column_of('created_at', $this->table)) {
-				$this->created_at = $this->connection->now();
-			}
-			if ($this->connection->is_column_of('updated_at', $this->table)) {
-				$this->updated_at = $this->connection->now();
-			}
-		
-			if ($related_model !== null && $this->relation() === true) {
-				$method = $this->relation_type.'_create';
-				$result = $this->connection->$method($this->table, $this->data, $related_model);
-			} else {
-				$result = $this->connection->create($this->table, $this->data);
-			}
-		
-			$this->id = $this->connection->last_id();
-		}
-		
-		foreach (array_merge($this->has_one, $this->has_many, $this->has_and_belongs_to_many) as $type => $relation) {
-			if (isset($this->relational_data[$relation])) {
-				if ($this->relational_data[$relation]->modified() === true) {
-					$result = $this->relational_data[$relation]->save($this);
-				}	
-			}
-		}
-		
-		if ($result !== false) {
-			$this->exists   = true;
-			$this->modified = false;
-			$result         = true;
-		}
-		
 		return $result;
 	}
 }

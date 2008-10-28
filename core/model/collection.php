@@ -51,6 +51,22 @@ class ModelCollection extends Collection {
 	}
 
 /**
+ * Validates each model in collection
+ *
+ * @return boolean
+ */
+	public function validates() {
+		$result = true;
+		foreach ($this->items as $model) {
+			if ($model->validates() === false) {
+				$result = false;
+				break;
+			}
+		}
+		return $result;
+	}
+
+/**
  * Adds a model to the Collection
  *
  * Before adding the model to the Collection, sets model's relation_type to a
