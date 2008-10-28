@@ -1,0 +1,21 @@
+
+development:
+    type:     mysql
+    host:     localhost
+    user:     root
+    password:
+    db:       prank_development
+
+test:
+    type:     mysql
+    host:     localhost
+    user:     root
+    password:
+    db:       prank_test
+
+production:
+    type:
+    host:
+    user:
+    password:
+    db:

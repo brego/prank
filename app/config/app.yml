@@ -1,0 +1,8 @@
+
+state: development
+
+directories:
+    models:      models
+    views:       views
+    controllers: controllers
+    webroot:     webroot
