@@ -37,7 +37,42 @@ class ModelBaseTestCase extends PrankTestCase {
 		$table = Inflector::tabelize('User');
 		$this->assert_equal($table, 'users');
 		
-		$columns = array('id', 'email', 'password', 'name', 'admin', 'created_at', 'updated_at');
+		$columns = array(
+			'id' => array(
+				'type'    => 'integer',
+				'limit'   => 11,
+				'null'    => false,
+				'default' => null),
+			'email' => array(
+				'type'    => 'string',
+				'limit'   => 255,
+				'null'    => true,
+				'default' => null),
+			'password' => array(
+				'type'    => 'string',
+				'limit'   => 40,
+				'null'    => true,
+				'default' => null),
+			'name' => array(
+				'type'    => 'string',
+				'limit'   => 255,
+				'null'    => true,
+				'default' => null),
+			'admin' => array(
+				'type'    => 'boolean',
+				'limit'   => 1,
+				'null'    => true,
+				'default' => 0),
+			'created_at' => array(
+				'type'    => 'datetime',
+				'limit'   => '',
+				'null'    => true,
+				'default' => null),
+			'updated_at' => array(
+				'type'    => 'datetime',
+				'limit'   => '',
+				'null'    => true,
+				'default' => null));
 		$this->assert_equal($this->db->columns($table), $columns);
 		
 		$test = new User;
@@ -434,6 +469,20 @@ class ModelBaseTestCase extends PrankTestCase {
 		$this->assert_equal($new_find->id, $id);
 		$this->assert_equal($new_find->updated_at, $time);
 	}
+	
+	// public function test_validation_setup() {
+	// 	$article = new Article;
+	// 	$validations = array(
+	// 		'name' => array(
+	// 			'validates_presence_of' => array(),
+	// 			'validates_length_of'   => array(
+	// 				'min'=>2,
+	// 				'max'=>40
+	// 				)
+	// 			)
+	// 		);
+	// 	$this->assert_equal($article->validations(), $validations);
+	// }
 
 	public function test___call() {
 		$test = User::find_by_name('test1');

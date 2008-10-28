@@ -31,9 +31,11 @@ class ModelBase extends Object {
 	private   $relational_data         = array();
 	private   $relations_loaded        = false;
 	private   $relations               = array();
+	private   $validations             = array();
 	protected $hollow                  = true;
 	protected $exists                  = false;  
 	private   $relation_type           = false;
+	private   $errors                  = array();
 /**
  * Is this model modified (has any data been set)
  *
@@ -54,7 +56,7 @@ class ModelBase extends Object {
  * 
  * @var mixed
  */
-	protected $has_many                = false;
+	public    $has_many                = false;
 /**
  * Describes the one-to-one local relationships
  *
@@ -63,7 +65,7 @@ class ModelBase extends Object {
  * 
  * @var mixed
  */
-	protected $has_one                 = false;
+	public    $has_one                 = false;
 /**
  * Describes the one-to-one foreign relationships
  *
@@ -72,7 +74,7 @@ class ModelBase extends Object {
  * 
  * @var mixed
  */
-	protected $belongs_to              = false;
+	public    $belongs_to              = false;
 /**
  * Describes the many-to-many relationships
  *
@@ -81,7 +83,7 @@ class ModelBase extends Object {
  * 
  * @var mixed
  */
-	protected $has_and_belongs_to_many = false;
+	public    $has_and_belongs_to_many = false;
 
 /**
  * Constructor
@@ -100,8 +102,8 @@ class ModelBase extends Object {
  * @return void
  */	
 	public function __construct($data = false) {
-		$this->table      = Inflector::tabelize(get_called_class());
 		$this->model      = get_called_class();
+		$this->table      = Inflector::tabelize($this->model);
 		$this->connection = ModelConnection::instance();
 		$this->columns    = $this->connection->columns($this->table);
 		
@@ -122,6 +124,8 @@ class ModelBase extends Object {
  *    and the modified property to true - no data is deleted from the model
  *    though.
  * 
+ * Ties in the validator methods.
+ * 
  * Also calls all the mixins (see the Object class).
  * If an unknown method is called, an exception is thrown.
  * 
@@ -138,70 +142,13 @@ class ModelBase extends Object {
 				$result         = true;
 			}
 			return $result;
+		} elseif (substr($method, 0, 9) === 'validate_') {
+			if (method_exists('ModelValidator', $method)) {
+				array_unshift($arguments, $this);
+				return call_user_func_array(array('ModelValidator', $method), $arguments);
+			}
 		} else {
 			return parent::__call($method, $arguments);
-		}
-	}
-
-/**
- * Dynamic static methods go here.
- *
- * Supported methods (where name and email are examples of column names):
- * - find(id)
- * - find_by_name(name)
- * - find_by_name_and_order_by_email(name)
- * - find_by_name_and_email(name, email)
- * - find_all()
- * - find_all_and_order_by_name()
- * - find_all_and_order_by_name_and_email_desc()
- * - delete(id)
- *
- * Also calls all the mixins (see the Object class).
- * If an unknown method is called, an exception is thrown.
- * 
- * @param  string $method
- * @param  string $arguments
- * @return mixed
- */
-	public static function __callStatic($method, $arguments) {
-		$connection = ModelConnection::instance();
-		$model      = get_called_class();
-		$table      = Inflector::tabelize(get_called_class());
-		$order      = '';
-		
-		if (strpos($method, 'order_by') !== false) {
-			$order = substr($method, strpos($method, 'order_by_')+9);
-			if (strpos($order, '_and_') !== false) {
-				$order = split('_and_', $order);
-				$order = array_map(function($item) {return str_replace('_desc', ' desc', $item);}, $order);
-				$order = implode(', ', $order);
-			} else {
-				$order = str_replace('_desc', ' desc', $order);	
-			}
-		}
-
-		if ($method === 'find' && is_numeric($arguments[0]) === true) {
-			return $connection->read($table, $model, "id='".$arguments[0]."'");
-		} elseif (substr($method, 0, 8) === 'find_by_') {
-			$column = down(substr($method, 8));
-			if (strpos($column, '_and_') !== false) {
-				$columns = split('_and_', $column);
-				if ($connection->are_columns_of($columns, $table)) {
-					$arguments = array_map(function($key, $item) {
-						return $key."='".$item."'";
-						}, $columns, $arguments);
-					$condition = implode(' and ', $arguments);
-					return $connection->read($table, $model, $condition, $order);
-				}
-			} elseif ($connection->is_column_of($column, $table)) {
-				return $connection->read($table, $model, $column."='".$arguments[0]."'");
-			}
-		} elseif (substr($method, 0, 8) === 'find_all') {
-			return $connection->read($table, $model, '', $order);
-		} elseif ($method === 'delete') {
-			return $connection->delete($table, 'id='.$arguments[0]);
-		} else {
-			return parent::__callStatic($method, $arguments);
 		}
 	}
 
@@ -309,6 +256,68 @@ class ModelBase extends Object {
 	}
 
 /**
+ * Dynamic static methods go here.
+ *
+ * Supported methods (where name and email are examples of column names):
+ * - find(id)
+ * - find_by_name(name)
+ * - find_by_name_and_order_by_email(name)
+ * - find_by_name_and_email(name, email)
+ * - find_all()
+ * - find_all_and_order_by_name()
+ * - find_all_and_order_by_name_and_email_desc()
+ * - delete(id)
+ *
+ * Also calls all the mixins (see the Object class).
+ * If an unknown method is called, an exception is thrown.
+ * 
+ * @param  string $method
+ * @param  string $arguments
+ * @return mixed
+ */
+	public static function __callStatic($method, $arguments) {
+		$connection = ModelConnection::instance();
+		$model      = get_called_class();
+		$table      = Inflector::tabelize($model);
+		$order      = '';
+
+		if (strpos($method, 'order_by') !== false) {
+			$order = substr($method, strpos($method, 'order_by_')+9);
+			if (strpos($order, '_and_') !== false) {
+				$order = split('_and_', $order);
+				$order = array_map(function($item) {return str_replace('_desc', ' desc', $item);}, $order);
+				$order = implode(', ', $order);
+			} else {
+				$order = str_replace('_desc', ' desc', $order);	
+			}
+		}
+
+		if ($method === 'find' && is_numeric($arguments[0]) === true) {
+			return $connection->read($table, $model, "id='".$arguments[0]."'");
+		} elseif (substr($method, 0, 8) === 'find_by_') {
+			$column = down(substr($method, 8));
+			if (strpos($column, '_and_') !== false) {
+				$columns = split('_and_', $column);
+				if ($connection->are_columns_of($columns, $table)) {
+					$arguments = array_map(function($key, $item) {
+						return $key."='".$item."'";
+						}, $columns, $arguments);
+					$condition = implode(' and ', $arguments);
+					return $connection->read($table, $model, $condition, $order);
+				}
+			} elseif ($connection->is_column_of($column, $table)) {
+				return $connection->read($table, $model, $column."='".$arguments[0]."'");
+			}
+		} elseif (substr($method, 0, 8) === 'find_all') {
+			return $connection->read($table, $model, '', $order);
+		} elseif ($method === 'delete') {
+			return $connection->delete($table, 'id='.$arguments[0]);
+		} else {
+			return parent::__callStatic($method, $arguments);
+		}
+	}
+
+/**
  * Is the Model empty?
  *
  * Triggers lazyload.
@@ -369,12 +378,22 @@ class ModelBase extends Object {
  * Returns fields of a Model 
  * 
  * Returns the names of the fields of this Model (which correspond to the
- * columns of the table it represents).
+ * columns of the table it represents), with all their details.
  *
  * @return array
  */
 	public function fields() {
 		return $this->columns;
+	}
+
+/**
+ * Does this model has that field
+ *
+ * @param  string  $field 
+ * @return boolean
+ */
+	public function has_field($field) {
+		return isset($this->columns[$field]);
 	}
 
 /**
@@ -415,6 +434,42 @@ class ModelBase extends Object {
 	}
 
 /**
+ * Validate the model
+ *
+ * If this model has a method called 'validate', model will be passed to
+ * ModelValidator::valid() and the validations will be checked, and boolean
+ * result returned. Otherwise, returns true.
+ * 
+ * @return boolean
+ */
+	public function valid() {
+		if (method_exists($this, 'validate') === true) {
+			$result = ModelValidator::validate($this);
+			if ($result === true) {
+				$return = true;
+			} else {
+				$this->errors = $result;
+				$return = false;
+			}
+			return $return;
+		} else {
+			return true;
+		}
+	}
+
+/**
+ * Retruns the list of errors of validation of this model
+ *
+ * If no errors were found, or Model::valid() has not yet ben run, returns an
+ * empty array. Else returns an array errors.
+ * 
+ * @return array
+ */
+	public function errors() {
+		return $this->errors;
+	}
+
+/**
  * Sets the data of this model
  *
  * Sets the given data of this Model. It will only work if the model has no
@@ -430,7 +485,7 @@ class ModelBase extends Object {
 			if (isset($data['id'])) {
 				$this->exists = true;
 			}
-			foreach ($this->columns as $column) {
+			foreach ($this->columns as $column => $description) {
 				if (isset($data[$column])) {
 					$this->data[$column] = $data[$column];
 				}

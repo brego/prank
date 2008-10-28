@@ -23,7 +23,18 @@
  * @subpackage Model
  */
 class ModelAdaptersMysql extends PDO implements ModelAdapter {
-	private $columns = array();
+	private $columns    = array();
+	private $data_types = array(
+		'binary'    => 'blob',
+		'boolean'   => 'tinyint', //(1)
+		'date'      => 'date',
+		'datetime'  => 'datetime',
+		'decimal'   => 'decimal',
+		'float'     => 'float',
+		'integer'   => 'int', //(11)
+		'string'    => 'varchar', //(255)
+		'text'      => 'text',
+		'time'      => 'time');
 
 /**
  * This Adapter supports multiple create statements.
@@ -85,7 +96,7 @@ class ModelAdaptersMysql extends PDO implements ModelAdapter {
  */	
 	public function is_column_of($column, $table) {
 		$this->columns($table);
-		if (array_search($column, $this->columns[$table]) !== false) {
+		if (isset($this->columns[$table][$column]) === true) {
 			return true;
 		} else {
 			return false;
@@ -95,7 +106,7 @@ class ModelAdaptersMysql extends PDO implements ModelAdapter {
 /**
  * Fetches column information from the table
  *
- * Always fetches the column informtion from the table, and saves them in the
+ * Always fetches the column informtion from the table, and saves it in the
  * cache.
  * 
  * @param  string $table 
@@ -103,8 +114,32 @@ class ModelAdaptersMysql extends PDO implements ModelAdapter {
  */
 	public function fetch_columns($table) {
 		$this->columns[$table] = array();
-		foreach ($this->query('show columns from '.$table.';') as $row) {
-			$this->columns[$table][] = $row[0];
+		$types = array_flip($this->data_types);
+		foreach ($this->query('show columns from '.$table.';', PDO::FETCH_ASSOC) as $row) {
+			// $this->columns[$table][] = $row[0];
+			$type  = explode('(', $row['Type']);
+			$limit = '';
+			if (count($type) === 2) {
+				$limit = (int)str_replace(')', '', $type[1]);
+				$type  = $types[$type[0]];
+			} else {
+				$type = $types[$type[0]];
+			}
+			
+			$this->columns[$table][$row['Field']]          = array();
+			$this->columns[$table][$row['Field']]['type']  = $type;
+			$this->columns[$table][$row['Field']]['limit'] = $limit;
+			if ($row['Null'] == 'NO') {
+				$this->columns[$table][$row['Field']]['null'] = false;
+			} else {
+				$this->columns[$table][$row['Field']]['null'] = true;
+			}
+			if ($row['Default'] == 'NULL') {
+				$this->columns[$table][$row['Field']]['default'] = null;
+			} else {
+				$this->columns[$table][$row['Field']]['default'] = $row['Default'];
+			}
+
 		}
 		return $this->columns[$table];
 	}

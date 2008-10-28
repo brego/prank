@@ -22,7 +22,42 @@ class ModelAdaptersMysqlTestCase extends PrankTestCase {
 		$dsn         = $params['type'].':host='.$params['host'].';dbname='.$params['db'];
 		$this->mysql = new $adapter($dsn, $params['user'], $params['password']);
 		
-		$this->collumns = array('id', 'email', 'password', 'name', 'admin', 'created_at', 'updated_at');
+		$this->collumns = array(
+			'id' => array(
+				'type'    => 'integer',
+				'limit'   => 11,
+				'null'    => false,
+				'default' => null),
+			'email' => array(
+				'type'    => 'string',
+				'limit'   => 255,
+				'null'    => true,
+				'default' => null),
+			'password' => array(
+				'type'    => 'string',
+				'limit'   => 40,
+				'null'    => true,
+				'default' => null),
+			'name' => array(
+				'type'    => 'string',
+				'limit'   => 255,
+				'null'    => true,
+				'default' => null),
+			'admin' => array(
+				'type'    => 'boolean',
+				'limit'   => 1,
+				'null'    => true,
+				'default' => 0),
+			'created_at' => array(
+				'type'    => 'datetime',
+				'limit'   => '',
+				'null'    => true,
+				'default' => null),
+			'updated_at' => array(
+				'type'    => 'datetime',
+				'limit'   => '',
+				'null'    => true,
+				'default' => null));
 	}
 	
 	public function teardown() {
@@ -40,8 +75,8 @@ class ModelAdaptersMysqlTestCase extends PrankTestCase {
 
 	public function test_fetch_columns() {
 		$this->assert_equal($this->mysql->fetch_columns('users'), $this->collumns);
-		$this->db->exec("ALTER TABLE `users` ADD `test` VARCHAR(225) NOT NULL;");
-		$this->collumns[] = 'test';
+		$this->db->exec("ALTER TABLE `users` ADD `test` VARCHAR(255) NOT NULL;");
+		$this->collumns['test'] = array('type'=>'string', 'limit'=>255, 'null'=>false, 'default'=>'');
 		$this->assert_equal($this->mysql->fetch_columns('users'), $this->collumns);
 	}
 
