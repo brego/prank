@@ -14,11 +14,11 @@ class ModelAdaptersMysqlTestCase extends PrankTestCase {
 		
 		require dirname(dirname(__FILE__)).DS.'mocks/_users.table.php';
 		
-		$config = from_yaml(file_get_contents(c('CONFIG').'db.yml'));
-		$params = $config[c('state')];
+		$config = from_yaml(file_get_contents(c('app').'config'.c()->ds.'db.yml'));
+		$params = $config[c()->state];
 		
 		$adapter     = 'ModelAdaptersMysql';
-		$dsn         = $params['type'].':host='.$params['host'].';dbname='.$params['db'];
+		$dsn         = $params['type'].':host='.$params['host'].';dbname='.$params['database'];
 		$this->mysql = new $adapter($dsn, $params['user'], $params['password']);
 		
 		$this->collumns = array(

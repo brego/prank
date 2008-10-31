@@ -20,10 +20,6 @@ class ConfigTestCase extends PrankTestCase {
 	public function test_static_set_get() {
 		Config::set('test', true);
 		$this->assert_true(Config::get('test'));
-		$test_array = array('test1' => true, 'test2' => true);
-		Config::set($test_array);
-		$this->assert_true(Config::get('test1'));
-		$this->assert_true(Config::get('test2'));
 	}
 	
 	public function test_rgular_set_get() {

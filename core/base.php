@@ -36,15 +36,15 @@ function __autoload($class_name) {
 		
 		if (class_exists($class_name) === false) {
 			$class_name = Inflector::underscore($class_name);
-			$class_name = str_replace('_', c('DS'), $class_name);
-			$class_name = str_replace('prank'.c('DS'), '', $class_name);
+			$class_name = str_replace('_', c()->ds, $class_name);
+			$class_name = str_replace('prank'.c()->ds, '', $class_name);
 		
-			if(is_file(c('CORE').$class_name.'.php')) {
-				require c('CORE').$class_name.'.php';
+			if(is_file(c()->core.$class_name.'.php')) {
+				require c()->core.$class_name.'.php';
 			}
 		
-			if(is_file(c('MODELS').$class_name.'.model.php')) {
-				require c('MODELS').$class_name.'.model.php';
+			if(is_file(c()->models.$class_name.'.model.php')) {
+				require c()->models.$class_name.'.model.php';
 			}
 		}
 	}
@@ -96,24 +96,19 @@ function array_cleanup($array) {
 /**
  * Interface for Config class
  *
- * Acts as a combined interface to Config::get and Config::set methods.
- * If given two arguments, the first one is treated as a lable for an option,
- * and the second one as value of that option.
- * If given an array, treats the array as an array of option=>value pairs to be
- * added to the configuration.
- * If given one argument, returns value of a corresponding key in the Config
- * class.
+ * If called without arguments, returns the configuration object. If called
+ * with a parameter, it is asumed to be name of a configuration property (will
+ * be fetched with Config::get()).
  * 
+ * @param  string $name
  * @return mixed
  */
-function c() {
-	$args = func_get_args();
-	if (is_array($args[0]) && count($args) == 1) {
-		Config::set($args[0]);
-	} elseif (count($args) == 2) {
-		Config::set($args[0], $args[1]);
-	} elseif (is_string($args[0])) {
-		return Config::get($args[0]);
+function c($name = false) {
+	if ($name !== false) {
+		return Config::get($name);
+	} else {
+		$config = Config::instance();
+		return $config;
 	}
 }
 
@@ -200,7 +195,7 @@ function to_yaml($variable) {
 		return syck_dump($variable);
 	} else {
 		if (class_exists('Spyc') === false) {
-			require dirname(c('CORE')).c('DS').'lib'.c('DS').'spyc'.c('DS').'spyc.php';
+			require c()->lib.'spyc'.c()->ds.'spyc.php';
 		}
 		return Spyc::YAMLDump($variable);
 	}
@@ -211,7 +206,7 @@ function from_yaml($yaml) {
 		return syck_load($yaml);
 	} else {
 		if (class_exists('Spyc') === false) {
-			require dirname(c('CORE')).c('DS').'lib'.c('DS').'spyc'.c('DS').'spyc.php';
+			require c()->lib.'spyc'.c()->ds.'spyc.php';
 		}
 		return Spyc::YAMLLoad($yaml);
 	}
@@ -270,7 +265,7 @@ function to_controller($name)
  * @param  string  $name Shortname of the controller
  **/
 function is_controller($name) {
-	if (file_exists(c('CONTROLLERS').down($name).'.controller.php')) {
+	if (file_exists(c()->controllers.down($name).'.controller.php')) {
 		return true;
 	} else {
 		return false;
@@ -286,7 +281,7 @@ function is_controller($name) {
 function load_controller($name) {
 	if (class_exists(ucfirst($name).'Controller') === false) {
 		if (is_controller($name)) {
-			require c('CONTROLLERS').down($name).'.controller.php';
+			require c()->controllers.down($name).'.controller.php';
 			return true;
 		} else {
 			return false;

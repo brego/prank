@@ -25,6 +25,7 @@ class Boot {
 	public  static $controller = null;
 	public  static $action     = null;
 	public  static $params     = array();
+	private        $config     = null;
 
 /**
  * Kickstarts the framework
@@ -50,15 +51,11 @@ class Boot {
 	private function __construct($start_point) {
 		$this->load_base_libs();
 		
-		c('DS',   DIRECTORY_SEPARATOR);
-		c('APP',  dirname(dirname($start_point)).c('DS'));
-		c('CORE', dirname(__FILE__).c('DS'));
+		Config::setup($start_point);
 		
-		ini_set('include_path', c('CORE').':'.c('APP').':.');
+		ini_set('include_path', c()->core.c()->ps.c()->app.c()->ps.'.');
 		
-		require c('APP').'config'.c('DS').'app.php';
-		
-		$this->set_error_reporting(c('state'));
+		$this->set_error_reporting(c()->state);
 		$this->parse_url(isset($_GET['url']) ? $_GET['url'] : null);
 		$this->run_controller();
 	}
@@ -83,13 +80,13 @@ class Boot {
 /**
  * Sets error reporting
  *
- * Depending on $status sets proper error_reporting level.
+ * Depending on $state sets proper error_reporting level.
  * 
- * @param  string $status Envoirnmental status
+ * @param  string $state Envoirnmental state
  * @return void
  */
-	private function set_error_reporting($status) {
-		switch ($status) {
+	private function set_error_reporting($state) {
+		switch ($state) {
 			case 'development':
 				error_reporting(E_ALL | E_NOTICE | E_DEPRECATED | E_STRICT);
 				break;
@@ -172,7 +169,7 @@ class Boot {
  */	
 	private function run_controller() {
 		function partial($name) {
-			require c('VIEWS').Boot::$controller.c('DS').'_'.$name.'.php';
+			require c()->views.Boot::$controller.c()->ds.'_'.$name.'.php';
 		}
 
 		try {

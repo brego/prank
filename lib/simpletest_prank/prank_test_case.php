@@ -41,7 +41,7 @@ class PrankTestCase extends UnitTestCase {
 		$this->webroot_dir             = $this->app_dir.'webroot'.DS;
 		$this->controllers_dir         = $this->app_dir.'controllers'.DS;
 		
-		$this->config_file             = $this->config_dir.'app.php';
+		$this->config_file             = $this->config_dir.'app.yml';
 		$this->db_config_file          = $this->config_dir.'db.yml';
 		$this->index_file              = $this->webroot_dir.'index.php';
 		$this->default_controller_file = $this->controllers_dir.'default.controller.php';
@@ -51,15 +51,9 @@ class PrankTestCase extends UnitTestCase {
 		mkdir($this->webroot_dir);
 		mkdir($this->controllers_dir);
 		
-		$sample_app_config = "<?php\n".
-			"c('MODELS',      c('APP').'models'.c('DS'));\n".
-			"c('VIEWS',       c('APP').'views'.c('DS'));\n".
-			"c('CONTROLLERS', c('APP').'controllers'.c('DS'));\n".
-			"c('CONFIG',      c('APP').'config'.c('DS'));\n".
-			"c('WEBROOT',     c('APP').'webroot'.c('DS'));\n".
-			"c('state',      'test');\n".
-			"?>";
-		file_put_contents($this->config_file, $sample_app_config);
+		$org_app_config = $this->from_yaml(file_get_contents(ROOT.'app'.DS.'config'.DS.'app.yml'));
+		$org_app_config['state'] = 'test';
+		file_put_contents($this->config_file, $this->to_yaml($org_app_config));
 		
 		$org_db_config_file = file_get_contents(ROOT.'app'.DS.'config'.DS.'db.yml');
 		file_put_contents($this->db_config_file, $org_db_config_file);
@@ -87,6 +81,28 @@ class PrankTestCase extends UnitTestCase {
 		rmdir($this->webroot_dir);
 		rmdir($this->controllers_dir);
 		rmdir($this->app_dir);
+	}
+	
+	private function to_yaml($variable) {
+		if (function_exists('syck_dump')) {
+			return syck_dump($variable);
+		} else {
+			if (class_exists('Spyc') === false) {
+				require ROOT.'lib'.DS.'spyc'.DS.'spyc.php';
+			}
+			return Spyc::YAMLDump($variable);
+		}
+	}
+
+	private function from_yaml($yaml) {
+		if (function_exists('syck_load')) {
+			return syck_load($yaml);
+		} else {
+			if (class_exists('Spyc') === false) {
+				require ROOT.'lib'.DS.'spyc'.DS.'spyc.php';
+			}
+			return Spyc::YAMLLoad($yaml);
+		}
 	}
 }
 

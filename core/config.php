@@ -31,24 +31,72 @@ class Config {
 		return self::$instance;
 	}
 	
-	public static function set() {
-		$args = func_get_args();
-		if (is_array($args[0]) && count($args) == 1) {
-			self::$config = array_merge(self::$config, $args[0]);
-		} else {
-			self::$config[$args[0]] = $args[1];
+	public static function setup($start_point) {
+		$config        = new stdClass;
+		$config->ds    = DIRECTORY_SEPARATOR;
+		$config->ps    = PATH_SEPARATOR;
+		$config->app   = dirname(dirname($start_point)).$config->ds;
+		$config->core  = dirname(__FILE__).$config->ds;
+		$config->prank = dirname(dirname(__FILE__)).$config->ds;
+		$config->lib   = $config->prank.'lib'.$config->ds;
+		
+		$default_app_config = array(
+			'state'       => 'development',
+			'directories' => array(
+				'models'      => 'models',
+				'views'       => 'views',
+				'controllers' => 'controllers',
+				'webroot'     => 'webroot'));
+		
+		$app_config = array();
+		if (is_file($config->app.'config'.$config->ds.'app.yml')) {
+			$app_config = file_get_contents($config->app.'config'.$config->ds.'app.yml');
+			$app_config = from_yaml($app_config);
 		}
+		$app_config = array_merge($default_app_config, $app_config);
+		
+		$config->state       = $app_config['state'];
+		$config->models      = $config->app.$app_config['directories']['models'].$config->ds;
+		$config->views       = $config->app.$app_config['directories']['views'].$config->ds;
+		$config->controllers = $config->app.$app_config['directories']['controllers'].$config->ds;
+		$config->webroot     = $config->app.$app_config['directories']['webroot'].$config->ds;
+		
+		if (is_file($config->app.'config'.$config->ds.'db.yml')) {
+			$db_config = file_get_contents($config->app.'config'.$config->ds.'db.yml');
+			$db_config = from_yaml($db_config);
+		} else {
+			throw new Exception('Currently Prank requires a database connection. Provide a config/db.yml with necessary data.');
+		}
+		
+		$config->db = new stdClass;
+		foreach ($db_config[$config->state] as $key => $value) {
+			$config->db->$key = $value;
+		}
+		
+		self::$config = $config;
+	}
+	
+	public static function set($name, $value) {
+		self::$config->$name = $value;
 	}
 	
 	public function __set($name, $value) {
-		self::$config[$name] = $value;
+		self::set($name, $value);
 	}
 	
-	public static function get($name) {
-		return self::$config[$name];
+	public static function get($name = false) {
+		if ($name === false) {
+			return self::$config;
+		} else {
+			if (isset(self::$config->$name)) {
+				return self::$config->$name;
+			} else {
+				throw new Exception('Property '.$name.' is not defined in the configuration.');
+			}
+		}
 	}
 	
 	public function __get($name) {
-		return self::$config[$name];
+		return self::get($name);
 	}
 }

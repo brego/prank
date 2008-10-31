@@ -57,17 +57,17 @@ class ControllerBase {
 		
 		ob_start();
 
-		if (file_exists(c('VIEWS').$this->shortname.c('DS').$this->view.'.php') && $this->view !== false) {
-			require c('VIEWS').$this->shortname.c('DS').$this->view.'.php';
+		if (file_exists(c()->views.$this->shortname.c()->ds.$this->view.'.php') && $this->view !== false) {
+			require c()->views.$this->shortname.c()->ds.$this->view.'.php';
 		}
 		
 		$content_for_layout = ob_get_clean();
 		
 		$content_for_layout = $this->before_layout($content_for_layout);
 			
-		if (file_exists(c('VIEWS').'layouts'.c('DS').$this->layout.'.php') && $this->layout !== false) {
+		if (file_exists(c()->views.'layouts'.c()->ds.$this->layout.'.php') && $this->layout !== false) {
 			ob_start();
-			require c('VIEWS').'layouts'.c('DS').$this->layout.'.php';
+			require c()->views.'layouts'.c()->ds.$this->layout.'.php';
 			$output = ob_get_clean();
 		} else {
 			$output = $content_for_layout;

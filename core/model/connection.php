@@ -47,16 +47,14 @@ class ModelConnection {
  * @return void
  */
 	private function __construct() {
-		$config = from_yaml(file_get_contents(c('CONFIG').'db.yml'));
-		$params = $config[c('state')];
-		
-		$adapter_class = 'ModelAdapters'.ucfirst($params['type']);
-		$dsn           = $params['type'].':host='.$params['host'].';dbname='.$params['db'];
+		$params        = c()->db;		
+		$adapter_class = 'ModelAdapters'.ucfirst($params->type);
+		$dsn           = $params->type.':host='.$params->host.';dbname='.$params->database;
 		
 		if (class_exists($adapter_class)) {
-			$this->adapter = new $adapter_class($dsn, $params['user'], $params['password']);
+			$this->adapter = new $adapter_class($dsn, $params->user, $params->password);
 		} else {
-			throw new Exception('Adapter of type '.$params['type'].' not found.');
+			throw new Exception('Adapter class '.$adapter_class.' (type '.$params->type.') not found.');
 		}
 	}
 

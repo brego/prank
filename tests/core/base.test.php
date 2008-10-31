@@ -36,11 +36,9 @@ class BaseTestCase extends PrankTestCase {
 	}
 	
 	public function test_c() {
-		$var = Config::get('DS');
-		$this->assert_equal($var, c('DS'));
+		$this->assert_equal(c()->ds, Config::get('ds'));
 		
-		c('test', 'a');
-		$this->assert_equal(Config::get('test'), 'a');
+		$this->assert_equal(c('ds'), Config::get('ds'));
 	}
 	
 	public function test_a() {
