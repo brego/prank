@@ -121,14 +121,14 @@ class Boot {
 
 		// URL parsed, saved to $path
 		// Setting & loading the $controller
-			if (is_controller($path[0])) {
+			if ($this->is_controller($path[0])) {
 				$controller = $path[0];
-			} elseif (is_controller('default')) {
+			} elseif ($this->is_controller('default')) {
 				$controller = 'default';
 			} else {
 				$controller = '404';
 			}
-			load_controller($controller);
+			$this->load_controller($controller);
 
 		// Setting the $action
 			if ($controller == $path[0] && count($path) > 1 && is_action_of($path[1], $controller)) {
@@ -152,7 +152,7 @@ class Boot {
 		} else {
 			$controller = 'default';
 			$action     = 'index';
-			load_controller($controller);
+			$this->load_controller($controller);
 		}
 		
 		self::$path       = $path;
@@ -173,7 +173,7 @@ class Boot {
 		}
 
 		try {
-			$controller_name   = to_controller(self::$controller);
+			$controller_name   = Inflector::to_controller(self::$controller);
 			$controller_object = new $controller_name;
 
 			$controller_object->action    = self::$action;
@@ -185,6 +185,39 @@ class Boot {
 		} catch (Exception $e) {
 			echo '<p>Exception: '.$e->getMessage().' in '.$e->getFile().' on line '.$e->getLine().".</p>\n",
 				str_replace("\n", "\n<br />", $e->getTraceAsString());
+		}
+	}
+	
+/**
+ * Loads the controller file
+ *
+ * @return boolean
+ * @param  string  $name Shortname of the controller.
+ **/
+	private function load_controller($name) {
+		if (class_exists(ucfirst($name).'Controller') === false) {
+			if ($this->is_controller($name)) {
+				require c()->controllers.down($name).'.controller.php';
+				return true;
+			} else {
+				return false;
+			}
+		}
+	}
+	
+/**
+ * Checks if controller file exists
+ *
+ * Checks if the $name exists in the controllers directory.
+ *
+ * @return boolean
+ * @param  string  $name Shortname of the controller
+ **/
+	private function is_controller($name) {
+		if (file_exists(c()->controllers.down($name).'.controller.php')) {
+			return true;
+		} else {
+			return false;
 		}
 	}
 }

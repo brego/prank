@@ -236,59 +236,6 @@ function down($string) {
 	return strtolower($string);
 }
 
-
-/**
- * Transforms a string into a valid controller class name.
- *
- * down()'s given string, capitalizes the first letter, and adds 'Controller'
- * at the end of the string.
- *
- * @return string Name to be transformed.
- * @param  string $string Valid class shortname of a controller.
- **/
-function to_controller($name)
-{
-	return Inflector::controlize($name);
-}
-
-
-/******************************************************************************
- * Basic controller handling functions.
- *****************************************************************************/
-
-/**
- * Checks if controller file exists.
- *
- * Checks if the $name exists in the CONTROLLERS directory.
- *
- * @return boolean
- * @param  string  $name Shortname of the controller
- **/
-function is_controller($name) {
-	if (file_exists(c()->controllers.down($name).'.controller.php')) {
-		return true;
-	} else {
-		return false;
-	}
-}
-
-/**
- * Loads the controller file.
- *
- * @return boolean
- * @param  string  $name Shortname of the controller.
- **/
-function load_controller($name) {
-	if (class_exists(ucfirst($name).'Controller') === false) {
-		if (is_controller($name)) {
-			require c()->controllers.down($name).'.controller.php';
-			return true;
-		} else {
-			return false;
-		}
-	}
-}
-
 /******************************************************************************
  * Basic action handling functions.
  *****************************************************************************/
@@ -301,13 +248,12 @@ function load_controller($name) {
  * @param  string  $controller Shortname of the controller.
  **/
 function is_action_of($action, $controller) {
-	return method_exists(to_controller($controller), $action);
+	return method_exists(Inflector::to_controller($controller), $action);
 }
 
 /******************************************************************************
  * View helper functions
  *****************************************************************************/
-
 
 /**
  * Returns the filename with a relative path to the root of the page.

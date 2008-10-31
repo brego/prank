@@ -324,7 +324,7 @@ class Inflector {
  * @param  string $class_name
  * @return string Singularized and camelized $class_name
  */
-	public static function controlize($class_name)
+	public static function to_controller($class_name)
 	{
 		return self::camelcase(self::singularize($class_name)).'Controller';
 	}

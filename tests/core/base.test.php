@@ -87,17 +87,6 @@ class BaseTestCase extends PrankTestCase {
 		$this->assert_equal(down('sOMEsMALLtEXT'), 'somesmalltext');
 	}
 	
-	public function test_to_controller() {
-		$this->assert_equal(to_controller('hello'), 'HelloController');
-	}
-	
-	public function test_is_controller() {
-		$this->assert_true(is_controller('DeFaUlT'));
-	}
-	
-	public function test_load_controller() {
-		$this->assert_true(class_exists('DefaultController'));
-	}
 	
 	public function test_is_action_of() {
 		$this->assert_true(method_exists('DefaultController', 'index'));
