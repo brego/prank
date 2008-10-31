@@ -2,20 +2,23 @@
 /**
  * Config
  *
- * PHP version 5.3.
- *
  * @filesource
  * @copyright  Copyright (c) 2008, Kamil "Brego" Dzieliński
  * @license    http://opensource.org/licenses/mit-license.php The MIT License
  * @author     Kamil "Brego" Dzieliński <brego@brego.dk>
  * @link       http://prank.brego.dk Prank's project page
- * @link       http://cakephp.org CakePHP's project page
  * @package    Prank
  * @subpackage Core
  * @since      Prank 0.10
  * @version    Prank 0.10
  */
 
+/**
+ * Core config class (a Singelton)
+ *
+ * @package    Prank
+ * @subpackage Core
+ */
 class Config {
 	private static $instance = null;
 	private static $config   = array();
@@ -24,13 +27,28 @@ class Config {
 	
 	private function __clone() {}
 	
+/**
+ * Returns the instance
+ *
+ * @return Config
+ */
 	public static function instance() {
 		if (self::$instance === null) {
 			self::$instance = new self;
 		}
 		return self::$instance;
 	}
-	
+
+/**
+ * Setups the configuration for Prank
+ *
+ * $start_point needs to be the an output of the __FILE__ from the starting
+ * point of the application. It will be used to determine full paths for
+ * directories.
+ * 
+ * @param  string $start_point 
+ * @return void
+ */
 	public static function setup($start_point) {
 		$config        = new stdClass;
 		$config->ds    = DIRECTORY_SEPARATOR;
@@ -73,15 +91,40 @@ class Config {
 		
 		self::$config = $config;
 	}
-	
+
+/**
+ * Sets a configuration variable
+ *
+ * @param  string $name 
+ * @param  mixed  $value 
+ * @return void
+ */
 	public static function set($name, $value) {
 		self::$config->$name = $value;
 	}
-	
+
+/**
+ * Overload for setting of a configuration variable
+ *
+ * Uses Config::set().
+ * 
+ * @param  string $name 
+ * @param  mixed  $value 
+ * @return void
+ */
 	public function __set($name, $value) {
 		self::set($name, $value);
 	}
 	
+/**
+ * Returns the value of the given configuration variable, or the whole object
+ *
+ * If given a name, returns the value. If not, returns the whole configuration
+ * object. If the requested $name is not set, Exception will be thrown.
+ * 
+ * @param  mixed $name 
+ * @return mixed
+ */
 	public static function get($name = false) {
 		if ($name === false) {
 			return self::$config;
@@ -93,8 +136,18 @@ class Config {
 			}
 		}
 	}
-	
+
+/**
+ * Overload for getting the configuration variable
+ * 
+ * Uses Config::get().
+ *
+ * @param  string $name 
+ * @return mixed
+ */
 	public function __get($name) {
 		return self::get($name);
 	}
 }
+
+?>
