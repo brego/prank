@@ -50,8 +50,7 @@ class Config {
 		
 		$app_config = array();
 		if (is_file($config->app.'config'.$config->ds.'app.yml')) {
-			$app_config = file_get_contents($config->app.'config'.$config->ds.'app.yml');
-			$app_config = from_yaml($app_config);
+			$app_config = from_yaml_file($config->app.'config'.$config->ds.'app.yml');
 		}
 		$app_config = array_merge($default_app_config, $app_config);
 		
@@ -62,8 +61,7 @@ class Config {
 		$config->webroot     = $config->app.$app_config['directories']['webroot'].$config->ds;
 		
 		if (is_file($config->app.'config'.$config->ds.'db.yml')) {
-			$db_config = file_get_contents($config->app.'config'.$config->ds.'db.yml');
-			$db_config = from_yaml($db_config);
+			$db_config = from_yaml_file($config->app.'config'.$config->ds.'db.yml');
 		} else {
 			throw new Exception('Currently Prank requires a database connection. Provide a config/db.yml with necessary data.');
 		}

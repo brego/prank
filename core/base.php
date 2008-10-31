@@ -126,7 +126,7 @@ function a() {
  * Sorts an array and returns the result
  * 
  * Parameter can be either an array, or multiple parameers that'll be converted
- * to an array.
+ * to an array. Sorting will be performed using sort().
  *
  * @return array
  */
@@ -142,7 +142,7 @@ function s() {
 /**
  * Recursively delete a directory
  * 
- * Removes specified directory/files.
+ * Removes specified directory/files, recursively.
  *
  * @param  string  $target Directory or file to be removed.
  * @return boolean Result of the removal.
@@ -182,14 +182,65 @@ function rm($target) {
  * File format functions
  *****************************************************************************/
 
+/**
+ * Returns the $variable converted into JSON format (using built-in
+ * json_encode()).
+ *
+ * @param  mixed  $variable 
+ * @return string
+ */
 function to_json($variable) {
 	return json_encode($variable);
 }
 
-function from_json($json) {
-	return json_decode($json, true);
+/**
+ * Convenience method for writing $variable in JSON format to $file
+ *
+ * @param  mixed  $variable 
+ * @param  string $file 
+ * @return mixed  Number of bytes written/false
+ */
+function to_json_file($variable, $file) {
+	return file_put_contents($file, to_json($variable));
 }
 
+/**
+ * Returns $json parsed into a php object/array
+ * 
+ * If $array is true, will return an associative array of given data. If it's
+ * false, will return an object. Conversion is done using built-in
+ * json_decode().
+ *
+ * @param  string  $json
+ * @param  boolean $array
+ * @return mixed
+ */
+function from_json($json, $array = true) {
+	return json_decode($json, $array);
+}
+
+/**
+ * Convenience method for reading JSON from $file
+ *
+ * @param  string  $file 
+ * @param  boolean $array 
+ * @return mixed
+ */
+function from_json_file($file, $array = true) {
+	return from_json(file_get_contents($file), $array);
+}
+
+/**
+ * Returns YAML-formatted $variable
+ *
+ * If the Syck extension is avilable, it will be used. Else, the Spyc class is
+ * expected to be found in core/lib/spyc/spyc.php.
+ * 
+ * @link   http://pecl.php.net/package/syck Pecl Syck extension
+ * @link   http://spyc.sourceforge.net/ A simple php yaml class
+ * @param  mixed  $variable 
+ * @return string
+ */
 function to_yaml($variable) {
 	if (function_exists('syck_dump')) {
 		return syck_dump($variable);
@@ -201,6 +252,28 @@ function to_yaml($variable) {
 	}
 }
 
+/**
+ * Convenience method for writing $variable in YAML format into $file
+ *
+ * @param  string $variable 
+ * @param  string $file 
+ * @return mixed  Number of bytes written/false
+ */
+function to_yaml_file($variable, $file) {
+	return file_put_contents($file, to_yaml($variable));
+}
+
+/**
+ * Returns given $yaml converted into php datatypes
+ * 
+ * If the Syck extension is avilable, it will be used. Else, the Spyc class is
+ * expected to be found in core/lib/spyc/spyc.php.
+ * 
+ * @link   http://pecl.php.net/package/syck Pecl Syck extension
+ * @link   http://spyc.sourceforge.net/ A simple php yaml class
+ * @param  string $yaml 
+ * @return mixed
+ */
 function from_yaml($yaml) {
 	if (function_exists('syck_load')) {
 		return syck_load($yaml);
@@ -210,6 +283,16 @@ function from_yaml($yaml) {
 		}
 		return Spyc::YAMLLoad($yaml);
 	}
+}
+
+/**
+ * Convenience method for reading YAML from $file
+ *
+ * @param  string $file 
+ * @return mixed
+ */
+function from_yaml_file($file) {
+	return from_yaml(file_get_contents($file));
 }
 
 /******************************************************************************
