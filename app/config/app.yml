@@ -7,3 +7,4 @@ directories:
     views:       views
     controllers: controllers
     webroot:     webroot
+    config:      config

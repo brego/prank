@@ -49,7 +49,7 @@ class Config {
  * @param  string $start_point 
  * @return void
  */
-	public static function setup($start_point) {
+	public static function setup($start_point, $config_dir = false) {
 		$config        = new stdClass;
 		$config->ds    = DIRECTORY_SEPARATOR;
 		$config->ps    = PATH_SEPARATOR;
@@ -64,11 +64,16 @@ class Config {
 				'models'      => 'models',
 				'views'       => 'views',
 				'controllers' => 'controllers',
-				'webroot'     => 'webroot'));
+				'webroot'     => 'webroot',
+				'config'      => 'config'));
+				
+		if ($config_dir === false) {
+			$config_dir = $config->app.'config'.$config->ds;
+		}
 		
 		$app_config = array();
-		if (is_file($config->app.'config'.$config->ds.'app.yml')) {
-			$app_config = from_yaml_file($config->app.'config'.$config->ds.'app.yml');
+		if (is_file($config_dir.'app.yml')) {
+			$app_config = from_yaml_file($config_dir.'app.yml');
 		}
 		$app_config = array_merge($default_app_config, $app_config);
 		
@@ -77,13 +82,13 @@ class Config {
 		$config->views       = $config->app.$app_config['directories']['views'].$config->ds;
 		$config->controllers = $config->app.$app_config['directories']['controllers'].$config->ds;
 		$config->webroot     = $config->app.$app_config['directories']['webroot'].$config->ds;
+		$config->config      = $config->app.$app_config['directories']['config'].$config->ds;
 		
-		if (is_file($config->app.'config'.$config->ds.'db.yml')) {
+		if (is_file($config->config.'db.yml')) {
 			$db_config = from_yaml_file($config->app.'config'.$config->ds.'db.yml');
 		} else {
 			throw new Exception('Currently Prank requires a database connection. Provide a config/db.yml with necessary data.');
 		}
-		
 		$config->db = new stdClass;
 		foreach ($db_config[$config->state] as $key => $value) {
 			$config->db->$key = $value;

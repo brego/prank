@@ -12,6 +12,8 @@ class PrankTestCase extends UnitTestCase {
 	public $controllers_dir         = null;
 
 	public $config_file             = null;
+	public $db_config_file          = null;
+	public $routes_config_file      = null;
 	public $index_file              = null;
 	public $default_controller_file = null;
 
@@ -43,6 +45,7 @@ class PrankTestCase extends UnitTestCase {
 		
 		$this->config_file             = $this->config_dir.'app.yml';
 		$this->db_config_file          = $this->config_dir.'db.yml';
+		$this->routes_config_file      = $this->config_dir.'routes.php';
 		$this->index_file              = $this->webroot_dir.'index.php';
 		$this->default_controller_file = $this->controllers_dir.'default.controller.php';
 		
@@ -51,8 +54,12 @@ class PrankTestCase extends UnitTestCase {
 		mkdir($this->webroot_dir);
 		mkdir($this->controllers_dir);
 		
-		$org_app_config = $this->from_yaml(file_get_contents(ROOT.'app'.DS.'config'.DS.'app.yml'));
-		$org_app_config['state'] = 'test';
+		// copy(ROOT.'app'.DS.'config'.DS.'routes.php', $this->routes_config_file);
+		file_put_contents($this->routes_config_file, ' ');
+		
+		$org_app_config           = $this->from_yaml(file_get_contents(ROOT.'app'.DS.'config'.DS.'app.yml'));
+		$org_app_config['state']  = 'test';
+		$org_app_config['config'] = $this->config_dir;
 		file_put_contents($this->config_file, $this->to_yaml($org_app_config));
 		
 		$org_db_config_file = file_get_contents(ROOT.'app'.DS.'config'.DS.'db.yml');
@@ -66,7 +73,7 @@ class PrankTestCase extends UnitTestCase {
 		
 		file_put_contents($this->index_file, ' ');
 		
-		$this->instance = Boot::run($this->index_file);
+		Config::setup($this->index_file);
 	}
 	
 	public function teardown_prank_spine() {
@@ -76,6 +83,7 @@ class PrankTestCase extends UnitTestCase {
 		unlink($this->db_config_file);
 		unlink($this->index_file);
 		unlink($this->default_controller_file);
+		unlink($this->routes_config_file);
 		
 		rmdir($this->config_dir);
 		rmdir($this->webroot_dir);

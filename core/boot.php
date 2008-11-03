@@ -20,22 +20,24 @@
 class Boot {
 	private static $instance = null;
 	
-	public  static $path       = array();
+	// public  static $path       = array();
 	public  static $url        = null;
 	public  static $controller = null;
 	public  static $action     = null;
 	public  static $params     = array();
+ 	public  static $route      = array();
 	private        $config     = null;
 
 /**
  * Kickstarts the framework
  *
  * @param  string $start_point Full path of index.php (__FILE__)
+ * @param  string $config_dir  Full path to the config directory
  * @return void
  */
-	public static function run($start_point = null) {
+	public static function run($start_point, $config_dir = false) {
 		if (self::$instance === null) {
-			self::$instance = new self($start_point);
+			self::$instance = new self($start_point, $config_dir);
 		}
 		return self::$instance;
 	}
@@ -46,17 +48,24 @@ class Boot {
  * Initializes the framework, and starts the Controller.
  *
  * @param  string $start_point Full path of index.php (__FILE__)
+ * @param  string $config_dir  Full path to the config directory
  * @return void
  */
-	private function __construct($start_point) {
+	private function __construct($start_point, $config_dir) {
 		$this->load_base_libs();
 		
-		Config::setup($start_point);
+		Config::setup($start_point, $config_dir);
 		
 		ini_set('include_path', c()->core.c()->ps.c()->app.c()->ps.'.');
-		
 		$this->set_error_reporting(c()->state);
-		$this->parse_url(isset($_GET['url']) ? $_GET['url'] : null);
+		
+		self::$url = isset($_GET['url']) ? $_GET['url'] : '/';
+		
+		$router = new Router;
+		self::$route = $router->parse_url(self::$url);
+		
+		$this->parse_route();
+		
 		$this->run_controller();
 	}
 	
@@ -101,62 +110,34 @@ class Boot {
 	}
 
 /**
- * Parse given url
- * 
- * Parses given url, and adapts it's elements as basic values for booting.
+ * TO BE COMMENTED
  *
- * @param  string $url 
  * @return void
  */
-	public function parse_url($url = null) {
-		$path       = array();
+	private function parse_route() {
 		$controller = null;
 		$action     = null;
 		$params     = array();
+		$route      = self::$route;
+		// d($route);
 		
-		// Parsing the URL
-		if ($url != null) {
-			$url  = split('/', $url);
-			$path = array_cleanup($url);
-
-		// URL parsed, saved to $path
-		// Setting & loading the $controller
-			if ($this->is_controller($path[0])) {
-				$controller = $path[0];
-			} elseif ($this->is_controller('default')) {
-				$controller = 'default';
-			} else {
-				$controller = '404';
-			}
-			$this->load_controller($controller);
-
-		// Setting the $action
-			if ($controller == $path[0] && count($path) > 1 && is_action_of($path[1], $controller)) {
-				$action = $path[1];
-			} elseif (is_action_of($path[0], $controller)) {
-				$action = $path[0];
-			} else { //if (is_action_of('index', $controller)) {
-				$action = 'index';
-			}
-
-		// Setting the $params
-			if ($controller == $path[0] && count($path) > 1 && $action == $path[1]) {
-				unset($path[0], $path[1]);
-				$params = $path;
-			} elseif ($action == $path[0]) {
-				unset($path[0]);
-				$params = $path;
-			} else {
-				$params = $path;
-			}
+		if (isset($route['controller']) && $this->is_controller($route['controller'])) {
+			$controller = $route['controller'];
+			unset($route['controller']);
 		} else {
-			$controller = 'default';
-			$action     = 'index';
-			$this->load_controller($controller);
+			$controller = 'Http404';
 		}
+		$this->load_controller($controller);
+
+		if (isset($route['action']) && is_action_of($route['action'], $controller)) {
+			$action = $route['action'];
+			unset($route['action']);
+		} else {
+			$action = 'index';
+		}
+
+		$params = $route;
 		
-		self::$path       = $path;
-		self::$url        = $url;
 		self::$controller = $controller;
 		self::$action     = $action;
 		self::$params     = $params;
@@ -199,6 +180,9 @@ class Boot {
 			if ($this->is_controller($name)) {
 				require c()->controllers.down($name).'.controller.php';
 				return true;
+			} elseif ($this->is_stub_controller($name)) {
+				require c()->core.'stubs'.c('ds').'app'.c('ds').'controllers'.c('ds').down($name).'.controller.php';
+				return true;
 			} else {
 				return false;
 			}
@@ -215,6 +199,14 @@ class Boot {
  **/
 	private function is_controller($name) {
 		if (file_exists(c()->controllers.down($name).'.controller.php')) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+	
+	private function is_stub_controller($name) {
+		if (file_exists(c()->core.'stubs'.c('ds').'app'.c('ds').'controllers'.c('ds').down($name).'.controller.php')) {
 			return true;
 		} else {
 			return false;

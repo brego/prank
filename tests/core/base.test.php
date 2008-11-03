@@ -88,9 +88,9 @@ class BaseTestCase extends PrankTestCase {
 	}
 	
 	
-	public function test_is_action_of() {
-		$this->assert_true(method_exists('DefaultController', 'index'));
-	}
+	// public function test_is_action_of() {
+	// 	$this->assert_true(method_exists('DefaultController', 'index'));
+	// }
 	
 	public function test_url() {
 		$this->assert_equal(url('/hello/'), '/hello/');
