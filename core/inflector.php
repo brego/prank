@@ -283,7 +283,7 @@ class Inflector {
  * @param  string $string String to be made more readable
  * @return string Human-readable string
  */
-	public static function humanize($string)
+	public static function human($string)
 	{
 		if (strpos($string, '_') !== false) {
 			return ucfirst(str_replace("_", " ", strtolower($string)));
@@ -301,7 +301,7 @@ class Inflector {
  * @param  string $table_name Name of database table to get class name for
  * @return string Singularized and Camelized $class_name
  */
-	public static function modelize($table_name)
+	public static function to_model($table_name)
 	{
 		return self::camelcase(self::singularize($table_name));
 	}
@@ -313,7 +313,7 @@ class Inflector {
  * @param  string $class_name Name of class to get database table name for
  * @return string Name of the database table for given class
  */
-	public static function tabelize($class_name)
+	public static function to_table($class_name)
 	{
 		return self::pluralize(self::underscore($class_name));
 	}

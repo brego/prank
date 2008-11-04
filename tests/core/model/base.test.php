@@ -34,7 +34,7 @@ class ModelBaseTestCase extends PrankTestCase {
 	}	
 	
 	public function test___construct() {
-		$table = Inflector::tabelize('User');
+		$table = Inflector::to_table('User');
 		$this->assert_equal($table, 'users');
 		
 		$columns = array(

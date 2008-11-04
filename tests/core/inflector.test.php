@@ -51,19 +51,19 @@ class InflectorTestCase extends PrankTestCase {
 		$this->assert_equal(Inflector::underscore('sOmEtHiNg nEw'), 'something_new');
 	}
 
-	public function test_humanize() {
-		$this->assert_equal(Inflector::humanize('something_new'), 'Something new');
-		$this->assert_equal(Inflector::humanize('SomethingNew'),  'Something new');
-		$this->assert_equal(Inflector::humanize('sOmEtHiNg nEw'), 'Something new');
+	public function test_human() {
+		$this->assert_equal(Inflector::human('something_new'), 'Something new');
+		$this->assert_equal(Inflector::human('SomethingNew'),  'Something new');
+		$this->assert_equal(Inflector::human('sOmEtHiNg nEw'), 'Something new');
 	}
 
-	public function test_modelize() {
-		$this->assert_equal(Inflector::modelize('models'), 'Model');
+	public function test_to_model() {
+		$this->assert_equal(Inflector::to_model('models'), 'Model');
 	}
 
-	public function test_tabelize() {
-		$this->assert_equal(Inflector::tabelize('Model'), 'models');
-		$this->assert_equal(Inflector::tabelize('Models'), 'models');
+	public function test_to_table() {
+		$this->assert_equal(Inflector::to_table('Model'), 'models');
+		$this->assert_equal(Inflector::to_table('Models'), 'models');
 	}
 
 	public function test_to_controller() {

@@ -103,7 +103,7 @@ class ModelBase extends Object {
  */	
 	public function __construct($data = false) {
 		$this->model      = get_called_class();
-		$this->table      = Inflector::tabelize($this->model);
+		$this->table      = Inflector::to_table($this->model);
 		$this->connection = ModelConnection::instance();
 		$this->columns    = $this->connection->columns($this->table);
 		
@@ -278,7 +278,7 @@ class ModelBase extends Object {
 	public static function __callStatic($method, $arguments) {
 		$connection = ModelConnection::instance();
 		$model      = get_called_class();
-		$table      = Inflector::tabelize($model);
+		$table      = Inflector::to_table($model);
 		$order      = '';
 
 		if (strpos($method, 'order_by') !== false) {
@@ -577,9 +577,9 @@ class ModelBase extends Object {
 			
 			foreach ($this->relations as $relation => $relation_type) {
 				$config = array(
-					'model'   => Inflector::modelize($relation),
+					'model'   => Inflector::to_model($relation),
 					'local'   => $this->table(),
-					'foreign' => Inflector::tabelize($relation),
+					'foreign' => Inflector::to_table($relation),
 					'id'      => $this->data['id'],
 					'type'    => $relation_type);
 				$config['local_id']   = Inflector::singularize($config['local']).'_id';
@@ -622,7 +622,7 @@ class ModelBase extends Object {
 					$this->relational_data[$relation] = new ModelCollection;
 					$this->relational_data[$relation]->relation_type($relation_type);
 				} else {
-					$model = Inflector::modelize($relation);
+					$model = Inflector::to_model($relation);
 					$this->relational_data[$relation] = new $model;
 					$this->relational_data[$relation]->relation_type($relation_type);
 				}
