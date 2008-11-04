@@ -1,21 +1,65 @@
 <?php
+/**
+ * Routing the url
+ *
+ * @filesource
+ * @copyright  Copyright (c) 2008, Kamil "Brego" Dzieliński
+ * @license    http://opensource.org/licenses/mit-license.php The MIT License
+ * @author     Kamil "Brego" Dzieliński <brego@brego.dk>
+ * @link       http://prank.brego.dk Prank's project page
+ * @package    Prank
+ * @subpackage Core
+ * @since      Prank 0.10
+ * @version    Prank 0.10
+ */
 
+/**
+ * Routing the url
+ *
+ * Parses given url acording to registered connections.
+ *
+ * @package    Prank
+ * @subpackage Core
+ */
 class Router {
 	private static $current_route = null;
 	private        $routes        = array();
-	
+
+/**
+ * Registers routes
+ * 
+ * Calls Router::register_routes().
+ *
+ * @return void
+ */
 	public function __construct() {
 		$this->register_routes();
 	}
-	
+
+/**
+ * Returns current routes
+ *
+ * @return array
+ */
 	public function routes() {
 		return $this->routes;
 	}
 
+/**
+ * Returns the current route
+ *
+ * @return array
+ */
 	public static function current_route() {
 		return self::$current_route;
 	}
-	
+
+/**
+ * Parses givven url, tries to match it against routes
+ *
+ * @param  string $url 
+ * @return array  Current route
+ */
 	public function parse_url($url) {
 		$out = array();
 		$ext = null;
@@ -54,21 +98,62 @@ class Router {
 		
 		return $out;
 	}
-	
+
+/**
+ * Loads user-defined routes
+ * 
+ * Loads app/config/routes.php. Defines a local variable $map, referencing
+ * $this.
+ *
+ * @return void
+ */
 	private function register_routes() {
 		$map = $this;
 		require c()->config.'routes.php';
 	}
-	
-	private function connect($route, $params = array()) {
+
+/**
+ * Connects given route
+ *
+ * Prank uses Rails'esque keywords preceeded with a colon for $route.
+ * :controller and :action are speciall - as they decide which controller and
+ * action will be run by Prank. You can provide default values for keywords.
+ * Keep in mind that Prank supports unnamed attributes (they will not be
+ * directly passed to the action though).
+ * 
+ * Uses Router::parse_route() for logic.
+ * 
+ * @todo   Implement ressourcess
+ * @param  string $route 
+ * @param  array  $defaults 
+ * @return void
+ */
+	private function connect($route, $defaults = array()) {
 		list($expression, $names) = $this->parse_route($route);
-		$this->routes[$expression] = array('names'=>$names, 'defaults'=>$params);
+		$this->routes[$expression] = array('names'=>$names, 'defaults'=>$defaults);
 	}
 	
+/**
+ * This will make support for named routes possible
+ *
+ * @todo   Implement named routes
+ * @param  string $method 
+ * @param  mixed  $arguments 
+ * @return void
+ */
 	public function __call($method, $arguments) {
 		throw new Exception('Nope');
 	}
-	
+
+/**
+ * Parses a user-defined route
+ * 
+ * Outputs an array consisting of a regular expression, and an array of names
+ * (keyowrds) found.
+ *
+ * @param  string $route 
+ * @return array
+ */
 	private function parse_route($route) {
 		if (empty($route) || $route === '/') {
 			return array('/^[\/]*$/', array());
@@ -113,7 +198,16 @@ class Router {
 		}
 		return array('#^' . join('', $parsed) . '[\/]*(?:([\/\-A-Za-z_0-9]+))?$#', $names);
 	}
-	
+
+/**
+ * Checks if $route matches the $url
+ * 
+ * If a match is found, all the submatches of the regex are returned.
+ *
+ * @param  string $route
+ * @param  string $url 
+ * @return mixed  False or array of submatches
+ */
 	private function match_route($route, $url) {
 		$match = preg_match($route, $url, $matches);
 		if ($match === 0) {
