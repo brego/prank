@@ -50,13 +50,13 @@ class BaseTestCase extends PrankTestCase {
 		$this->assert_equal(s('b', 'c', 'a'), array('a', 'b', 'c'));
 	}
 	
-	public function test_rm() {
-		$test_directory = ROOT.'tests'.DS.'tmp'.DS.'rm-test-dir'.DS;
-		mkdir($test_directory);
-		mkdir($test_directory.'some-content-dir');
-		rm($test_directory);
-		$this->assert_false(is_dir($test_directory));
-	}
+	// public function test_rm() {
+	// 	$test_directory = ROOT.'tests'.DS.'tmp'.DS.'rm-test-dir'.DS;
+	// 	mkdir($test_directory);
+	// 	mkdir($test_directory.'some-content-dir');
+	// 	rm($test_directory);
+	// 	$this->assert_false(is_dir($test_directory));
+	// }
 	
 	public function test_to_json() {
 		$this->assert_equal(to_json(array('a'=>'b')), '{"a":"b"}');
