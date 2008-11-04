@@ -65,7 +65,8 @@ class Config {
 				'views'       => 'views',
 				'controllers' => 'controllers',
 				'webroot'     => 'webroot',
-				'config'      => 'config'));
+				'config'      => 'config',
+				'helpers'     => 'helpers'));
 				
 		if ($config_dir === false) {
 			$config_dir = $config->app.'config'.$config->ds;
@@ -83,6 +84,7 @@ class Config {
 		$config->controllers = $config->app.$app_config['directories']['controllers'].$config->ds;
 		$config->webroot     = $config->app.$app_config['directories']['webroot'].$config->ds;
 		$config->config      = $config->app.$app_config['directories']['config'].$config->ds;
+		$config->helpers     = $config->app.$app_config['directories']['helpers'].$config->ds;
 		
 		if (is_file($config->config.'db.yml')) {
 			$db_config = from_yaml_file($config->app.'config'.$config->ds.'db.yml');
