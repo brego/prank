@@ -8,3 +8,4 @@ directories:
     controllers: controllers
     webroot:     webroot
     config:      config
+    helpers:     helpers
