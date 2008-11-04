@@ -22,15 +22,12 @@
  * @subpackage Core
  */
 class Boot {
-	private static $instance = null;
-	
-	// public  static $path       = array();
+	private static $instance   = null;
 	public  static $url        = null;
 	public  static $controller = null;
 	public  static $action     = null;
 	public  static $params     = array();
  	public  static $route      = array();
-	private        $config     = null;
 
 /**
  * Kickstarts the framework
