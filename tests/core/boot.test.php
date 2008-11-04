@@ -25,12 +25,6 @@ class BootTestCase extends PrankTestCase {
 		$this->assert_true(function_exists('down'));
 		$this->assert_true(function_exists('is_action_of'));
 		$this->assert_true(function_exists('url'));
-		$this->assert_true(function_exists('css'));
-		$this->assert_true(function_exists('_css'));
-		$this->assert_true(function_exists('compress_css'));
-		$this->assert_true(function_exists('javascript'));
-		$this->assert_true(function_exists('_javascript'));
-		$this->assert_true(function_exists('compress_javascript'));
 	}
 	
 	public function test___construct() {
