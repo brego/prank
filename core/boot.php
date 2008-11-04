@@ -123,9 +123,8 @@ class Boot {
 		$action     = null;
 		$params     = array();
 		$route      = self::$route;
-		// d($route);
 		
-		if (isset($route['controller']) && $this->is_controller($route['controller'])) {
+		if (isset($route['controller']) && is_file(c()->controllers.down($route['controller']).'.controller.php')) {
 			$controller = $route['controller'];
 			unset($route['controller']);
 		} else {
@@ -181,10 +180,10 @@ class Boot {
  **/
 	private function load_controller($name) {
 		if (class_exists(ucfirst($name).'Controller') === false) {
-			if (file_exists(c()->controllers.down($name).'.controller.php')) {
+			if (is_file(c()->controllers.down($name).'.controller.php')) {
 				require c()->controllers.down($name).'.controller.php';
 				return true;
-			} elseif (file_exists(c()->core.'stubs'.c('ds').'app'.c('ds').'controllers'.c('ds').down($name).'.controller.php')) {
+			} elseif (is_file(c()->core.'stubs'.c('ds').'app'.c('ds').'controllers'.c('ds').down($name).'.controller.php')) {
 				require c()->core.'stubs'.c('ds').'app'.c('ds').'controllers'.c('ds').down($name).'.controller.php';
 				return true;
 			} else {
