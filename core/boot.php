@@ -1,10 +1,6 @@
 <?php
 /**
- * Booting the framework.
- *
- * Routing and setup for controllers.
- *
- * PHP version 5.3.
+ * Booting the framework
  *
  * @filesource
  * @copyright  Copyright (c) 2008, Kamil "Brego" Dzieliński
@@ -17,6 +13,14 @@
  * @version    Prank 0.10
  */
 
+/**
+ * Booting the framework
+ *
+ * Routing and setup for controllers.
+ *
+ * @package    Prank
+ * @subpackage Core
+ */
 class Boot {
 	private static $instance = null;
 	
@@ -110,7 +114,7 @@ class Boot {
 	}
 
 /**
- * TO BE COMMENTED
+ * Parses the route, loads controller
  *
  * @return void
  */
@@ -177,39 +181,15 @@ class Boot {
  **/
 	private function load_controller($name) {
 		if (class_exists(ucfirst($name).'Controller') === false) {
-			if ($this->is_controller($name)) {
+			if (file_exists(c()->controllers.down($name).'.controller.php')) {
 				require c()->controllers.down($name).'.controller.php';
 				return true;
-			} elseif ($this->is_stub_controller($name)) {
+			} elseif (file_exists(c()->core.'stubs'.c('ds').'app'.c('ds').'controllers'.c('ds').down($name).'.controller.php')) {
 				require c()->core.'stubs'.c('ds').'app'.c('ds').'controllers'.c('ds').down($name).'.controller.php';
 				return true;
 			} else {
-				return false;
+				throw new Exception('File for '.ucfirst($name).'Controller was not found.');
 			}
-		}
-	}
-	
-/**
- * Checks if controller file exists
- *
- * Checks if the $name exists in the controllers directory.
- *
- * @return boolean
- * @param  string  $name Shortname of the controller
- **/
-	private function is_controller($name) {
-		if (file_exists(c()->controllers.down($name).'.controller.php')) {
-			return true;
-		} else {
-			return false;
-		}
-	}
-	
-	private function is_stub_controller($name) {
-		if (file_exists(c()->core.'stubs'.c('ds').'app'.c('ds').'controllers'.c('ds').down($name).'.controller.php')) {
-			return true;
-		} else {
-			return false;
 		}
 	}
 }
