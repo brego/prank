@@ -23,16 +23,16 @@
 * @subpackage Core
  */
 class Collection implements Iterator, Countable {
-	private   $key       = 0;
-	private   $size      = 0;
 	protected $items     = array();
-	private   $loader    = null;
 /**
  * Name of single item in the colection (used in each)
  *
  * @var string
  */
 	protected $item_name = 'item';
+	private   $key       = 0;
+	private   $size      = 0;
+	private   $loader    = null;
 
 /**
  * Constructor
