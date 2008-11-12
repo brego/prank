@@ -20,8 +20,8 @@ class ControllerBaseTestCase extends PrankTestCase {
 		$test->test_view_string = 'test';
 		$test->test_view_array  = array('one', 'two', 'three');
 		
-		$this->assert_equal($test->view_variables['test_view_string'], 'test');
-		$this->assert_equal($test->view_variables['test_view_array'], array('one', 'two', 'three'));
+		$this->assert_equal(TestController::$view_variables['test_view_string'], 'test');
+		$this->assert_equal(TestController::$view_variables['test_view_array'], array('one', 'two', 'three'));
 	}
 }
 
