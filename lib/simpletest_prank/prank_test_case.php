@@ -79,16 +79,7 @@ class PrankTestCase extends UnitTestCase {
 	public function teardown_prank_spine() {
 		$this->instance = null;
 		
-		unlink($this->config_file);
-		unlink($this->db_config_file);
-		unlink($this->index_file);
-		unlink($this->default_controller_file);
-		unlink($this->routes_config_file);
-		
-		rmdir($this->config_dir);
-		rmdir($this->webroot_dir);
-		rmdir($this->controllers_dir);
-		rmdir($this->app_dir);
+		$this->rm($this->app_dir);
 	}
 	
 	private function to_yaml($variable) {
@@ -110,6 +101,37 @@ class PrankTestCase extends UnitTestCase {
 				require ROOT.'lib'.DS.'spyc'.DS.'spyc.php';
 			}
 			return Spyc::YAMLLoad($yaml);
+		}
+	}
+	
+	private function rm($target) {
+		if (is_file($target)) {
+			if (is_writable($target)) {
+				if (unlink($target)) {
+					return true;
+				}
+			}
+			return false;
+		}
+		if (is_dir($target)) {
+			if (is_writable($target)) {
+				foreach(new DirectoryIterator($target) as $object) {
+					if ($object->isDot()) {
+						unset($object);
+						continue;
+					}
+					if ($object->isFile()) {
+						$this->rm($object->getPathName());
+					} elseif ($object->isDir()) {
+						$this->rm($object->getRealPath());
+					}
+					unset($object);
+				}
+				if (rmdir($target)) {
+					return true;
+				}
+			}
+			return false;
 		}
 	}
 }
