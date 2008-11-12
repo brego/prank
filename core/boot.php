@@ -53,6 +53,9 @@ class Boot {
  * @return void
  */
 	private function __construct($start_point, $config_dir) {
+		
+		session_start();
+		
 		$this->load_base_libs();
 		
 		Config::setup($start_point, $config_dir);
@@ -149,18 +152,14 @@ class Boot {
  * @return void
  */	
 	private function run_controller() {
-		function partial($name) {
-			require c()->views.Boot::$controller.c()->ds.'_'.$name.'.php';
-		}
-
 		try {
 			$controller_name   = Inflector::to_controller(self::$controller);
 			$controller_object = new $controller_name;
 
-			$controller_object->action    = self::$action;
-			$controller_object->view      = self::$action;
-			$controller_object->params    = self::$params;
-			$controller_object->shortname = self::$controller;
+			$controller_object->action     = self::$action;
+			$controller_object->view       = self::$action;
+			$controller_object->params     = self::$params;
+			$controller_object->controller = self::$controller;
 
 			$controller_object->run();
 		} catch (Exception $e) {

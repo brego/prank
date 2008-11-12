@@ -23,8 +23,8 @@ class ControllerBase {
 	public $view           = null;
 	public $params         = array();
 	public $layout         = 'default';
-	public $shortname      = null;
-	public $view_variables = array();
+	public $controller      = null;
+	public static $view_variables = array();
 
 /**
  * All unknown variables are defined as view variables
@@ -34,7 +34,7 @@ class ControllerBase {
  * @return void
  */
 	public function __set($var, $val) {
-		$this->view_variables[$var] = $val;
+		self::$view_variables[$var] = $val;
 	}
 
 /**
@@ -46,6 +46,13 @@ class ControllerBase {
  * @return void
  */
 	public function run() {
+		
+		function partial($name, $params = array()) {
+			extract($params);
+			extract(ControllerBase::$view_variables);
+			require c()->views.Boot::$controller.c()->ds.'_'.$name.'.php';
+		}
+		
 		$this->before_run();
 		
 		call_user_func_array(array($this, $this->action), $this->params);
@@ -53,19 +60,19 @@ class ControllerBase {
 		$this->after_run();
 		$this->before_render();
 		
-		extract($this->view_variables);
+		extract(self::$view_variables);
 		
 		ob_start();
 
-		if (file_exists(c()->views.$this->shortname.c()->ds.$this->view.'.php') && $this->view !== false) {
-			require c()->views.$this->shortname.c()->ds.$this->view.'.php';
+		if (is_file(c()->views.$this->controller.c()->ds.$this->view.'.php') && $this->view !== false) {
+			require c()->views.$this->controller.c()->ds.$this->view.'.php';
 		}
 		
 		$content_for_layout = ob_get_clean();
 		
 		$content_for_layout = $this->before_layout($content_for_layout);
 			
-		if (file_exists(c()->views.'layouts'.c()->ds.$this->layout.'.php') && $this->layout !== false) {
+		if (is_file(c()->views.'layouts'.c()->ds.$this->layout.'.php') && $this->layout !== false) {
 			ob_start();
 			require c()->views.'layouts'.c()->ds.$this->layout.'.php';
 			$output = ob_get_clean();
