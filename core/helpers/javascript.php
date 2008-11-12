@@ -9,12 +9,13 @@
  * @link       http://prank.brego.dk Prank's project page
  * @package    Prank
  * @subpackage Helpers
- * @since      Prank 0.10
- * @version    Prank 0.10
+ * @since      Prank 0.20
+ * @version    Prank 0.20
  */
 
 /**
- * Return HTML code for linking JS files, and compress them.
+ * Return HTML code for linking JS files, and compress them
+ * 
  *
  * Accepts one or more string filenames for javascript files. Files are asumed
  * to reside in /webroot/js/. On first call, files will be catched in a
@@ -27,76 +28,72 @@
  * @return string Link to the compressed JS file.
  */
 function javascript() {
-	/*
-	add a comment to the compressed file, with location of the uncompessed ones
-	allow for multiple files & compress them into a single file (in given order)
-	use url()
-	use catching & compressing
-		use filemtime() and md5 on filename	
-	*/
 	clearstatcache();
-	$args  = func_get_args();
-	$files = array();
-	
-	foreach ($args as $index => $filename) {
-		if (substr($filename, -3, 3) != '.js') {
-			$args[$index] = $filename.'.js';
-		}
+	$files  = func_get_args();
+	$output = '';
+
+	foreach ($files as $file) {
+		$output .= javascript_link($file);
 	}
 	
-	foreach ($args as $filename) {
-		$files[] = $filename;
-		$files[] = filemtime(WEBROOT.'js'.DS.$filename);
-	}
-	$hash = md5(implode($files));
-	
-	if(is_file(WEBROOT.'tmp/'.$hash.'.php')) {
-		$link = $link = '<script type="text/javascript" src="'.url('tmp/'.$hash.'.php').'"></script>'."\n";
-	} else {
-		$compressed = null;
-		foreach ($args as $filename) {
-			$file        = file_get_contents(WEBROOT.'js'.DS.$filename);
-			$compressed .= compress_javascript($file);
-		}
-		$compressed_filename = 'tmp/'.md5(implode('', $files)).'.php';
-		$output  = "<?php header('Content-Type: text/javascript'); ob_start('ob_gzhandler'); ?>\n";
-		$output .= "/*\nThis file is a compressed version of this site's JavaScript code.\n";
-		$output .= "For uncompressed version, refer to the following files:\n";
-		$output .= implode("\n", $args)."\nIn the js/ directory of this site.";
-		$output .= "\n*/\n";
-		$output .= $compressed;
-		$output .= "\n<?php ob_end_flush(); ?>";
-		file_put_contents($compressed_filename, $output);
-		$link = '<script type="text/javascript" src="'.url($compressed_filename).'"></script>'."\n";
-	}
-	return $link;
+	$output .= javascript_link('behavior.php');
+
+	return $output;
 }
 
 /**
- * Print alias for javascript method.
+ * Print alias for javascript method
  *
  * This is an alias for the javascript method - with the subtle change of
- * printing the link, instead of returning it.
+ * outputting the link, instead of returning it.
  *
  * @return void
  */
 function _javascript() {
-	$args   = func_get_args();
-	$output = call_user_func_array('javascript', $args);
+	$files  = func_get_args();
+	$output = call_user_func_array('javascript', $files);
 	echo $output;
 }
 
 /**
- * This function compresses JS code.
+ * Returns a html link to a javascript file
  *
- * @param  string $script JS to be compressed.
- * @return string Compressed JS code.
+ * @param  string $file 
+ * @return string
  */
-function compress_javascript($script) {
-	$script = preg_replace('!/\*[^*]*\*+([^/][^*]*\*+)*/!', '', $script);
-	$script = preg_replace('!//.*!', '', $script);
-	$script = str_replace(array("\r\n", "\r", "\n", "\t", '  ', '   ', '    '), '', $script);
-	return $script;
+function javascript_link($file) {
+	if (substr($file, -3, 3) !== '.js' && substr($file, -4, 4) !== '.php') {
+		$file = $file.'.js';
+	}
+	$file = '<script src="'.url('js/'.$file).'" type="text/javascript" charset="utf-8"></script>'."\n";
+	return $file;
+}
+
+/**
+ * Print alias for javascript_link method
+ *
+ * @param  string $file 
+ * @return string
+ */
+function _javascript_link($file) {
+	echo javascript_link($file);
+}
+
+function add_javascript_behavior($behavior) {
+	if (isset($_SESSION) === false) {
+		session_start();
+	}
+	if (isset($_SESSION['prank']) === false) {
+		$_SESSION['prank'] = array();
+	}
+	if (isset($_SESSION['prank']['javascript']) === false) {
+		$_SESSION['javascript'] = array();
+	}
+	if (isset($_SESSION['prank']['javascript']['behaviors']) === false) {
+		$_SESSION['javascript'] = array();
+	}
+	
+	$_SESSION['prank']['javascript']['behaviors'][] = $behavior;
 }
 
 ?>
