@@ -2,13 +2,6 @@
 /**
  * Object base class
  *
- * Used for extending the basic functionality of objects. Currently providing
- * following functionality:
- *
- * - Adding methods to classes (through Object::extend)
- * 
- * PHP version 5.3.
- *
  * @filesource
  * @copyright  Copyright (c) 2008, Kamil "Brego" Dzieliński
  * @license    http://opensource.org/licenses/mit-license.php The MIT License
@@ -20,12 +13,30 @@
  * @version    Prank 0.10
  */
 
+/**
+ * Object base class
+ *
+ * Used for extending the basic functionality of objects. Currently providing
+ * following functionality:
+ *
+ * - Adding methods to classes through Object::extend()
+ * - Adding methods to objects through $object->extend()
+ * - Testing if a class responds to a method through Object::responds()
+ * - Testing if an object responds to a method through $object->responds()
+ * 
+ * If overriding Object's __call() or __callStatic(), remember to call on
+ * parent::__call() and parent::__callStatic() - or else the functionality
+ * won't work.
+ *
+ * @package    Prank
+ * @subpackage Core
+ */
 class Object {
 	private static $extended_class_methods  = array();
 	private        $extended_object_methods = array();
 
 /**
- * Registers object extension functions (mixins)
+ * Provides object-specific capabilities
  * 
  * Remember to return the return of this function. If $method is not
  * registered, throws a new Exception.
@@ -77,7 +88,7 @@ class Object {
 	}
 
 /**
- * Registers static extension functions (mixins)
+ * Provides class-specific capabilities
  * 
  * Remember to return the return of this function. If $method is not
  * registered, throws a new Exception.
