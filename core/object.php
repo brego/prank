@@ -32,8 +32,8 @@
  * @subpackage Core
  */
 class Object {
-	private static $extended_class_methods  = array();
-	private        $extended_object_methods = array();
+	protected static $extended_class_methods  = array();
+	protected        $extended_object_methods = array();
 
 /**
  * Provides object-specific capabilities
