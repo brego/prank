@@ -18,29 +18,38 @@ class ObjectTestCase extends PrankTestCase {
 	
 	public function teardown() {
 	}
-	
-	public function test_extending() {
-		Object::extend('return_true', function(){return true;});
-		$test = new Object;
-		$this->assert_true($test->return_true());
-		$this->assert_true(Object::return_true());
-		
-		Object::extend('return_self', function($object){return $object;});
-		$test = new Object;
-		$this->assert_equal($test->return_self(), $test);
-		
-		Object::extend('return_new_self', function($class){return new $class;});
-		$test = new Object;
-		$this->assert_equal($test->return_new_self(), new Object);
-	}
-	
+
 	public function test_responds() {
-		$test = new TestObject;
-		$this->assert_true($test->responds('i_am_public'));
-		$this->assert_false($test->responds('i_am_so_private'));
+		$object = new TestObject;
+		$this->assert_true($object->responds('i_am_public'));
+		$this->assert_false($object->responds('i_am_so_private'));
 		
 		$this->assert_true(TestObject::responds('static_public'));
 		$this->assert_false(TestObject::responds('static_private'));
+	}
+
+	public function test_object_extending() {
+		$object = new TestObject;
+		$this->assert_false($object->responds('return_true'));
+		$object->extend('return_true', function() {return true;});
+		$this->assert_true($object->return_true());
+		$this->assert_false(TestObject::responds('return_true'));
+		
+		$object->extend('return_self', function($object) {return $object;});
+		$this->assert_identical($object, $object->return_self());
+	}
+	
+	public function test_class_extending() {
+		TestObject::extend('return_false', function() {return false;});
+		$this->assert_true(TestObject::responds('return_false'));
+		$this->assert_false(TestObject::return_false());
+		
+		TestObject::extend('return_class', function($class) {return $class;});
+		$this->assert_equal(TestObject::return_class(), 'TestObject');
+		
+		$object = new TestObject;
+		$this->assert_false($object->responds('return_false'));
+		$this->assert_false($object->responds('return_class'));
 	}	
 }
 
