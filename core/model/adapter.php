@@ -37,6 +37,7 @@ interface ModelAdapter {
 	public function update($table, $data, $condition);
 	public function delete($table, $condition);
 	
+	public function filter_string($value);
 	public function now();
 	
 	public function has_many_read($info);

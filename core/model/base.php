@@ -33,9 +33,13 @@ class ModelBase extends Object {
 	private   $relations               = array();
 	private   $validations             = array();
 	protected $hollow                  = true;
-	protected $exists                  = false;  
+	protected $exists                  = false;
 	private   $relation_type           = false;
 	private   $errors                  = array();
+	
+	public    $filter_input            = true;
+	public    $escape_output           = true;
+	
 /**
  * Is this model modified (has any data been set)
  *
@@ -84,6 +88,7 @@ class ModelBase extends Object {
  * @var mixed
  */
 	public    $has_and_belongs_to_many = false;
+
 
 /**
  * Constructor
@@ -170,6 +175,8 @@ class ModelBase extends Object {
  */	
 	public function __set($variable, $value) {
 		if ($this->connection->is_column_of($variable, $this->table)) {
+			$value = $this->filter_input($value);
+			
 			$this->load();
 			$this->hollow          = false;
 			$this->modified        = true;
@@ -217,7 +224,7 @@ class ModelBase extends Object {
 	public function __get($variable) {
 		$this->load();
 		if (isset($this->data[$variable])) {
-			return $this->data[$variable];
+			return $this->escape_output($this->data[$variable]);
 		} elseif (array_search($variable, array_keys($this->relations)) !== false) {
 			$this->load_relations();
 			if (isset($this->relational_data[$variable])) {
@@ -309,7 +316,11 @@ class ModelBase extends Object {
 				return $connection->read($table, $model, $column."='".$arguments[0]."'");
 			}
 		} elseif (substr($method, 0, 8) === 'find_all') {
-			return $connection->read($table, $model, '', $order);
+			$found = $connection->read($table, $model, '', $order);
+			if (is_a($found, 'ModelCollection') === false) {
+				$found = new ModelCollection($found);
+			}
+			return $found;
 		} elseif ($method === 'delete') {
 			return $connection->delete($table, 'id='.$arguments[0]);
 		} else {
@@ -439,6 +450,22 @@ class ModelBase extends Object {
 			return true;
 		} else {
 			return false;
+		}
+	}
+
+	private function filter_input($value) {
+		if ($this->filter_input === true) {
+			return $this->connection->filter_string($value);
+		} else {
+			return $value;
+		}
+	}
+	
+	private function escape_output($value) {
+		if ($this->escape_output === true) {
+			return $value;
+		} else {
+			return $value;
 		}
 	}
 

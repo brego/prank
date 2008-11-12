@@ -97,6 +97,17 @@ class ModelAdaptersMysql extends PDO implements ModelAdapter {
 		}
 		return $prepared_data;
 	}
+
+/**
+ * Filters a string for security
+ * 
+ * @param  string $value 
+ * @return mixed
+ */
+	public function filter_string($value) {
+		// return $this->quote(trim($value);
+		return $value;
+	}
 	
 /**
  * Returns current time in database-specific format
