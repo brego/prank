@@ -111,6 +111,13 @@ class ModelAdaptersMysqlTestCase extends PrankTestCase {
 	public function test_now() {
 		$this->assert_equal($this->mysql->now(), date('Y-m-d H:i:s'));
 	}
+	
+	public function test_filter_string() {
+		$this->assert_equal($this->mysql->filter_string(' test   '), 'test');
+		$this->assert_equal(
+			$this->mysql->filter_string('\x00'.", \n, \r, \, ', ".'"'."  \x1a"),
+			'\\\\x00, \\\\n, \\\\r, \\\, \\\', \"  \\\\x1a');
+	}
 
 }
 

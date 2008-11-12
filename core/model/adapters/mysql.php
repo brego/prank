@@ -105,7 +105,13 @@ class ModelAdaptersMysql extends PDO implements ModelAdapter {
  * @return mixed
  */
 	public function filter_string($value) {
-		// return $this->quote(trim($value);
+		if (is_bool($value) === false) {
+			$value   = trim($value);
+			$search  = array("\x00",  "\n",  "\r",  '\\',   "'",  '"',  "\x1a");
+			$replace = array("\\x00", "\\n", "\\r", '\\\\', "\'", '\"', "\\\\x1a");
+			$value   = str_replace($search, $replace, $value);
+		}
+
 		return $value;
 	}
 	

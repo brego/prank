@@ -23,72 +23,69 @@
  * @subpackage Model
  */
 class ModelBase extends Object {
+/**
+* Describes the one-to-many relationships
+*
+* String or array of names of models this model have many of. This property
+* will contain a Collection with all the coresponding objects.
+* 
+* @var mixed
+*/
+	public    $has_many                = false;
+/**
+* Describes the one-to-one local relationships
+*
+* String or array of names of models this model has one of. This property
+* will contain the coresponding model.
+* 
+* @var mixed
+*/
+	public    $has_one                 = false;
+/**
+* Describes the one-to-one foreign relationships
+*
+* String or array of names of models this model belongs to. This property
+* will contain the coresponding model.
+* 
+* @var mixed
+*/
+	public    $belongs_to              = false;
+/**
+* Describes the many-to-many relationships
+*
+* String or array of names of models this model have many of. This property
+* will contain a Collection with all the coresponding objects.
+* 
+* @var mixed
+*/
+	public    $has_and_belongs_to_many = false;
+	public    $filter_input            = true;
+	public    $escape_output           = true;
+	protected $connection              = null;
+	protected $hollow                  = true;
+	protected $exists                  = false;
 	private   $table                   = null;
 	private   $model                   = null;
-	protected $connection              = null;
 	private   $columns                 = null;
 	private   $data                    = array();
 	private   $relational_data         = array();
 	private   $relations_loaded        = false;
 	private   $relations               = array();
 	private   $validations             = array();
-	protected $hollow                  = true;
-	protected $exists                  = false;
 	private   $relation_type           = false;
 	private   $errors                  = array();
-	
-	public    $filter_input            = true;
-	public    $escape_output           = true;
-	
 /**
  * Is this model modified (has any data been set)
  *
  * @var boolean
  */
-	private $modified                  = false;
-/**                                    
+	private   $modified                = false;
+/**
  * If this model is lazy-loaded, contains a callable loader function
  *
  * @var mixed                          
- */                                    
-	private $loader                    = null; 
-/**
- * Describes the one-to-many relationships
- *
- * String or array of names of models this model have many of. This property
- * will contain a Collection with all the coresponding objects.
- * 
- * @var mixed
- */
-	public    $has_many                = false;
-/**
- * Describes the one-to-one local relationships
- *
- * String or array of names of models this model has one of. This property
- * will contain the coresponding model.
- * 
- * @var mixed
- */
-	public    $has_one                 = false;
-/**
- * Describes the one-to-one foreign relationships
- *
- * String or array of names of models this model belongs to. This property
- * will contain the coresponding model.
- * 
- * @var mixed
- */
-	public    $belongs_to              = false;
-/**
- * Describes the many-to-many relationships
- *
- * String or array of names of models this model have many of. This property
- * will contain a Collection with all the coresponding objects.
- * 
- * @var mixed
- */
-	public    $has_and_belongs_to_many = false;
-
+ */ 
+	private   $loader                  = null; 
 
 /**
  * Constructor
@@ -175,7 +172,7 @@ class ModelBase extends Object {
  */	
 	public function __set($variable, $value) {
 		if ($this->connection->is_column_of($variable, $this->table)) {
-			$value = $this->filter_input($value);
+			$value = $this->filter_input($variable, $value);
 			
 			$this->load();
 			$this->hollow          = false;
@@ -224,7 +221,7 @@ class ModelBase extends Object {
 	public function __get($variable) {
 		$this->load();
 		if (isset($this->data[$variable])) {
-			return $this->escape_output($this->data[$variable]);
+			return $this->escape_output($variable, $this->data[$variable]);
 		} elseif (array_search($variable, array_keys($this->relations)) !== false) {
 			$this->load_relations();
 			if (isset($this->relational_data[$variable])) {
@@ -453,17 +450,33 @@ class ModelBase extends Object {
 		}
 	}
 
-	private function filter_input($value) {
-		if ($this->filter_input === true) {
+/**
+ * Uses Adapter's filter_string to filter the input
+ *
+ * Unless the value is explicitly boolean, a string will be returned.
+ * 
+ * @param  string $variable 
+ * @param  mixed  $value 
+ * @return mixed
+ */
+	private function filter_input($variable, $value) {
+		if ($this->filter_input === true || in_array($variable, $this->filter_input) === true) {
 			return $this->connection->filter_string($value);
 		} else {
 			return $value;
 		}
 	}
-	
-	private function escape_output($value) {
-		if ($this->escape_output === true) {
-			return $value;
+
+/**
+ * Escapes output with htmlspecialchars
+ *
+ * @param  string $variable 
+ * @param  mixed  $value 
+ * @return mixed
+ */
+	private function escape_output($variable, $value) {
+		if ($this->escape_output === true || in_array($variable, $this->escape_output) === true) {
+			return htmlspecialchars($value, ENT_NOQUOTES, 'UTF-8');
 		} else {
 			return $value;
 		}

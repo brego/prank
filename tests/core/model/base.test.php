@@ -543,6 +543,12 @@ class ModelBaseTestCase extends PrankTestCase {
 		$result = $this->db->query("select * from users where name='test1';");
 		$this->assert_equal($result->rowCount(), 0);
 	}
+	
+	public function test_escape_output() {
+		$user = new User;
+		$user->name = '<script> & <some more>';
+		$this->assert_equal($user->name, '&lt;script&gt; &amp; &lt;some more&gt;');
+	}
 }
 
 ?>
