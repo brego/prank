@@ -321,4 +321,13 @@ function url($file_or_action) {
 	}
 }
 
+function redirect($address) {
+	$address = url($address);
+	// header("Location: http://".$_SERVER['HTTP_HOST']
+	// 	."/".dirname($_SERVER['PHP_SELF'])
+	// 	."/".$address);
+	header('Location: '.$address);
+	exit();
+}
+
 ?>
