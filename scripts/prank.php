@@ -119,6 +119,7 @@ function test($case=false, $method=false, $mate=false) {
 	$test->collect(ROOT.'tests/', new PrankTestCollector);
 
 	if ($mate == 'mate') {
+		session_start();
 		$reporter = new HtmlReporter;
 	} else {
 		$reporter = new DefaultReporter;
