@@ -142,6 +142,15 @@ class CollectionTestCase extends PrankTestCase {
 		$this->collection->clear();
 		$this->assert_equal(count($this->collection), 0);
 	}
+	
+	public function test_array_access() {
+		$collection = new Collection;
+		$collection['one'] = 1;
+		$collection['two'] = 2;
+		$this->assert_equal(count($collection), 2);
+		$this->assert_equal($collection['one'], 1);
+		$this->assert_equal($collection['two'], 2);
+	}
 }
 
 ?>

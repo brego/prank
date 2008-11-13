@@ -22,7 +22,7 @@
 * @package    Prank
 * @subpackage Core
  */
-class Collection implements Iterator, Countable {
+class Collection implements Iterator, Countable, ArrayAccess {
 	protected $items     = array();
 /**
  * Name of single item in the colection (used in each)
@@ -49,14 +49,32 @@ class Collection implements Iterator, Countable {
 				foreach ($items[0] as $item) {
 					$this->add($item);
 				}
-			} elseif (count($items) === 1) {
-				$this->add($items[0]);
 			} else {
 				foreach ($items as $item) {
 					$this->add($item);
 				}
 			}	
 		}
+	}
+
+/**
+ * Adds new item to the collection
+ *
+ * Can be called with one or two parameters. Called with one, expects it to be
+ * an item to be added to the collection. Called with two, expects the first to
+ * be the offset and the second to be the value (so that
+ * $Collection['my_offset'] is possible - vide ArrayAccess).
+ *
+ * @return void
+ */
+	public function add() {
+		$arguments = func_get_args();
+		if (count($arguments) === 2) {
+			$this->items[$arguments[0]] = $arguments[1];
+		} else {
+			$this->items[] = $arguments[0];
+		}
+		$this->size++;
 	}
 
 /**
@@ -186,67 +204,6 @@ class Collection implements Iterator, Countable {
 	}
 
 /**
- * Implements the Countable interface
- * 
- * Be advised that count calls on a collection result in the lazy-load being
- * run (if applicable).
- * 
- * @return integer Size of the collection
- */	
-	public function count() {
-		$this->load();
-		return $this->size;
-	}
-
-/**
- * Part of the Iterator, returns current item
- *
- * Be advised that current calls on a collection result in the lazy-load being
- * run (if applicable).
- * 
- * @return mixed Current item from the collection
- */
-	public function current() {
-		$this->load();
-		return $this->items[$this->key];
-	}
-
-/**
- * Part of the Iterator, moves the set one step forward
- *
- * @return void
- */
-	public function next() {
-		$this->load();
-		$this->key++;
-	}
-
-/**
- * Part of the Iterator, moves the set to the beginning
- *
- * @return void
- */
-	public function rewind() {
-		$this->load();
-		$this->key = 0;
-	}
-
-/**
- * Part of the Iterator, checks if there are any more elements after the
- * current one
- *
- * @return boolean
- */
-	public function valid() {
-		$this->load();
-		if ($this->key >= $this->size) {
-			return false;
-		} else {
-			return true;
-		}
-	}
-
-/**
  * This reverses the internal array
  *
  * Array gets reversed, and internal pointer gets rewinded.
@@ -260,29 +217,6 @@ class Collection implements Iterator, Countable {
 	}
 
 /**
- * Part of the Iterator, returns the current position in the set
- *
- * @return integer
- */
-	public function key() {
-		$this->load();
-		return $this->key;
-	}
-
-/**
- * Adds new item to the collection
- *
- * Adds new item to the collection and ++'s the size of it.
- *
- * @param  mixed $item
- * @return void
- */
-	public function add($item) {
-		$this->items[] = $item;
-		$this->size++;
-	}
-
-/**
  * Clears the collection
  *
  * @return void
@@ -292,6 +226,146 @@ class Collection implements Iterator, Countable {
 		$this->key   = 0;
 		$this->size  = 0;
 	}
+	
+/**
+ * The Iterator interface:
+ */
+
+/**
+ * Part of the Iterator, returns current item
+ *
+ * Be advised that this method results in the lazy-load being run (if
+ * applicable).
+ * 
+ * @return mixed Current item
+ */
+	public function current() {
+		$this->load();
+		return $this->items[$this->key];
+	}
+	
+/**
+ * Part of the Iterator, returns the key of the current element
+ *
+ * Be advised that this method results in the lazy-load being run (if
+ * applicable).
+ * 
+ * @return integer
+ */
+	public function key() {
+		$this->load();
+		return $this->key;
+	}
+	
+/**
+ * Part of the Iterator, moves forward to next element
+ *
+ * Be advised that this method results in the lazy-load being run (if
+ * applicable).
+ * 
+ * @return void
+ */
+	public function next() {
+		$this->load();
+		$this->key++;
+	}	
+
+/**
+ * Part of the Iterator, rewinds the set to the first element
+ *
+ * Be advised that this method results in the lazy-load being run (if
+ * applicable).
+ * 
+ * @return void
+ */
+	public function rewind() {
+		$this->load();
+		$this->key = 0;
+	}
+
+/**
+ * Part of the Iterator, checks if there is a current element after calls to
+ * rewind() or next()
+ *
+ * Be advised that this method results in the lazy-load being run (if
+ * applicable).
+ * 
+ * @return boolean
+ */
+	public function valid() {
+		$this->load();
+		if ($this->key >= $this->size) {
+			return false;
+		} else {
+			return true;
+		}
+	}	
+
+/**
+ * The Countable interface:
+ */
+
+/**
+ * Part of the Countable, counts all the elements
+ * 
+ * Makes it possible to use count($Collection).
+ * 
+ * Be advised that this method results in the lazy-load being run (if
+ * applicable).
+ * 
+ * @return integer Size of the collection
+ */	
+	public function count() {
+		$this->load();
+		return $this->size;
+	}
+	
+/**
+ * The ArrayAccess interface:
+ */
+
+/**
+ * Part of the ArrayAccess, checks wheter the $offset exists
+ *
+ * @param  mixed   $offset 
+ * @return boolean
+ */
+	public function offsetExists($offset) {
+		return isset($this->items[$offset]);
+	}
+
+/**
+ * Part of the ArrayAccess, returns the value at the $offset
+ *
+ * @param  mixed $offset 
+ * @return mixed
+ */
+	public function offsetGet($offset) {
+		return $this->items[$offset];
+	}
+
+/**
+ * Part of the ArrayAccess, sets a $value at the $offset
+ *
+ * @param  mixed $offset 
+ * @param  mixed $value 
+ * @return void
+ */
+	public function offsetSet($offset, $value) {
+		$this->add($offset, $value);
+	}
+
+/**
+ * Part of the ArrayAccess, deletes the value at the $offset
+ *
+ * @param  mixed $offset 
+ * @return void
+ */
+	public function offsetUnset($offset) {
+		unset($this->items[$offset]);
+		$this->size--;
+	}
+
 }
 
 ?>
