@@ -13,6 +13,8 @@
  * @version    Prank 0.10
  */
 
+namespace Prank\Core;
+
 /**
 * Collection - used to collect items
 * 
@@ -22,7 +24,7 @@
 * @package    Prank
 * @subpackage Core
  */
-class Collection implements Iterator, Countable {
+class Collection implements \Iterator, \Countable {
 	protected $items     = array();
 /**
  * Name of single item in the colection (used in each)

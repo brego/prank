@@ -13,6 +13,8 @@
  * @version    Prank 0.10
  */
 
+namespace Prank\Model;
+
 /**
  * Baseclass for all models
  *
@@ -22,7 +24,7 @@
  * @package    Prank
  * @subpackage Model
  */
-class ModelBase extends Object {
+class Base extends \Prank\Core\Object {
 /**
 * Describes the one-to-many relationships
 *

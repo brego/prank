@@ -19,6 +19,8 @@
  * @version    Prank 0.10
  */
 
+namespace Prank\Core;
+
 class Inflector {
 	
 	private function __construct() {}

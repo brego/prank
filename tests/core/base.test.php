@@ -2,7 +2,7 @@
 
 require_once dirname(dirname(dirname(__FILE__))).DS.'core/base.php';
 
-class BaseTestCase extends PrankTestCase {
+class BaseTestCase extends \PrankTestCase {
 	
 	public function setup() {
 		$this->setup_prank_spine();

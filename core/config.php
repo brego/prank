@@ -13,6 +13,8 @@
  * @version    Prank 0.10
  */
 
+namespace Prank\Core;
+
 /**
  * Core config class (a Singelton)
  *
@@ -50,7 +52,7 @@ class Config {
  * @return void
  */
 	public static function setup($start_point, $config_dir = false) {
-		$config        = new stdClass;
+		$config        = new \stdClass;
 		$config->ds    = DIRECTORY_SEPARATOR;
 		$config->ps    = PATH_SEPARATOR;
 		$config->app   = dirname(dirname($start_point)).$config->ds;
@@ -89,9 +91,9 @@ class Config {
 		if (is_file($config->config.'db.yml')) {
 			$db_config = from_yaml_file($config->app.'config'.$config->ds.'db.yml');
 		} else {
-			throw new Exception('Currently Prank requires a database connection. Provide a config/db.yml with necessary data.');
+			throw new \Exception('Currently Prank requires a database connection. Provide a config/db.yml with necessary data.');
 		}
-		$config->db = new stdClass;
+		$config->db = new \stdClass;
 		foreach ($db_config[$config->state] as $key => $value) {
 			$config->db->$key = $value;
 		}

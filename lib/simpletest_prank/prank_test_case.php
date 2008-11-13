@@ -73,7 +73,7 @@ class PrankTestCase extends UnitTestCase {
 		
 		file_put_contents($this->index_file, ' ');
 		
-		Config::setup($this->index_file);
+		\Prank\Core\Config::setup($this->index_file);
 	}
 	
 	public function teardown_prank_spine() {
@@ -89,7 +89,7 @@ class PrankTestCase extends UnitTestCase {
 			if (class_exists('Spyc') === false) {
 				require ROOT.'lib'.DS.'spyc'.DS.'spyc.php';
 			}
-			return Spyc::YAMLDump($variable);
+			return \Spyc::YAMLDump($variable);
 		}
 	}
 
@@ -100,7 +100,7 @@ class PrankTestCase extends UnitTestCase {
 			if (class_exists('Spyc') === false) {
 				require ROOT.'lib'.DS.'spyc'.DS.'spyc.php';
 			}
-			return Spyc::YAMLLoad($yaml);
+			return \Spyc::YAMLLoad($yaml);
 		}
 	}
 	
@@ -115,7 +115,7 @@ class PrankTestCase extends UnitTestCase {
 		}
 		if (is_dir($target)) {
 			if (is_writable($target)) {
-				foreach(new DirectoryIterator($target) as $object) {
+				foreach(new \DirectoryIterator($target) as $object) {
 					if ($object->isDot()) {
 						unset($object);
 						continue;

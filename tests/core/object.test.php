@@ -2,7 +2,7 @@
 
 require_once dirname(dirname(dirname(__FILE__))).DS.'core/object.php';
 
-class TestObject extends Object {
+class TestObject extends \Prank\Core\Object {
 	private function i_am_so_private() {}
 	public function i_am_public() {}
 	

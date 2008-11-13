@@ -1,5 +1,7 @@
 <?php
 
+namespace Prank\Core;
+
 class Load {
 	private $storage = array();
 	

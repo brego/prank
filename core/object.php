@@ -13,6 +13,8 @@
  * @version    Prank 0.10
  */
 
+namespace Prank\Core;
+
 /**
  * Object base class
  *

@@ -16,6 +16,8 @@
  * @version    Prank 0.10
  */
 
+namespace Prank\Core;
+
 /******************************************************************************
  * Basic helper functions.
  *****************************************************************************/
@@ -31,6 +33,7 @@
  **/
 function __autoload($class_name) {
 	if (substr($class_name, -10, 10) !== 'Controller') {
+		d($class_name);
 		
 		if (class_exists($class_name) === false) {
 			$class_name = Inflector::underscore($class_name);
