@@ -47,11 +47,11 @@ EOF;
 		file_put_contents($this->routes_config_file, $file);
 		$instance = Boot::run($this->index_file);
 		
-		$this->assert_identical(Boot::$url, '/');
-		$this->assert_identical(Boot::$controller, 'default');
-		$this->assert_identical(Boot::$action, 'index');
-		$this->assert_identical(Boot::$params, array());
-		$this->assert_identical(Boot::$route, array('controller'=>'default'));
+		$this->assert_identical($instance->test('url'), '/');
+		$this->assert_identical($instance->test('controller'), 'default');
+		$this->assert_identical($instance->test('action'), 'index');
+		$this->assert_identical($instance->test('params'), array());
+		$this->assert_identical($instance->test('route'), array('controller'=>'default'));
 	}
 }
 

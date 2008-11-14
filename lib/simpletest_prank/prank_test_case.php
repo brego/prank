@@ -72,8 +72,8 @@ class PrankTestCase extends UnitTestCase {
 		file_put_contents($this->default_controller_file, $default_controller_file);
 		
 		file_put_contents($this->index_file, ' ');
-		
-		Config::setup($this->index_file);
+		$registry = Registry::instance();
+		$registry->config = new Config($this->index_file);
 	}
 	
 	public function teardown_prank_spine() {

@@ -6,20 +6,11 @@ class ConfigTestCase extends PrankTestCase {
 	public $instance = null;
 	
 	public function setup() {
-		$this->instance = Config::instance();
+		$this->instance = new Config;
 	}
 	
 	public function teardown() {
 		$this->instance = null;
-	}
-	
-	public function test_instance() {
-		$this->assert_equal($this->instance, Config::instance());
-	}
-	
-	public function test_static_set_get() {
-		Config::set('test', true);
-		$this->assert_true(Config::get('test'));
 	}
 	
 	public function test_rgular_set_get() {
