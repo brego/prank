@@ -36,9 +36,11 @@ class BaseTestCase extends PrankTestCase {
 	}
 	
 	public function test_c() {
-		$this->assert_equal(c()->ds, Config::get('ds'));
+		$registry = Registry::instance();
 		
-		$this->assert_equal(c('ds'), Config::get('ds'));
+		$this->assert_equal(c()->ds, $registry->config->ds);
+		
+		$this->assert_equal(c('ds'), $registry->config->ds);
 	}
 	
 	public function test_a() {

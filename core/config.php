@@ -14,29 +14,27 @@
  */
 
 /**
- * Core config class (a Singelton)
+ * Core config class
  *
  * @package    Prank
  * @subpackage Core
  */
 class Config {
-	private static $instance = null;
-	private static $config   = array();
-	
-	private function __construct() {}
-	
-	private function __clone() {}
-	
+	private $config = null;
+
 /**
- * Returns the instance
+ * Constructor
+ * 
+ * If $start_point is set, calls automatically on Config::setup.
  *
- * @return Config
+ * @param  string $start_point 
+ * @param  string $config_dir 
+ * @return void
  */
-	public static function instance() {
-		if (self::$instance === null) {
-			self::$instance = new self;
+	public function __construct($start_point = false, $config_dir = false) {
+		if ($start_point !== false) {
+			$this->setup($start_point, $config_dir);
 		}
-		return self::$instance;
 	}
 
 /**
@@ -49,7 +47,7 @@ class Config {
  * @param  string $start_point 
  * @return void
  */
-	public static function setup($start_point, $config_dir = false) {
+	public function setup($start_point, $config_dir = false) {
 		$config        = new stdClass;
 		$config->ds    = DIRECTORY_SEPARATOR;
 		$config->ps    = PATH_SEPARATOR;
@@ -96,64 +94,32 @@ class Config {
 			$config->db->$key = $value;
 		}
 		
-		self::$config = $config;
-	}
-
-/**
- * Sets a configuration variable
- *
- * @param  string $name 
- * @param  mixed  $value 
- * @return void
- */
-	public static function set($name, $value) {
-		self::$config->$name = $value;
+		$this->config = $config;
 	}
 
 /**
  * Overload for setting of a configuration variable
- *
- * Uses Config::set().
  * 
  * @param  string $name 
  * @param  mixed  $value 
  * @return void
  */
 	public function __set($name, $value) {
-		self::set($name, $value);
-	}
-	
-/**
- * Returns the value of the given configuration variable, or the whole object
- *
- * If given a name, returns the value. If not, returns the whole configuration
- * object. If the requested $name is not set, Exception will be thrown.
- * 
- * @param  mixed $name 
- * @return mixed
- */
-	public static function get($name = false) {
-		if ($name === false) {
-			return self::$config;
-		} else {
-			if (isset(self::$config->$name)) {
-				return self::$config->$name;
-			} else {
-				throw new Exception('Property '.$name.' is not defined in the configuration.');
-			}
-		}
+		$this->config->$name = $value;
 	}
 
 /**
  * Overload for getting the configuration variable
- * 
- * Uses Config::get().
  *
  * @param  string $name 
  * @return mixed
  */
 	public function __get($name) {
-		return self::get($name);
+		if (isset($this->config->$name)) {
+			return $this->config->$name;
+		} else {
+			throw new Exception('Property '.$name.' is not defined in the configuration.');
+		}
 	}
 }
 

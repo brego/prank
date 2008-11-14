@@ -103,9 +103,11 @@ function array_cleanup($array) {
  */
 function c($name = false) {
 	if ($name !== false) {
-		return Config::get($name);
+		$registry = Registry::instance();
+		return $registry->config->$name;
 	} else {
-		$config = Config::instance();
+		$registry = Registry::instance();
+		$config   = $registry->config;
 		return $config;
 	}
 }

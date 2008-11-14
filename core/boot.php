@@ -22,12 +22,12 @@
  * @subpackage Core
  */
 class Boot {
+	private        $url        = null;
+	private        $controller = null;
+	private        $action     = null;
+	private        $params     = array();
+ 	private        $route      = array();
 	private static $instance   = null;
-	public  static $url        = null;
-	public  static $controller = null;
-	public  static $action     = null;
-	public  static $params     = array();
- 	public  static $route      = array();
 
 /**
  * Kickstarts the framework
@@ -54,19 +54,18 @@ class Boot {
  */
 	private function __construct($start_point, $config_dir) {
 		
-		session_start();
-		
+		session_start();		
 		$this->load_base_libs();
 		
-		Config::setup($start_point, $config_dir);
+		$registry         = Registry::instance();
+		$registry->config = new Config($start_point, $config_dir);
 		
 		ini_set('include_path', c()->core.c()->ps.c()->app.c()->ps.'.');
 		$this->set_error_reporting(c()->state);
 		
-		self::$url = isset($_GET['url']) ? $_GET['url'] : '/';
-		
-		$router = new Router;
-		self::$route = $router->parse_url(self::$url);
+		$this->url        = isset($_GET['url']) ? $_GET['url'] : '/';
+		$registry->router = new Router;
+		$this->route      = $registry->router->parse_url($this->url);
 		
 		$this->parse_route();
 		
@@ -122,7 +121,7 @@ class Boot {
 		$controller = null;
 		$action     = null;
 		$params     = array();
-		$route      = self::$route;
+		$route      = $this->route;
 		
 		if (isset($route['controller']) && is_file(c()->controllers.down($route['controller']).'.controller.php')) {
 			$controller = $route['controller'];
@@ -141,9 +140,9 @@ class Boot {
 
 		$params = $route;
 		
-		self::$controller = $controller;
-		self::$action     = $action;
-		self::$params     = $params;
+		$this->controller = $controller;
+		$this->action     = $action;
+		$this->params     = $params;
 	}
 
 /**
@@ -153,13 +152,13 @@ class Boot {
  */	
 	private function run_controller() {
 		try {
-			$controller_name   = Inflector::to_controller(self::$controller);
+			$controller_name   = Inflector::to_controller($this->controller);
 			$controller_object = new $controller_name;
 
-			$controller_object->action     = self::$action;
-			$controller_object->view       = self::$action;
-			$controller_object->params     = self::$params;
-			$controller_object->controller = self::$controller;
+			$controller_object->action     = $this->action;
+			$controller_object->view       = $this->action;
+			$controller_object->params     = $this->params;
+			$controller_object->controller = $this->controller;
 
 			$controller_object->run();
 		} catch (Exception $e) {
@@ -186,5 +185,17 @@ class Boot {
 				throw new Exception('File for '.ucfirst($name).'Controller was not found.');
 			}
 		}
+	}
+
+/**
+ * For testing purposes only
+ * 
+ * Returns a property of this object.
+ *
+ * @param  string $property 
+ * @return mixed
+ */
+	public function test($property) {
+		return $this->$property;
 	}
 }
