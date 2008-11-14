@@ -14,7 +14,6 @@ class BootTestCase extends PrankTestCase {
 	
 	public function test_load_base_libs() {
 		$this->assert_true(class_exists('Config'));
-		$this->assert_true(class_exists('Inflector'));
 		
 		$this->assert_true(function_exists('__autoload'));
 		$this->assert_true(function_exists('_'));

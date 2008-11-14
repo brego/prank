@@ -1,7 +1,7 @@
 <?php
 
 require_once dirname(dirname(dirname(__FILE__))).DS.'core'.DS.'boot.php';
-require_once dirname(dirname(dirname(__FILE__))).DS.'core'.DS.'inflector.php';
+// require_once dirname(dirname(dirname(__FILE__))).DS.'core'.DS.'inflector.php';
 require_once dirname(dirname(dirname(__FILE__))).DS.'core'.DS.'config.php';
 
 class PrankTestCase extends UnitTestCase {

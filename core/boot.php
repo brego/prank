@@ -78,15 +78,8 @@ class Boot {
  * @return void
  */
 	private function load_base_libs() {
-		if (class_exists('Config') === false) {
-			require 'config.php';
-		}
-		if (class_exists('Inflector') === false) {
-			require 'inflector.php';
-		}
-		if (function_exists('__autoload') === false) {
-			require 'base.php';
-		}
+		require_once 'base.php';
+		require 'inflector.php';
 	}
 
 /**
@@ -152,7 +145,7 @@ class Boot {
  */	
 	private function run_controller() {
 		try {
-			$controller_name   = Inflector::to_controller($this->controller);
+			$controller_name   = to_controller($this->controller);
 			$controller_object = new $controller_name;
 
 			$controller_object->action     = $this->action;

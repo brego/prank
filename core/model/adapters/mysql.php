@@ -330,7 +330,7 @@ class ModelAdaptersMysql extends PDO implements ModelAdapter {
  * @return void
  */
 	public function has_many_create($table, $data, $relation) {
-		$foreign = Inflector::singularize($relation->table()).'_id';
+		$foreign = singularize($relation->table()).'_id';
 		if (!isset($data[$foreign])) {
 			$data[$foreign] = $relation->id;
 		}
@@ -346,7 +346,7 @@ class ModelAdaptersMysql extends PDO implements ModelAdapter {
  * @return void
  */
 	public function has_one_create($table, $data, $relation) {
-		$foreign = Inflector::singularize($relation->table()).'_id';
+		$foreign = singularize($relation->table()).'_id';
 		if (!isset($data[$foreign])) {
 			$data[$foreign] = $relation->id;
 		}
@@ -364,7 +364,7 @@ class ModelAdaptersMysql extends PDO implements ModelAdapter {
 	public function belongs_to_create($table, $data, $relation) {
 		$return = $this->exec('insert into '.$table.' set '.implode(', ', $this->prepare_data($data)).';');
 		
-		$foreign = Inflector::singularize($table).'_id';
+		$foreign = singularize($table).'_id';
 		if (!isset($relation->$foreign)) {
 			$relation->$foreign = $this->last_id();
 		}
@@ -384,9 +384,9 @@ class ModelAdaptersMysql extends PDO implements ModelAdapter {
 		$return = $this->exec('insert into '.$table.' set '.implode(', ', $this->prepare_data($data)).';');
 		
 		$relation_table = implode('_', s($table, $relation->table()));
-		$local          = Inflector::singularize($table).'_id';
+		$local          = singularize($table).'_id';
 		$local_id       = $this->last_id();
-		$foreign        = Inflector::singularize($relation->table()).'_id';
+		$foreign        = singularize($relation->table()).'_id';
 		$foreign_id     = $relation->id;
 		
 		$query = "insert into ".$relation_table." set ".$foreign."='".$foreign_id."', ".$local."='".$local_id."';";

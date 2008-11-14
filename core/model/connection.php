@@ -88,8 +88,8 @@ class ModelConnection {
 	public function __call($method, $params) {
 		if(method_exists($this->adapter, $method)) {
 			return call_user_func_array(array($this->adapter, $method), $params);
-		} elseif (method_exists($this->adapter, Inflector::camelback($method))) {
-			return call_user_func_array(array($this->adapter, Inflector::camelback($method)), $params);
+		} elseif (method_exists($this->adapter, camelback($method))) {
+			return call_user_func_array(array($this->adapter, camelback($method)), $params);
 		} else {
 			throw new Exception('Unknown method has been called - '.$method);
 		}

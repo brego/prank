@@ -105,7 +105,7 @@ class ModelBase extends Object {
  */	
 	public function __construct($data = false) {
 		$this->model      = get_called_class();
-		$this->table      = Inflector::to_table($this->model);
+		$this->table      = to_table($this->model);
 		$this->connection = ModelConnection::instance();
 		$this->columns    = $this->connection->columns($this->table);
 		
@@ -187,12 +187,12 @@ class ModelBase extends Object {
 				$value->relation_type('has_many');
 			}
 			if ($this->relations[$variable] == 'has_one' && $this->exists() === true) {
-				$id_name = Inflector::singularize($this->table).'_id';
+				$id_name = singularize($this->table).'_id';
 				$value->$id_name = $this->id;
 				$value->relation_type('has_one');
 			}
 			if ($this->relations[$variable] == 'belongs_to' && $this->exists() === true) {
-				$id_name = Inflector::singularize($value->table()).'_id';
+				$id_name = singularize($value->table()).'_id';
 				$this->$id_name = $value->id;
 				$value->relation_type('belongs_to');
 			}
@@ -282,7 +282,7 @@ class ModelBase extends Object {
 	public static function __callStatic($method, $arguments) {
 		$connection = ModelConnection::instance();
 		$model      = get_called_class();
-		$table      = Inflector::to_table($model);
+		$table      = to_table($model);
 		$order      = '';
 
 		if (strpos($method, 'order_by') !== false) {
@@ -617,13 +617,13 @@ class ModelBase extends Object {
 			
 			foreach ($this->relations as $relation => $relation_type) {
 				$config = array(
-					'model'   => Inflector::to_model($relation),
+					'model'   => to_model($relation),
 					'local'   => $this->table(),
-					'foreign' => Inflector::to_table($relation),
+					'foreign' => to_table($relation),
 					'id'      => $this->data['id'],
 					'type'    => $relation_type);
-				$config['local_id']   = Inflector::singularize($config['local']).'_id';
-				$config['foreign_id'] = Inflector::singularize($config['foreign']).'_id';
+				$config['local_id']   = singularize($config['local']).'_id';
+				$config['foreign_id'] = singularize($config['foreign']).'_id';
 				$config['join']       = implode('_', s($config['local'], $config['foreign']));
 				if ($relation_type == 'belongs_to') {
 					$config['id'] = $this->data[$config['foreign_id']];
@@ -662,7 +662,7 @@ class ModelBase extends Object {
 					$this->relational_data[$relation] = new ModelCollection;
 					$this->relational_data[$relation]->relation_type($relation_type);
 				} else {
-					$model = Inflector::to_model($relation);
+					$model = to_model($relation);
 					$this->relational_data[$relation] = new $model;
 					$this->relational_data[$relation]->relation_type($relation_type);
 				}

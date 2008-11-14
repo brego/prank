@@ -33,7 +33,7 @@ function __autoload($class_name) {
 	if (substr($class_name, -10, 10) !== 'Controller') {
 		
 		if (class_exists($class_name) === false) {
-			$class_name = Inflector::underscore($class_name);
+			$class_name = strtolower(preg_replace('/(?<=\\w)([A-Z])/', '_\\1', $class_name));
 			$class_name = str_replace('_', c()->ds, $class_name);
 			$class_name = str_replace('prank'.c()->ds, '', $class_name);
 		
@@ -292,7 +292,7 @@ function down($string) {
  * @param  string  $controller Shortname of the controller.
  **/
 function is_action_of($action, $controller) {
-	return method_exists(Inflector::to_controller($controller), $action);
+	return method_exists(to_controller($controller), $action);
 }
 
 /******************************************************************************

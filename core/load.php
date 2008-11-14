@@ -4,7 +4,7 @@ class Load {
 	private $storage = array();
 	
 	public function __callStatic($method, $params) {
-		$method = Inflector::singularize($method);
+		$method = singularize($method);
 		if (isset(self::$storage[$method][$params[0]]) === false) {
 			try {
 				if (is_file(c($method).$params[0].'.php')) {
