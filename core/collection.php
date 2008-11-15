@@ -65,14 +65,15 @@ class Collection implements Iterator, Countable, ArrayAccess {
  * be the offset and the second to be the value (so that
  * $Collection['my_offset'] is possible - vide ArrayAccess).
  *
+ * @param  mixed $item
  * @return void
  */
-	public function add() {
+	public function add($item) {
 		$arguments = func_get_args();
 		if (count($arguments) === 2) {
 			$this->items[$arguments[0]] = $arguments[1];
 		} else {
-			$this->items[] = $arguments[0];
+			$this->items[] = $item;
 		}
 		$this->size++;
 	}

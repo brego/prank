@@ -19,12 +19,12 @@
  */
 
 class ControllerBase {
+	public $view_variables = array();
 	public $action         = null;
 	public $view           = null;
 	public $params         = array();
 	public $layout         = 'default';
-	public $controller      = null;
-	public static $view_variables = array();
+	public $controller     = null;
 
 /**
  * All unknown variables are defined as view variables
@@ -34,7 +34,7 @@ class ControllerBase {
  * @return void
  */
 	public function __set($var, $val) {
-		self::$view_variables[$var] = $val;
+		$this->view_variables[$var] = $val;
 	}
 
 /**
@@ -47,11 +47,13 @@ class ControllerBase {
  */
 	public function run() {
 		
-		function partial($name, $params = array()) {
+		$controller = $this;
+		$partial    = function($name, $params = array()) use($controller) {
 			extract($params);
-			extract(ControllerBase::$view_variables);
-			require c()->views.Boot::$controller.c()->ds.'_'.$name.'.php';
-		}
+			extract($controller->view_variables);
+			require c()->views.$controller->controller.c()->ds.'_'.$name.'.php';
+		};
+		unset($controller);
 		
 		$this->before_run();
 		
@@ -60,7 +62,7 @@ class ControllerBase {
 		$this->after_run();
 		$this->before_render();
 		
-		extract(self::$view_variables);
+		extract($this->view_variables);
 		
 		ob_start();
 
