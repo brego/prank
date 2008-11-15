@@ -21,34 +21,6 @@
  *****************************************************************************/
 
 /**
- * Autoloader function.
- *
- * Saves us from keeping track of the require's on the framework level. ATM no
- * autoloading for userland classes.
- *
- * @return void
- * @param  string $class_name Name of the class to be loaded.
- **/
-function __autoload($class_name) {
-	if (substr($class_name, -10, 10) !== 'Controller') {
-		
-		if (class_exists($class_name) === false) {
-			$class_name = strtolower(preg_replace('/(?<=\\w)([A-Z])/', '_\\1', $class_name));
-			$class_name = str_replace('_', c()->ds, $class_name);
-			$class_name = str_replace('prank'.c()->ds, '', $class_name);
-		
-			if(is_file(c()->core.$class_name.'.php')) {
-				require c()->core.$class_name.'.php';
-			}
-		
-			if(is_file(c()->models.$class_name.'.model.php')) {
-				require c()->models.$class_name.'.model.php';
-			}
-		}
-	}
-}
-
-/**
  * Shortcut for echo
  *
  * @return void

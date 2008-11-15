@@ -12,20 +12,6 @@ class BootTestCase extends PrankTestCase {
 		$this->teardown_prank_spine();
 	}
 	
-	public function test_load_base_libs() {
-		$this->assert_true(class_exists('Config'));
-		
-		$this->assert_true(function_exists('__autoload'));
-		$this->assert_true(function_exists('_'));
-		$this->assert_true(function_exists('d'));
-		$this->assert_true(function_exists('array_cleanup'));
-		$this->assert_true(function_exists('c'));
-		$this->assert_true(function_exists('up'));
-		$this->assert_true(function_exists('down'));
-		$this->assert_true(function_exists('is_action_of'));
-		$this->assert_true(function_exists('url'));
-	}
-	
 	public function test___construct() {
 		$this->assert_equal(c('ds'),          DS);
 		$this->assert_equal(c('app'),         $this->app_dir);

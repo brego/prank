@@ -54,11 +54,13 @@ class Boot {
  */
 	private function __construct($start_point, $config_dir) {
 		
-		session_start();		
+		session_start();
 		$this->load_base_libs();
 		
 		$registry         = Registry::instance();
 		$registry->config = new Config($start_point, $config_dir);
+		
+		spl_autoload_register('Boot::autoload');
 		
 		ini_set('include_path', c()->core.c()->ps.c()->app.c()->ps.'.');
 		$this->set_error_reporting(c()->state);
@@ -71,6 +73,33 @@ class Boot {
 		
 		$this->run_controller();
 	}
+
+/**
+ * Autoloader function
+ *
+ * Registered in the constructor.
+ *
+ * @param  string $class_name Name of the class to be loaded
+ * @return void
+ **/
+	public static function autoload($class) {
+		if (substr($class, -10, 10) !== 'Controller') {
+
+			if (class_exists($class) === false) {
+				$class = strtolower(preg_replace('/(?<=\\w)([A-Z])/', '_\\1', $class));
+				$class = str_replace('_', DIRECTORY_SEPARATOR, $class);
+				$class = str_replace('prank'.DIRECTORY_SEPARATOR, '', $class);
+
+				if(is_file(c()->core.$class.'.php')) {
+					require c()->core.$class.'.php';
+				}
+
+				if(is_file(c()->models.$class.'.model.php')) {
+					require c()->models.$class.'.model.php';
+				}
+			}
+		}
+	}
 	
 /**
  * Loads Config, Inflector and Base
@@ -79,7 +108,9 @@ class Boot {
  */
 	private function load_base_libs() {
 		require_once 'base.php';
-		require 'inflector.php';
+		require_once 'inflector.php';
+		require_once 'registry.php';
+		require_once 'config.php';
 	}
 
 /**
