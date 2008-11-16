@@ -300,7 +300,7 @@ class Collection implements Iterator, Countable, ArrayAccess {
 		} else {
 			return true;
 		}
-	}	
+	}
 
 /**
  * The Countable interface:
