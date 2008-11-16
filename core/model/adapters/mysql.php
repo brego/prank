@@ -226,7 +226,7 @@ class ModelAdaptersMysql extends PDO implements ModelAdapter {
  * @param  string $model 
  * @param  string $condition 
  * @param  string $order 
- * @return void
+ * @return mixed
  */
 	public function read($table, $model, $condition = '', $order = '') {
 		$query = 'select * from '.$table;

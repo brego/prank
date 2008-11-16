@@ -8,6 +8,7 @@ require_once 'mocks/_profile.model.php';
 require_once 'mocks/_author.model.php';
 require_once 'mocks/_article.model.php';
 require_once 'mocks/_editor.model.php';
+require_once 'mocks/_animal.model.php';
 
 class ModelBaseTestCase extends PrankTestCase {
 	public $db = null;
@@ -20,6 +21,7 @@ class ModelBaseTestCase extends PrankTestCase {
 		require 'mocks/_profiles.table.php';
 		require 'mocks/_habtm.tables.php';
 		require 'mocks/_editors.table.php';
+		require 'mocks/_animals.table.php';
 	}
 	
 	public function teardown() {
@@ -31,6 +33,7 @@ class ModelBaseTestCase extends PrankTestCase {
 		$this->db->exec('DROP TABLE `articles`;');
 		$this->db->exec('DROP TABLE `articles_authors`;');
 		$this->db->exec('DROP TABLE `editors`;');
+		$this->db->exec('DROP TABLE `animals`;');
 	}	
 	
 	public function test___construct() {
@@ -548,6 +551,50 @@ class ModelBaseTestCase extends PrankTestCase {
 		$user = new User;
 		$user->name = '<script> & <some more>';
 		$this->assert_equal($user->name, '&lt;script&gt; &amp; &lt;some more&gt;');
+	}
+	
+	public function test_serialization() {
+		$user = User::find(1);
+		$user_serialized = serialize($user);
+		
+		$properties = array(
+			'model'                   => $user->test('model'),
+			'table'                   => $user->test('table'),
+			'columns'                 => $user->test('columns'),
+			'data'                    => $user->test('data'),
+			'relational_data'         => $user->test('relational_data'),
+			'has_one'                 => $user->has_one,
+			'has_many'                => $user->has_many,
+			'belongs_to'              => $user->belongs_to,
+			'has_and_belongs_to_many' => $user->has_and_belongs_to_many,
+			'modified'                => $user->test('modified'),
+			'loader'                  => $user->test('loader'),
+			'filter_input'            => $user->filter_input,
+			'escape_output'           => $user->escape_output,
+			'hollow'                  => $user->test('hollow'),
+			'relations_loaded'        => $user->test('relations_loaded'),
+			'relations'               => $user->test('relations'),
+			'validations'             => $user->test('validations'),
+			'relation_type'           => $user->test('relation_type'),
+			'errors'                  => $user->test('errors'));
+		$properties_serialized = 'C:4:"User":1362:{'.serialize($properties).'}';
+		
+		$this->assert_equal($user_serialized, $properties_serialized);
+		
+		$user_unserialized = unserialize($user_serialized);
+		
+		$this->assert_identical($user, $user_unserialized);
+	}
+	
+	public function test_modified() {
+		$dog = new Animal(array('name'=>'Rufus'));
+		
+		$this->assert_true($dog->modified());
+		
+		$cat = new Animal;
+		$cat->name = 'George';
+		
+		$this->assert_true($cat->modified());
 	}
 }
 

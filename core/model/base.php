@@ -22,7 +22,7 @@
  * @package    Prank
  * @subpackage Model
  */
-class ModelBase extends Object {
+class ModelBase extends Object implements Serializable, Iterator, Countable {
 /**
 * Describes the one-to-many relationships
 *
@@ -297,7 +297,12 @@ class ModelBase extends Object {
 		}
 
 		if ($method === 'find' && is_numeric($arguments[0]) === true) {
-			return $connection->read($table, $model, "id='".$arguments[0]."'");
+			$result = $connection->read($table, $model, "id='".$arguments[0]."'");
+			if ($result === false) {
+				return new ModelCollection;
+			} else {
+				return $result;
+			}
 		} elseif (substr($method, 0, 8) === 'find_by_') {
 			$column = down(substr($method, 8));
 			if (strpos($column, '_and_') !== false) {
@@ -307,10 +312,20 @@ class ModelBase extends Object {
 						return $key."='".$item."'";
 						}, $columns, $arguments);
 					$condition = implode(' and ', $arguments);
-					return $connection->read($table, $model, $condition, $order);
+					$result = $connection->read($table, $model, $condition, $order);
+					if ($result === false) {
+						return new ModelCollection;
+					} else {
+						return $result;
+					}
 				}
 			} elseif ($connection->is_column_of($column, $table)) {
-				return $connection->read($table, $model, $column."='".$arguments[0]."'");
+				$result = $connection->read($table, $model, $column."='".$arguments[0]."'");
+				if ($result === false) {
+					return new ModelCollection;
+				} else {
+					return $result;
+				}
 			}
 		} elseif (substr($method, 0, 8) === 'find_all') {
 			$found = $connection->read($table, $model, '', $order);
@@ -323,6 +338,16 @@ class ModelBase extends Object {
 		} else {
 			return parent::__callStatic($method, $arguments);
 		}
+	}
+
+/**
+ * For testing purposes only!
+ *
+ * @param  string $property 
+ * @return mixed
+ */
+	public function test($property) {
+		return $this->$property;
 	}
 
 /**
@@ -530,7 +555,8 @@ class ModelBase extends Object {
  */	
 	public function set_data($data) {
 		if (is_array($data) === true && empty($this->data) === true) {
-			$this->hollow = false;
+			$this->hollow   = false;
+			$this->modified = true;
 			if (isset($data['id'])) {
 				$this->exists = true;
 			}
@@ -687,7 +713,7 @@ class ModelBase extends Object {
  */
 	public function save($related_model = null) {
 		$result = true;
-		if ($this->validates() === true) {		
+		if ($this->validates() === true) {
 			foreach ($this->belongs_to as $type => $relation) {
 				if (isset($this->relational_data[$relation])) {
 					if ($this->relational_data[$relation]->modified() === true) {
@@ -697,7 +723,7 @@ class ModelBase extends Object {
 					}	
 				}
 			}
-		
+			
 			if ($this->exists === true && $this->modified === true) {
 				if ($this->connection->is_column_of('updated_at', $this->table)) {
 					$this->updated_at = $this->connection->now();
@@ -741,6 +767,85 @@ class ModelBase extends Object {
 		}
 		return $result;
 	}
+
+/**
+ * The Serializable interface:
+ */	
+	
+	public function serialize() {
+		$properties = array(
+			'model'                   => $this->model,
+			'table'                   => $this->table,
+			'columns'                 => $this->columns,
+			'data'                    => $this->data,
+			'relational_data'         => $this->relational_data,
+			'has_one'                 => $this->has_one,
+			'has_many'                => $this->has_many,
+			'belongs_to'              => $this->belongs_to,
+			'has_and_belongs_to_many' => $this->has_and_belongs_to_many,
+			'modified'                => $this->modified,
+			'loader'                  => $this->loader,
+			'filter_input'            => $this->filter_input,
+			'escape_output'           => $this->escape_output,
+			'hollow'                  => $this->hollow,
+			'relations_loaded'        => $this->relations_loaded,
+			'relations'               => $this->relations,
+			'validations'             => $this->validations,
+			'relation_type'           => $this->relation_type,
+			'errors'                  => $this->errors);
+		
+		return serialize($properties);
+	}
+	
+	public function unserialize($data) {
+		$properties = unserialize($data);
+		foreach($properties as $property => $value) {
+			$this->$property = $value;
+		}
+		$this->connection = ModelConnection::instance();
+	}	
+	
+/**
+ * The Iterator interface:
+ * 
+ * This is just a mask, for seemless useage between this and a ModelCollection.
+ */
+
+	private $key = false;
+
+	public function current() {
+		return $this;
+	}
+
+	public function key() {
+		return $this->key;
+	}
+
+	public function next() {
+		$this->key++;
+	}	
+
+	public function rewind() {
+		$this->key = 0;
+	}
+
+	public function valid() {
+		if ($this->key >= 1) {
+			return false;
+		} else {
+			return true;
+		}
+	}
+
+/**
+ * The Countable interface:
+ * 
+ * This is just a mask, for seemless useage between this and a ModelCollection.
+ */
+	public function count() {
+		return 1;
+	}
+	
 }
 
 ?>

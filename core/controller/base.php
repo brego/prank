@@ -36,6 +36,14 @@ class ControllerBase {
 	public function __set($var, $val) {
 		$this->view_variables[$var] = $val;
 	}
+	
+	public function __get($property) {
+		if (isset($this->view_variables[$property])) {
+			return $this->view_variables[$property];
+		} else {
+			throw new Exception('Property '.$property.' is not defined.');
+		}
+	}
 
 /**
  * Runs the controller and the view
