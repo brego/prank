@@ -54,7 +54,7 @@ class Boot {
  */
 	private function __construct($start_point, $config_dir) {
 		
-		session_start();
+		// session_start();
 		$this->load_base_libs();
 		
 		$registry         = Registry::instance();
