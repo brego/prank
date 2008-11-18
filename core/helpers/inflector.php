@@ -5,8 +5,6 @@
  * Pluralizes, singularizes and changes words. Based on CakePHP's Inflector
  * class.
  *
- * PHP version 5.3.
- *
  * @filesource
  * @copyright  Copyright (c) 2008, Kamil "Brego" Dzieliński
  * @license    http://opensource.org/licenses/mit-license.php The MIT License
@@ -16,7 +14,7 @@
  * @package    Prank
  * @subpackage Core
  * @since      Prank 0.10
- * @version    Prank 0.10
+ * @version    Prank 0.25
  */
 
 /**

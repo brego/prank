@@ -10,7 +10,7 @@
  * @package    Prank
  * @subpackage Core
  * @since      Prank 0.10
- * @version    Prank 0.10
+ * @version    Prank 0.25
  */
 
 /**
@@ -54,11 +54,14 @@ class Boot {
  */
 	private function __construct($start_point, $config_dir) {
 		
-		// session_start();
-		$this->load_base_libs();
+		require_once 'base.php';
+		require_once 'registry.php';
+		require_once 'config.php';
 		
 		$registry         = Registry::instance();
 		$registry->config = new Config($start_point, $config_dir);
+		
+		use_helper('inflector.php', 'base.php');
 		
 		spl_autoload_register('Boot::autoload');
 		
@@ -99,18 +102,6 @@ class Boot {
 				}
 			}
 		}
-	}
-	
-/**
- * Loads Config, Inflector and Base
- *
- * @return void
- */
-	private function load_base_libs() {
-		require_once 'base.php';
-		require_once 'inflector.php';
-		require_once 'registry.php';
-		require_once 'config.php';
 	}
 
 /**
@@ -176,13 +167,16 @@ class Boot {
  */	
 	private function run_controller() {
 		try {
+			$registry          = Registry::instance();
 			$controller_name   = to_controller($this->controller);
 			$controller_object = new $controller_name;
 
 			$controller_object->action     = $this->action;
 			$controller_object->view       = $this->action;
-			$controller_object->params     = $this->params;
+			$controller_object->parameters = $this->params;
 			$controller_object->controller = $this->controller;
+
+			$registry->current_controller  = $controller_object;
 
 			$controller_object->run();
 		} catch (Exception $e) {
@@ -202,8 +196,8 @@ class Boot {
 			if (is_file(c()->controllers.down($name).'.controller.php')) {
 				require c()->controllers.down($name).'.controller.php';
 				return true;
-			} elseif (is_file(c()->core.'stubs'.c('ds').'app'.c('ds').'controllers'.c('ds').down($name).'.controller.php')) {
-				require c()->core.'stubs'.c('ds').'app'.c('ds').'controllers'.c('ds').down($name).'.controller.php';
+			} elseif (is_file(file_path(c()->core.'stubs', 'app', 'controllers', down($name).'.controller.php'))) {
+				require file_path(c()->core.'stubs', 'app', 'controllers', down($name).'.controller.php');
 				return true;
 			} else {
 				throw new Exception('File for '.ucfirst($name).'Controller was not found.');

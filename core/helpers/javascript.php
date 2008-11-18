@@ -10,7 +10,7 @@
  * @package    Prank
  * @subpackage Helpers
  * @since      Prank 0.20
- * @version    Prank 0.20
+ * @version    Prank 0.25
  */
 
 /**

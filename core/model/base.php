@@ -10,7 +10,7 @@
  * @package    Prank
  * @subpackage Model
  * @since      Prank 0.10
- * @version    Prank 0.10
+ * @version    Prank 0.25
  */
 
 /**
@@ -398,6 +398,7 @@ class ModelBase extends Object implements Serializable, Iterator, Countable {
  * @return string
  */
 	public function to_json() {
+		use_helper('json.php');
 		return to_json($this->data);
 	}
 

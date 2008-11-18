@@ -1,30 +1,35 @@
 <?php
 /**
- * Baseclass for all controllers.
- *
- * All controllers extend this base class. Contains methods for rendering,
- * callbacks, and communication with the view.
- *
- * PHP version 5.3.
- *
+ * Baseclass for all controllers
+ * 
  * @filesource
  * @copyright  Copyright (c) 2008, Kamil "Brego" Dzieliński
  * @license    http://opensource.org/licenses/mit-license.php The MIT License
  * @author     Kamil "Brego" Dzieliński <brego@brego.dk>
  * @link       http://prank.brego.dk Prank's project page
  * @package    Prank
- * @subpackage Core.Controller
+ * @subpackage Controller
  * @since      Prank 0.10
- * @version    Prank 0.10
+ * @version    Prank 0.25
  */
 
+/**
+ * Baseclass for all controllers
+ *
+ * All controllers extend this base class. Contains methods for rendering,
+ * callbacks, and communication with the view.
+ *
+ * @package    Prank
+ * @subpackage Controller
+ */
 class ControllerBase {
-	public $view_variables = array();
-	public $action         = null;
-	public $view           = null;
-	public $params         = array();
-	public $layout         = 'default';
-	public $controller     = null;
+	public  $view_variables    = array();
+	public  $action            = null;
+	public  $view              = null;
+	public  $parameters        = array();
+	public  $layout            = 'default';
+	public  $controller        = null;
+	private $params_calculated = false;
 
 /**
  * All unknown variables are defined as view variables
@@ -40,6 +45,27 @@ class ControllerBase {
 	public function __get($property) {
 		if (isset($this->view_variables[$property])) {
 			return $this->view_variables[$property];
+		} elseif ($property === 'params') {
+			if ($this->params_calculated === true) {
+				return $this->parameters;
+			} else {				
+				$reflection      = new ReflectionMethod($this, $this->action);
+				$parameter_names = array();
+				$parameters      = array();
+
+				foreach ($reflection->getParameters() as $param) {
+					$parameter_names[] = $param->getName();
+				}
+				$i = 0;
+				foreach ($this->parameters as $value) {
+					$parameters[$parameter_names[$i]] = $value;
+					$i++;
+				}
+				$this->params_calculated = true;
+				$parameters = array_merge($parameters, $_POST);
+				// d($parameters);
+				return $parameters;
+			}
 		} else {
 			throw new Exception('Property '.$property.' is not defined.');
 		}
@@ -55,17 +81,9 @@ class ControllerBase {
  */
 	public function run() {
 		
-		$controller = $this;
-		$partial    = function($name, $params = array()) use($controller) {
-			extract($params);
-			extract($controller->view_variables);
-			require c()->views.$controller->controller.c()->ds.'_'.$name.'.php';
-		};
-		unset($controller);
-		
 		$this->before_run();
 		
-		call_user_func_array(array($this, $this->action), $this->params);
+		call_user_func_array(array($this, $this->action), $this->parameters);
 			
 		$this->after_run();
 		$this->before_render();
@@ -74,17 +92,17 @@ class ControllerBase {
 		
 		ob_start();
 
-		if (is_file(c()->views.$this->controller.c()->ds.$this->view.'.php') && $this->view !== false) {
-			require c()->views.$this->controller.c()->ds.$this->view.'.php';
+		if (is_file(file_path(c()->views.$this->controller, $this->view.'.php')) && $this->view !== false) {
+			require file_path(c()->views.$this->controller, $this->view.'.php');
 		}
 		
 		$content_for_layout = ob_get_clean();
 		
 		$content_for_layout = $this->before_layout($content_for_layout);
 			
-		if (is_file(c()->views.'layouts'.c()->ds.$this->layout.'.php') && $this->layout !== false) {
+		if (is_file(file_path(c()->views.'layouts', $this->layout.'.php')) && $this->layout !== false) {
 			ob_start();
-			require c()->views.'layouts'.c()->ds.$this->layout.'.php';
+			require file_path(c()->views.'layouts', $this->layout.'.php');
 			$output = ob_get_clean();
 		} else {
 			$output = $content_for_layout;

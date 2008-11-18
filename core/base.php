@@ -13,12 +13,8 @@
  * @package    Prank
  * @subpackage Core
  * @since      Prank 0.10
- * @version    Prank 0.10
+ * @version    Prank 0.25
  */
-
-/******************************************************************************
- * Basic helper functions.
- *****************************************************************************/
 
 /**
  * Shortcut for echo
@@ -104,63 +100,30 @@ function a() {
  */
 function s() {
 	$array = func_get_args();
-	if (count($array) == 1 && is_array($array)) {
+	if (count($array) == 1 && is_array($array[0])) {
 		$array = $array[0];
 	}
 	sort($array);
 	return $array;
 }
 
-/******************************************************************************
- * File format functions
- *****************************************************************************/
-
 /**
- * Returns the $variable converted into JSON format (using built-in
- * json_encode()).
+ * Returns a given arguments separated by current directory separator
  *
- * @param  mixed  $variable 
+ * This method accepts multiple rguments, and returns them glued together by 
+ * current directory separator. If the first argument has the separator as it's
+ * last character, it'll be stripped (meaning it's ok to use Prank's leading
+ * '/' configuration variables, as long as they're used as the first argument).
+ * 
  * @return string
  */
-function to_json($variable) {
-	return json_encode($variable);
-}
-
-/**
- * Convenience method for writing $variable in JSON format to $file
- *
- * @param  mixed  $variable 
- * @param  string $file 
- * @return mixed  Number of bytes written/false
- */
-function to_json_file($variable, $file) {
-	return file_put_contents($file, to_json($variable));
-}
-
-/**
- * Returns $json parsed into a php object/array
- * 
- * If $array is true, will return an associative array of given data. If it's
- * false, will return an object. Conversion is done using built-in
- * json_decode().
- *
- * @param  string  $json
- * @param  boolean $array
- * @return mixed
- */
-function from_json($json, $array = true) {
-	return json_decode($json, $array);
-}
-
-/**
- * Convenience method for reading JSON from $file
- *
- * @param  string  $file 
- * @param  boolean $array 
- * @return mixed
- */
-function from_json_file($file, $array = true) {
-	return from_json(file_get_contents($file), $array);
+function file_path() {
+	$files = func_get_args();
+	$ds    = DIRECTORY_SEPARATOR;
+	if (substr($files[0], -1) === $ds) {
+		$files[0] = substr($files[0], 0, -1);
+	}
+	return implode($ds, $files);
 }
 
 /**
@@ -179,7 +142,7 @@ function to_yaml($variable) {
 		return syck_dump($variable);
 	} else {
 		if (class_exists('Spyc') === false) {
-			require c()->lib.'spyc'.c()->ds.'spyc.php';
+			require file_path($c()->lib.'spyc', 'spyc.php');
 		}
 		return Spyc::YAMLDump($variable);
 	}
@@ -212,7 +175,7 @@ function from_yaml($yaml) {
 		return syck_load($yaml);
 	} else {
 		if (class_exists('Spyc') === false) {
-			require c()->lib.'spyc'.c()->ds.'spyc.php';
+			require file_path($c()->lib.'spyc', 'spyc.php');
 		}
 		return Spyc::YAMLLoad($yaml);
 	}
@@ -267,41 +230,44 @@ function is_action_of($action, $controller) {
 	return method_exists(to_controller($controller), $action);
 }
 
-/******************************************************************************
- * View helper functions
- *****************************************************************************/
-
 /**
- * Returns the filename with a relative path to the root of the page.
+ * Use this to require helpers
+ * 
+ * This method takes multiple arguments, and they don't have to contain .php
+ * extension. A helper file can be included only once, so the method will
+ * simply ignore a second call with the same helper name. Helpers are searched
+ * for in app/helpers and core/helpers respectively.
+ * 
+ * If the helper doesn't exist, will throw an Exception.
  *
- * @return string Relative path to the file
- * @param  string $file_or_action A file or action/controller/param
- * @todo   This is far from being rock-solid... Could use some rethinking or
- *         refactoring...
- **/
-function url($file_or_action) {
-	if (isset($_GET['url'])) {
-		$request = split('/', $_SERVER['REQUEST_URI']);
-		$request = array_cleanup($request);	
-	
-		$url = split('/', $_GET['url']);
-		$url = array_cleanup($url);
-	
-		$result = array_diff($request, $url);
-		
-		return '/'.implode('/', $result).'/'.$file_or_action;
-	} else {
-		return $file_or_action;
+ * @todo   require_once needs to be changed to require! damn test suite!
+ * @return void
+ */
+function use_helper() {
+	$files     = func_get_args();
+	$registry  = Registry::instance();
+	if (isset($registry->helpers_loaded) === false) {
+		$registry->helpers_loaded = new stdClass;
 	}
-}
-
-function redirect($address) {
-	$address = url($address);
-	// header("Location: http://".$_SERVER['HTTP_HOST']
-	// 	."/".dirname($_SERVER['PHP_SELF'])
-	// 	."/".$address);
-	header('Location: '.$address);
-	exit();
+	foreach ($files as $file) {
+		if (substr($file, -4, 4) !== '.php') {
+			$file = $file.'.php';
+		}
+		if (isset($registry->helpers_loaded->$file) === false) {
+			$core_path = file_path($registry->config->core, 'helpers', $file);
+			$app_path  = file_path($registry->config->app, 'helpers', $file);
+			if (is_file($app_path)) {
+				$registry->helpers_loaded->$file = true;
+				require_once $app_path;
+			} elseif (is_file($core_path)) {
+				$registry->helpers_loaded->$file = true;
+				require_once $core_path;
+			} else {
+				break;
+				throw new Exception('Helper '.$file.' not found in core or application helper directories.');
+			}
+		}
+	}
 }
 
 ?>

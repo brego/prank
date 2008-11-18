@@ -10,7 +10,7 @@
  * @package    Prank
  * @subpackage Core
  * @since      Prank 0.10
- * @version    Prank 0.10
+ * @version    Prank 0.25
  */
 
 /**
@@ -64,6 +64,16 @@ class Registry {
  */
 	public function __set($property, $value) {
 		$this->items[$property] = $value;
+	}
+
+/**
+ * For testing if an overloaded property is set
+ *
+ * @param  string  $property 
+ * @return boolean
+ */
+	public function __isset($property) {
+		return isset($this->items[$property]);
 	}
 }
 

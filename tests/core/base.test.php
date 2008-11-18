@@ -52,22 +52,6 @@ class BaseTestCase extends PrankTestCase {
 		$this->assert_equal(s('b', 'c', 'a'), array('a', 'b', 'c'));
 	}
 	
-	// public function test_rm() {
-	// 	$test_directory = ROOT.'tests'.DS.'tmp'.DS.'rm-test-dir'.DS;
-	// 	mkdir($test_directory);
-	// 	mkdir($test_directory.'some-content-dir');
-	// 	rm($test_directory);
-	// 	$this->assert_false(is_dir($test_directory));
-	// }
-	
-	public function test_to_json() {
-		$this->assert_equal(to_json(array('a'=>'b')), '{"a":"b"}');
-	}
-	
-	public function test_from_json() {
-		$this->assert_equal(from_json('{"a":"b"}'), array('a'=>'b'));
-	}
-	
 	public function test_to_yaml() {
 		$string = "---\na: \n  one: two\n";
 		if (function_exists('syck_dump')) {
@@ -89,36 +73,12 @@ class BaseTestCase extends PrankTestCase {
 		$this->assert_equal(down('sOMEsMALLtEXT'), 'somesmalltext');
 	}
 	
-	
-	// public function test_is_action_of() {
-	// 	$this->assert_true(method_exists('DefaultController', 'index'));
-	// }
-	
-	public function test_url() {
-		$this->assert_equal(url('/hello/'), '/hello/');
+	public function test_file_path() {
+		$test     = file_path('one/', 'two', 'three');
+		$ds       = DIRECTORY_SEPARATOR;
+		$expected = 'one'.$ds.'two'.$ds.'three';
 		
-		//TEST ME MORE!
-		
-	}
-	
-	// should this be moved to a separate class/file?
-	
-	public function test_css() {
-	}
-	
-	public function test__css() {
-	}
-	
-	public function test_compress_css() {
-	}
-	
-	public function test_javascript() {
-	}
-	
-	public function test__javascript() {
-	}
-	
-	public function test_compress_javascript() {
+		$this->assert_equal($test, $expected);
 	}
 }
 
