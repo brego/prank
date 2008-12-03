@@ -65,7 +65,7 @@ function javascript_link($file) {
 	if (substr($file, -3, 3) !== '.js' && substr($file, -4, 4) !== '.php') {
 		$file = $file.'.js';
 	}
-	$file = '<script src="'.url('js/'.$file).'" type="text/javascript" charset="utf-8"></script>'."\n";
+	$file = '<script src="'.url('/js/'.$file).'" type="text/javascript" charset="utf-8"></script>'."\n";
 	return $file;
 }
 
@@ -79,10 +79,17 @@ function _javascript_link($file) {
 	echo javascript_link($file);
 }
 
+/**
+ * undocumented function
+ *
+ * @todo   Fix the session_start()
+ * @param  string $behavior 
+ * @return void
+ */
 function add_javascript_behavior($behavior) {
-	if (isset($_SESSION) === false) {
-		session_start();
-	}
+	// if (isset($_SESSION) === false) {
+	// 	session_start();
+	// }
 	if (isset($_SESSION['prank']) === false) {
 		$_SESSION['prank'] = array();
 	}

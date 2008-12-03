@@ -17,15 +17,15 @@ class HelpersJavascriptTestCase extends PrankTestCase {
 	
 	public function test_javascript_link() {
 		$test     = javascript_link('test');
-		$expected = '<script src="js/test.js" type="text/javascript" charset="utf-8"></script>'."\n";
+		$expected = '<script src="/js/test.js" type="text/javascript" charset="utf-8"></script>'."\n";
 		$this->assert_identical($test, $expected);
 		
 		$test     = javascript_link('behavior.php');
-		$expected = '<script src="js/behavior.php" type="text/javascript" charset="utf-8"></script>'."\n";
+		$expected = '<script src="/js/behavior.php" type="text/javascript" charset="utf-8"></script>'."\n";
 		$this->assert_identical($test, $expected);
 		
 		$test     = javascript_link('test.js');
-		$expected = '<script src="js/test.js" type="text/javascript" charset="utf-8"></script>'."\n";
+		$expected = '<script src="/js/test.js" type="text/javascript" charset="utf-8"></script>'."\n";
 		$this->assert_identical($test, $expected);
 	}
 	
