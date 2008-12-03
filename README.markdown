@@ -40,6 +40,13 @@ Design Goals
 Usage
 =====
 
-This is an ongoing experiment, and it is in continuous alpha stage, so use at your own risk. There's no use of writing a proper usage document at the moment, as things change frequently around here. However, Most of the Code is pretty self-explanatory. Take look at the provided /app/ directory, to see how to create your own test-apps. If you have comments or suggestions, contact me through <brego.dk@gmail.com>.
+This is an ongoing experiment, and it is in continuous alpha stage, so use at
+your own risk. There's no use of writing a proper usage document at the moment,
+as things change frequently around here. However, Most of the code is pretty
+self-explanatory. Take look at the provided /app/ directory, to see how to
+create your own test-apps. If you have comments or suggestions, contact me
+through [brego][].
 
 Enjoy ;)
+
+[brego]: mailto:brego.dk@gmail.com
