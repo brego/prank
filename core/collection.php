@@ -3,14 +3,15 @@
  * Collection - used to collect items
  * 
  * @filesource
- * @copyright  Copyright (c) 2008, Kamil "Brego" Dzieliński
+ * @copyright  Copyright (c) 2008-2009, Kamil "Brego" Dzieliński
  * @license    http://opensource.org/licenses/mit-license.php The MIT License
  * @author     Kamil "Brego" Dzieliński <brego@brego.dk>
- * @link       http://prank.brego.dk Prank's project page
+ * @link       http://prank.brego.dk/ Prank's project page
+ * @link       http://github.com/brego/prank/ Prank's Git repository
  * @package    Prank
  * @subpackage Core
  * @since      Prank 0.10
- * @version    Prank 0.25
+ * @version    Prank 0.30
  */
 
 /**
@@ -161,7 +162,7 @@ class Collection implements Iterator, Countable, ArrayAccess {
  * @return mixed Array of results or null
  */
 	public function each($lambda) {
-		$reflection      = new ReflectionMethod($lambda);
+		$reflection      = new ReflectionFunction($lambda);
 		$parameter_names = array();
 		$return          = array();
 		

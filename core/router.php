@@ -3,14 +3,15 @@
  * Routing the url
  *
  * @filesource
- * @copyright  Copyright (c) 2008, Kamil "Brego" Dzieliński
+ * @copyright  Copyright (c) 2008-2009, Kamil "Brego" Dzieliński
  * @license    http://opensource.org/licenses/mit-license.php The MIT License
  * @author     Kamil "Brego" Dzieliński <brego@brego.dk>
- * @link       http://prank.brego.dk Prank's project page
+ * @link       http://prank.brego.dk/ Prank's project page
+ * @link       http://github.com/brego/prank/ Prank's Git repository
  * @package    Prank
  * @subpackage Core
  * @since      Prank 0.10
- * @version    Prank 0.25
+ * @version    Prank 0.30
  */
 
 /**
@@ -67,22 +68,22 @@ class Router {
 		if (strpos($url, '/') !== 0) {
 			$url = '/' . $url;
 		}
-		
+
 		foreach ($this->routes as $route => $params) {
 			if (($matches = $this->match_route($route, $url)) !== false) {
 				$names    = $params['names'];
 				$defaults = $params['defaults'];
-				
+
 				array_shift($matches);
 
 				foreach ($matches as $key => $found) {
-					if (empty($found)) {
+					if (empty($found) && $found !== '0' && $found !== 0) {
 						continue;
 					}
 					if (isset($names[$key])) {
 						$out[$names[$key]] = $found;
 					} else {
-						foreach (array_cleanup(split('/', $found)) as $param) {
+						foreach (array_cleanup(explode('/', $found)) as $param) {
 							array_push($out, $param);
 						}
 					}
@@ -93,7 +94,7 @@ class Router {
 				break;
 			}
 		}
-		
+
 		self::$current_route = $out;
 		
 		return $out;

@@ -3,14 +3,15 @@
  * Booting the framework
  *
  * @filesource
- * @copyright  Copyright (c) 2008, Kamil "Brego" Dzieliński
+ * @copyright  Copyright (c) 2008-2009, Kamil "Brego" Dzieliński
  * @license    http://opensource.org/licenses/mit-license.php The MIT License
  * @author     Kamil "Brego" Dzieliński <brego@brego.dk>
- * @link       http://prank.brego.dk Prank's project page
+ * @link       http://prank.brego.dk/ Prank's project page
+ * @link       http://github.com/brego/prank/ Prank's Git repository
  * @package    Prank
  * @subpackage Core
  * @since      Prank 0.10
- * @version    Prank 0.25
+ * @version    Prank 0.30
  */
 
 /**
@@ -27,24 +28,9 @@ class Boot {
 	private        $action     = null;
 	private        $params     = array();
  	private        $route      = array();
-	private static $instance   = null;
 
 /**
- * Kickstarts the framework
- *
- * @param  string $start_point Full path of index.php (__FILE__)
- * @param  string $config_dir  Full path to the config directory
- * @return void
- */
-	public static function run($start_point, $config_dir = false) {
-		if (self::$instance === null) {
-			self::$instance = new self($start_point, $config_dir);
-		}
-		return self::$instance;
-	}
-
-/**
- * Private constructor
+ * Constructor
  * 
  * Initializes the framework, and starts the Controller.
  *
@@ -52,8 +38,10 @@ class Boot {
  * @param  string $config_dir  Full path to the config directory
  * @return void
  */
-	private function __construct($start_point, $config_dir) {
-		
+	public function __construct($start_point, $config_dir = false) {
+
+		ob_start();
+
 		require_once 'base.php';
 		require_once 'registry.php';
 		require_once 'config.php';
@@ -75,6 +63,8 @@ class Boot {
 		$this->parse_route();
 		
 		$this->run_controller();
+
+		ob_end_flush();
 	}
 
 /**
@@ -89,16 +79,15 @@ class Boot {
 		if (substr($class, -10, 10) !== 'Controller') {
 
 			if (class_exists($class) === false) {
-				$class = strtolower(preg_replace('/(?<=\\w)([A-Z])/', '_\\1', $class));
-				$class = str_replace('_', DIRECTORY_SEPARATOR, $class);
-				$class = str_replace('prank'.DIRECTORY_SEPARATOR, '', $class);
+				$class_underscore = strtolower(preg_replace('/(?<=\\w)([A-Z])/', '_\\1', $class));
+				$class = str_replace('_', DIRECTORY_SEPARATOR, $class_underscore);
 
 				if(is_file(c()->core.$class.'.php')) {
 					require c()->core.$class.'.php';
 				}
 
-				if(is_file(c()->models.$class.'.model.php')) {
-					require c()->models.$class.'.model.php';
+				if(is_file(c()->models.$class_underscore.'.model.php')) {
+					require c()->models.$class_underscore.'.model.php';
 				}
 			}
 		}
@@ -144,6 +133,7 @@ class Boot {
 		} else {
 			$controller = 'Http404';
 		}
+
 		$this->load_controller($controller);
 
 		if (isset($route['action']) && is_action_of($route['action'], $controller)) {
@@ -154,7 +144,7 @@ class Boot {
 		}
 
 		$params = $route;
-		
+
 		$this->controller = $controller;
 		$this->action     = $action;
 		$this->params     = $params;
@@ -204,16 +194,6 @@ class Boot {
 			}
 		}
 	}
-
-/**
- * For testing purposes only
- * 
- * Returns a property of this object.
- *
- * @param  string $property 
- * @return mixed
- */
-	public function test($property) {
-		return $this->$property;
-	}
 }
+
+?>

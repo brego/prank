@@ -3,14 +3,15 @@
  * ModelCollection - used to collect Models
  * 
  * @filesource
- * @copyright  Copyright (c) 2008, Kamil "Brego" Dzieliński
+ * @copyright  Copyright (c) 2008-2009, Kamil "Brego" Dzieliński
  * @license    http://opensource.org/licenses/mit-license.php The MIT License
  * @author     Kamil "Brego" Dzieliński <brego@brego.dk>
  * @link       http://prank.brego.dk Prank's project page
+ * @link       http://github.com/brego/prank/ Prank's Git repository
  * @package    Prank
  * @subpackage Model
  * @since      Prank 0.10
- * @version    Prank 0.25
+ * @version    Prank 0.30
  */
 
 /**
@@ -96,23 +97,14 @@ class ModelCollection extends Collection {
  */
 	public function save($related_model = null) {
 		if ($this->modified()) {
-			// $connection = ModelConnection::instance();
-			$return     = true;
+			$return = true;
 			
-			// if ($connection->multiple_create() === true) {
-			// 	$data = array();
-			// 	foreach ($this->items as $model) {
-			// 		$data[] = $model->data;
-			// 	}
-			// 	$connection
-			// } else {
-				foreach ($this->items as $model) {
-					$return = $model->save($related_model);
-					if ($return === false) {
-						break;
-					}
-				}	
-			// }
+			foreach ($this->items as $model) {
+				$return = $model->save($related_model);
+				if ($return === false) {
+					break;
+				}
+			}	
 			
 			return $return;
 		}

@@ -3,14 +3,15 @@
  * MySQL adapter
  *
  * @filesource
- * @copyright  Copyright (c) 2008, Kamil "Brego" Dzieliński
+ * @copyright  Copyright (c) 2008-2009, Kamil "Brego" Dzieliński
  * @license    http://opensource.org/licenses/mit-license.php The MIT License
  * @author     Kamil "Brego" Dzieliński <brego@brego.dk>
  * @link       http://prank.brego.dk Prank's project page
+ * @link       http://github.com/brego/prank/ Prank's Git repository
  * @package    Prank
  * @subpackage Model
  * @since      Prank 0.10
- * @version    Prank 0.25
+ * @version    Prank 0.30
  */
 
 /**
@@ -39,6 +40,21 @@ class ModelAdaptersMysql extends PDO implements ModelAdapter {
 		'boolean' => 1,
 		'integer' => 11,
 		'string'  => 255);
+
+/**
+ * Extending the constructor
+ * 
+ * Mostly to set the UTF-8 straight.
+ *
+ * @param  string $dsn 
+ * @param  string $user 
+ * @param  string $password 
+ * @return void
+ */
+	public function __construct($dsn, $user, $password) {
+		parent::__construct($dsn, $user, $password);
+		$this->exec('SET NAMES utf8;');
+	}
 
 /**
  * This Adapter supports multiple create statements.
@@ -78,6 +94,29 @@ class ModelAdaptersMysql extends PDO implements ModelAdapter {
 		} else {
 			unset($arguments[0]);
 			call_user_func_array(array($result, 'setFetchMode'), $arguments);
+		}
+		return $result;
+	}
+
+/**
+ * Execute a query, and push the results into a Model or a collection thereof.
+ *
+ * @param  string $query A standard SQL query
+ * @param  string $model Name of the Model
+ * @return mixed  A Model corresponding to $model, or a ModelCollection of models.
+ */
+	public function query_to_model($query, $model) {
+		$result = $this->query($query, PDO::FETCH_ASSOC);
+		if ($result->rowCount() == 1) {
+			$result = new $model($result->fetch());
+		} elseif ($result->rowCount() > 1) {
+			$collection = new ModelCollection;
+			foreach ($result as $row) {
+				$collection->add(new $model($row));
+			}
+			$result = $collection;
+		} else {
+			$result = false;
 		}
 		return $result;
 	}
@@ -228,13 +267,16 @@ class ModelAdaptersMysql extends PDO implements ModelAdapter {
  * @param  string $order 
  * @return mixed
  */
-	public function read($table, $model, $condition = '', $order = '') {
+	public function read($table, $model, $condition = '', $order = '', $limit = '') {
 		$query = 'select * from '.$table;
 		if ($condition !== '') {
 			$query .=' where '.$condition;
 		}
 		if ($order !== '') {
 			$query .=' order by '.$order;
+		}
+		if ($limit !== '') {
+			$query .=' limit '.$limit;
 		}
 		$query .= ';';
 		$result = $this->query($query, PDO::FETCH_ASSOC);

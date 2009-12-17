@@ -3,14 +3,15 @@
  * Basic interaction methods interface
  *
  * @filesource
- * @copyright  Copyright (c) 2008, Kamil "Brego" Dzieliński
+ * @copyright  Copyright (c) 2008-2009, Kamil "Brego" Dzieliński
  * @license    http://opensource.org/licenses/mit-license.php The MIT License
  * @author     Kamil "Brego" Dzieliński <brego@brego.dk>
  * @link       http://prank.brego.dk Prank's project page
+ * @link       http://github.com/brego/prank/ Prank's Git repository
  * @package    Prank
  * @subpackage Model
  * @since      Prank 0.10
- * @version    Prank 0.25
+ * @version    Prank 0.30
  */
 
 /**
@@ -22,7 +23,9 @@
 interface ModelAdapter {
 	
 	public function exec($query);
+	
 	public function query();
+	public function query_to_model($query, $model);
 	
 	public function last_id();
 	
@@ -33,7 +36,7 @@ interface ModelAdapter {
 	public function multiple_create();
 
 	public function create($table, $data);
-	public function read($table, $model, $condition = '');
+	public function read($table, $model, $condition = '', $order = '', $limit = '');
 	public function update($table, $data, $condition);
 	public function delete($table, $condition);
 	

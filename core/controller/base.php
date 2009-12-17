@@ -3,14 +3,15 @@
  * Baseclass for all controllers
  * 
  * @filesource
- * @copyright  Copyright (c) 2008, Kamil "Brego" Dzieliński
+ * @copyright  Copyright (c) 2008-2009, Kamil "Brego" Dzieliński
  * @license    http://opensource.org/licenses/mit-license.php The MIT License
  * @author     Kamil "Brego" Dzieliński <brego@brego.dk>
- * @link       http://prank.brego.dk Prank's project page
+ * @link       http://prank.brego.dk/ Prank's project page
+ * @link       http://github.com/brego/prank/ Prank's Git repository
  * @package    Prank
  * @subpackage Controller
  * @since      Prank 0.10
- * @version    Prank 0.25
+ * @version    Prank 0.30
  */
 
 /**
@@ -23,13 +24,14 @@
  * @subpackage Controller
  */
 class ControllerBase {
-	public  $view_variables    = array();
-	public  $action            = null;
-	public  $view              = null;
-	public  $parameters        = array();
-	public  $layout            = 'default';
-	public  $controller        = null;
-	private $params_calculated = false;
+	public    $view_variables    = array();
+	public    $action            = null;
+	public    $view              = null;
+	public    $parameters        = array();
+	public    $layout            = 'default';
+	public    $controller        = null;
+	private   $params_calculated = false;
+	protected $session           = true;
 
 /**
  * All unknown variables are defined as view variables
@@ -63,7 +65,6 @@ class ControllerBase {
 				}
 				$this->params_calculated = true;
 				$parameters = array_merge($parameters, $_POST);
-				// d($parameters);
 				return $parameters;
 			}
 		} else {
@@ -80,6 +81,9 @@ class ControllerBase {
  * @return void
  */
 	public function run() {
+		if ($this->session !== false) {
+			$this->session = Session::instance();
+		}
 		
 		$this->before_run();
 		
@@ -89,6 +93,10 @@ class ControllerBase {
 		$this->before_render();
 		
 		extract($this->view_variables);
+		if ($this->session !== false) {
+			$session = $this->session;
+		}
+		$current_action = $this->action;
 		
 		ob_start();
 

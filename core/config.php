@@ -3,14 +3,15 @@
  * Config
  *
  * @filesource
- * @copyright  Copyright (c) 2008, Kamil "Brego" Dzieliński
+ * @copyright  Copyright (c) 2008-2009, Kamil "Brego" Dzieliński
  * @license    http://opensource.org/licenses/mit-license.php The MIT License
  * @author     Kamil "Brego" Dzieliński <brego@brego.dk>
- * @link       http://prank.brego.dk Prank's project page
+ * @link       http://prank.brego.dk/ Prank's project page
+ * @link       http://github.com/brego/prank/ Prank's Git repository
  * @package    Prank
  * @subpackage Core
  * @since      Prank 0.10
- * @version    Prank 0.25
+ * @version    Prank 0.30
  */
 
 /**
@@ -72,7 +73,7 @@ class Config {
 		
 		$app_config = array();
 		if (is_file($config_dir.'app.yml')) {
-			$app_config = from_yaml_file($config_dir.'app.yml');
+			$app_config = from_yaml_file($config_dir.'app.yml', $config);
 		}
 		$app_config = array_merge($default_app_config, $app_config);
 		

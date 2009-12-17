@@ -1,4 +1,4 @@
-Prank v0.25 - Common Sense PHP Framework
+Prank v0.30 - Common Sense PHP Framework
 ========================================
 
 Prank is a common sense [PHP][] framework, which tries to utilize the common
@@ -21,9 +21,10 @@ from being efficient (although I try to make them as scalable as possible)
 want your PHP to scale and use as few resources as possible, don’t use a
 framework.
 
-Prank is also an opinionated software - I'm not trying to please everybody, or
-even please myself in full. In all events, Prank is meant to take the most sane
-and common-sense way of doing things. Which is, of course, subjective.
+Prank is also a highly opinionated software - I'm not trying to please
+everybody, or even please myself in full. In all events, Prank is meant to take
+the most sane and common-sense way of doing things. Which is, of course,
+subjective.
 
 Design Goals
 ------------
@@ -35,7 +36,7 @@ Design Goals
 *  Object Oriented design as basis of functionality, functions as syntax sugar
    and helpers for common tasks. There's nothing wrong with sugar.
 
-*  Clever use of Lambda/Closures and smart static methods when possible.
+*  Clever use of Lambda/Closures and smart static methods when applicable.
 
 Usage
 =====

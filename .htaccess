@@ -1,7 +1,5 @@
 <IfModule mod_rewrite.c>
 	RewriteEngine On
-#	RewriteRule ^$ webroot/ [L]
-#	RewriteRule (.*) webroot/$1 [L]
 	RewriteRule ^(app|core|lib|scripts|tests) - [F,L]
 	RewriteRule .* app/webroot/$0 [L]
 </IfModule>

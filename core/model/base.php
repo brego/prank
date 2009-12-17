@@ -1,20 +1,21 @@
 <?php
 /**
- * Baseclass for all models
+ * Base class for all models
  *
  * @filesource
- * @copyright  Copyright (c) 2008, Kamil "Brego" Dzieliński
+ * @copyright  Copyright (c) 2008-2009, Kamil "Brego" Dzieliński
  * @license    http://opensource.org/licenses/mit-license.php The MIT License
  * @author     Kamil "Brego" Dzieliński <brego@brego.dk>
  * @link       http://prank.brego.dk Prank's project page
+ * @link       http://github.com/brego/prank/ Prank's Git repository
  * @package    Prank
  * @subpackage Model
  * @since      Prank 0.10
- * @version    Prank 0.25
+ * @version    Prank 0.30
  */
 
 /**
- * Baseclass for all models
+ * Base class for all models
  *
  * All models extend this base class. Contains methods basic CRUD, but also 
  * advnced finders and assotiations.
@@ -74,6 +75,9 @@ class ModelBase extends Object implements Serializable, Iterator, Countable {
 	private   $validations             = array();
 	private   $relation_type           = false;
 	private   $errors                  = array();
+	protected $session                 = false;
+	private   $key                     = false;
+
 /**
  * Is this model modified (has any data been set)
  *
@@ -108,7 +112,8 @@ class ModelBase extends Object implements Serializable, Iterator, Countable {
 		$this->table      = to_table($this->model);
 		$this->connection = ModelConnection::instance();
 		$this->columns    = $this->connection->columns($this->table);
-		
+		$this->session    = Session::instance();
+
 		$this->set_data($data);
 		
 		$this->setup_relation('has_many');
@@ -284,16 +289,25 @@ class ModelBase extends Object implements Serializable, Iterator, Countable {
 		$model      = get_called_class();
 		$table      = to_table($model);
 		$order      = '';
+		$limit      = '';
+
+
+		if (substr($method, -6, 6) == '_limit') {
+			$method = str_replace('_and_limit', '', $method);
+			$limit = array_pop($arguments);
+		}
 
 		if (strpos($method, 'order_by') !== false) {
 			$order = substr($method, strpos($method, 'order_by_')+9);
+			$arglist = $order;
 			if (strpos($order, '_and_') !== false) {
-				$order = split('_and_', $order);
+				$order = explode('_and_', $order);
 				$order = array_map(function($item) {return str_replace('_desc', ' desc', $item);}, $order);
 				$order = implode(', ', $order);
 			} else {
 				$order = str_replace('_desc', ' desc', $order);	
 			}
+			$method = str_replace('_and_order_by_'.$arglist, '', $method);
 		}
 
 		if ($method === 'find' && is_numeric($arguments[0]) === true) {
@@ -303,16 +317,18 @@ class ModelBase extends Object implements Serializable, Iterator, Countable {
 			} else {
 				return $result;
 			}
+		} elseif ($method === 'find_by_sql') {
+			return $connection->query_to_model($arguments[0], $model);
 		} elseif (substr($method, 0, 8) === 'find_by_') {
 			$column = down(substr($method, 8));
 			if (strpos($column, '_and_') !== false) {
-				$columns = split('_and_', $column);
+				$columns = explode('_and_', $column);
 				if ($connection->are_columns_of($columns, $table)) {
 					$arguments = array_map(function($key, $item) {
 						return $key."='".$item."'";
 						}, $columns, $arguments);
 					$condition = implode(' and ', $arguments);
-					$result = $connection->read($table, $model, $condition, $order);
+					$result = $connection->read($table, $model, $condition, $order, $limit);
 					if ($result === false) {
 						return new ModelCollection;
 					} else {
@@ -320,7 +336,7 @@ class ModelBase extends Object implements Serializable, Iterator, Countable {
 					}
 				}
 			} elseif ($connection->is_column_of($column, $table)) {
-				$result = $connection->read($table, $model, $column."='".$arguments[0]."'");
+				$result = $connection->read($table, $model, $column."='".$arguments[0]."'", $order, $limit);
 				if ($result === false) {
 					return new ModelCollection;
 				} else {
@@ -338,16 +354,6 @@ class ModelBase extends Object implements Serializable, Iterator, Countable {
 		} else {
 			return parent::__callStatic($method, $arguments);
 		}
-	}
-
-/**
- * For testing purposes only!
- *
- * @param  string $property 
- * @return mixed
- */
-	public function test($property) {
-		return $this->$property;
 	}
 
 /**
@@ -770,9 +776,10 @@ class ModelBase extends Object implements Serializable, Iterator, Countable {
 	}
 
 /**
- * The Serializable interface:
- */	
-	
+ * The Serializable interface
+ * 
+ * @return string Serialized representation of a Model.
+ */
 	public function serialize() {
 		$properties = array(
 			'model'                   => $this->model,
@@ -798,6 +805,12 @@ class ModelBase extends Object implements Serializable, Iterator, Countable {
 		return serialize($properties);
 	}
 	
+/**
+ * The Serializable interface
+ *
+ * @param  string $data Serialized representation of a Model
+ * @return void
+ */
 	public function unserialize($data) {
 		$properties = unserialize($data);
 		foreach($properties as $property => $value) {
@@ -807,13 +820,10 @@ class ModelBase extends Object implements Serializable, Iterator, Countable {
 	}	
 	
 /**
- * The Iterator interface:
+ * The Iterator interface
  * 
  * This is just a mask, for seemless useage between this and a ModelCollection.
  */
-
-	private $key = false;
-
 	public function current() {
 		return $this;
 	}
@@ -839,14 +849,13 @@ class ModelBase extends Object implements Serializable, Iterator, Countable {
 	}
 
 /**
- * The Countable interface:
+ * The Countable interface
  * 
  * This is just a mask, for seemless useage between this and a ModelCollection.
  */
 	public function count() {
 		return 1;
-	}
-	
+	}	
 }
 
 ?>
