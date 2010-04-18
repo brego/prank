@@ -3,7 +3,7 @@
  * Object base class
  *
  * @filesource
- * @copyright  Copyright (c) 2008-2009, Kamil "Brego" Dzieliński
+ * @copyright  Copyright (c) 2008-2010, Kamil "Brego" Dzieliński
  * @license    http://opensource.org/licenses/mit-license.php The MIT License
  * @author     Kamil "Brego" Dzieliński <brego@brego.dk>
  * @link       http://prank.brego.dk/ Prank's project page
