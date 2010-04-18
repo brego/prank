@@ -194,6 +194,17 @@ class Boot {
 			}
 		}
 	}
+
+/**
+ * Backwards compatible instantiation of the Boot class.
+ *
+ * @param  string $start_point
+ * @param  string $config_dir
+ * @return void
+ */
+	public static function run($start_point, $config_dir = false) {
+		return new self($start_point, $config_dir);
+	}
 }
 
 ?>
