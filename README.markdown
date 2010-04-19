@@ -1,4 +1,4 @@
-Prank v0.30 - Common Sense PHP Framework
+Prank v0.50 - Common Sense PHP Framework
 ========================================
 
 Prank is a common sense [PHP][] framework, which tries to utilize the common

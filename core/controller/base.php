@@ -25,10 +25,10 @@
  */
 class ControllerBase {
 	public    $view_variables    = array();
+	public    $layout            = 'default';
 	private   $action            = null;
 	private   $view              = null;
 	private   $parameters        = array();
-	public    $layout            = 'default';
 	private   $controller        = null;
 	private   $config            = null;
 	private   $params_calculated = false;
@@ -78,7 +78,12 @@ class ControllerBase {
  *
  * Calls all callbacks, the action method, and renders the output. Also
  * provides the layout functionality.
- * 
+ *
+ * @param  string $action 
+ * @param  string $view 
+ * @param  string $parameters 
+ * @param  string $controller 
+ * @param  string $config 
  * @return void
  */
 	public function run($action, $view, $parameters, $controller, $config) {
