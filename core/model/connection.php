@@ -11,7 +11,7 @@
  * @package    Prank
  * @subpackage Model
  * @since      Prank 0.10
- * @version    Prank 0.30
+ * @version    Prank 0.50
  */
 
 /**
@@ -48,14 +48,15 @@ class ModelConnection {
  * @return void
  */
 	private function __construct() {
-		$params        = c()->db;		
-		$adapter_class = 'ModelAdapters'.ucfirst($params->type);
-		$dsn           = $params->type.':host='.$params->host.';dbname='.$params->database;
+		$registry      = Registry::instance();
+		$params        = $registry->config['db'];
+		$adapter_class = 'ModelAdapters'.ucfirst($params['type']);
+		$dsn           = $params['type'].':host='.$params['host'].';dbname='.$params['database'];
 		
 		if (class_exists($adapter_class)) {
-			$this->adapter = new $adapter_class($dsn, $params->user, $params->password);
+			$this->adapter = new $adapter_class($dsn, $params['user'], $params['password']);
 		} else {
-			throw new Exception('Adapter class '.$adapter_class.' (type '.$params->type.') not found.');
+			throw new Exception('Adapter class '.$adapter_class.' (type '.$params['type'].') not found.');
 		}
 	}
 

@@ -11,7 +11,7 @@
  * @package    Prank
  * @subpackage Core
  * @since      Prank 0.10
- * @version    Prank 0.30
+ * @version    Prank 0.50
  */
 
 /**
@@ -30,6 +30,7 @@ class Registry {
  * @return Registry
  */
 	public static function instance() {
+		// print ' [INST Registry] ';
 		if (self::$instance === null) {
 			self::$instance = new self;
 		}

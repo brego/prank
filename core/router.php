@@ -11,7 +11,7 @@
  * @package    Prank
  * @subpackage Core
  * @since      Prank 0.10
- * @version    Prank 0.30
+ * @version    Prank 0.50
  */
 
 /**
@@ -25,6 +25,7 @@
 class Router {
 	private static $current_route = null;
 	private        $routes        = array();
+	private        $config        = null;
 
 /**
  * Registers routes
@@ -33,7 +34,8 @@ class Router {
  *
  * @return void
  */
-	public function __construct() {
+	public function __construct($config) {
+		$this->config = $config;
 		$this->register_routes();
 	}
 
@@ -110,7 +112,7 @@ class Router {
  */
 	private function register_routes() {
 		$map = $this;
-		require c()->config.'routes.php';
+		require $this->config['config'].'routes.php';
 	}
 
 /**

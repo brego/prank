@@ -11,7 +11,7 @@
  * @package    Prank
  * @subpackage Core
  * @since      Prank 0.10
- * @version    Prank 0.30
+ * @version    Prank 0.50
  */
 
 /**
@@ -23,11 +23,12 @@
  * @subpackage Core
  */
 class Boot {
-	private        $url        = null;
-	private        $controller = null;
-	private        $action     = null;
-	private        $params     = array();
- 	private        $route      = array();
+	private $url        = null;
+	private $controller = null;
+	private $action     = null;
+	private $params     = array();
+ 	private $route      = array();
+	private $config     = null;
 
 /**
  * Constructor
@@ -39,25 +40,26 @@ class Boot {
  * @return void
  */
 	public function __construct($start_point, $config_dir = false) {
-
 		ob_start();
 
-		require_once 'base.php';
-		require_once 'registry.php';
-		require_once 'config.php';
+		require 'base.php';
+		require 'registry.php';
+		require 'config.php';
 		
 		$registry         = Registry::instance();
-		$registry->config = new Config($start_point, $config_dir);
+		$config           = new Config($start_point, $config_dir);
+		$this->config     = $config;
+		$registry->config = $config;
 		
 		use_helper('inflector.php', 'base.php');
 		
 		spl_autoload_register('Boot::autoload');
 		
-		ini_set('include_path', c()->core.c()->ps.c()->app.c()->ps.'.');
-		$this->set_error_reporting(c()->state);
+		ini_set('include_path', $config['core'].$config['ps'].$config['app'].$config['ps'].'.');
+		$this->set_error_reporting($config['state']);
 		
 		$this->url        = isset($_GET['url']) ? $_GET['url'] : '/';
-		$registry->router = new Router;
+		$registry->router = new Router($config);
 		$this->route      = $registry->router->parse_url($this->url);
 		
 		$this->parse_route();
@@ -82,12 +84,14 @@ class Boot {
 				$class_underscore = strtolower(preg_replace('/(?<=\\w)([A-Z])/', '_\\1', $class));
 				$class = str_replace('_', DIRECTORY_SEPARATOR, $class_underscore);
 
-				if(is_file(c()->core.$class.'.php')) {
-					require c()->core.$class.'.php';
+				$registry = Registry::instance();
+
+				if(is_file($registry->config['core'].$class.'.php')) {
+					require $registry->config['core'].$class.'.php';
 				}
 
-				if(is_file(c()->models.$class_underscore.'.model.php')) {
-					require c()->models.$class_underscore.'.model.php';
+				if(is_file($registry->config['models'].$class_underscore.'.model.php')) {
+					require $registry->config['models'].$class_underscore.'.model.php';
 				}
 			}
 		}
@@ -127,7 +131,7 @@ class Boot {
 		$params     = array();
 		$route      = $this->route;
 		
-		if (isset($route['controller']) && is_file(c()->controllers.down($route['controller']).'.controller.php')) {
+		if (isset($route['controller']) && is_file($this->config['controllers'].down($route['controller']).'.controller.php')) {
 			$controller = $route['controller'];
 			unset($route['controller']);
 		} else {
@@ -161,14 +165,16 @@ class Boot {
 			$controller_name   = to_controller($this->controller);
 			$controller_object = new $controller_name;
 
-			$controller_object->action     = $this->action;
-			$controller_object->view       = $this->action;
-			$controller_object->parameters = $this->params;
-			$controller_object->controller = $this->controller;
+			// $controller_object->action     = $this->action;
+			// $controller_object->view       = $this->action;
+			// $controller_object->parameters = $this->params;
+			// $controller_object->controller = $this->controller;
+			// $controller_object->config     = $this->config;
 
 			$registry->current_controller  = $controller_object;
 
-			$controller_object->run();
+			$controller_object->run($this->action, $this->action, $this->params, $this->controller, $this->config);
+			
 		} catch (Exception $e) {
 			echo '<p>Exception: '.$e->getMessage().' in '.$e->getFile().' on line '.$e->getLine().".</p>\n",
 				str_replace("\n", "\n<br />", $e->getTraceAsString());
@@ -183,11 +189,11 @@ class Boot {
  **/
 	private function load_controller($name) {
 		if (class_exists(ucfirst($name).'Controller') === false) {
-			if (is_file(c()->controllers.down($name).'.controller.php')) {
-				require c()->controllers.down($name).'.controller.php';
+			if (is_file($this->config['controllers'].down($name).'.controller.php')) {
+				require $this->config['controllers'].down($name).'.controller.php';
 				return true;
-			} elseif (is_file(file_path(c()->core.'stubs', 'app', 'controllers', down($name).'.controller.php'))) {
-				require file_path(c()->core.'stubs', 'app', 'controllers', down($name).'.controller.php');
+			} elseif (is_file(file_path($this->config['core'].'stubs', 'app', 'controllers', down($name).'.controller.php'))) {
+				require file_path($this->config['core'].'stubs', 'app', 'controllers', down($name).'.controller.php');
 				return true;
 			} else {
 				throw new Exception('File for '.ucfirst($name).'Controller was not found.');

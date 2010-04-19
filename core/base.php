@@ -14,7 +14,7 @@
  * @package    Prank
  * @subpackage Core
  * @since      Prank 0.10
- * @version    Prank 0.30
+ * @version    Prank 0.50
  */
 
 /**
@@ -61,24 +61,14 @@ function array_cleanup($array) {
 }
 
 /**
- * Interface for Config class
- *
- * If called without arguments, returns the configuration object. If called
- * with a parameter, it is asumed to be name of a configuration property (will
- * be fetched with Config::get()).
+ * This function is deprecated.
  * 
- * @param  string $name
- * @return mixed
+ * @param      string $name
+ * @return     mixed
+ * @deprecated
  */
 function c($name = false) {
-	if ($name !== false) {
-		$registry = Registry::instance();
-		return $registry->config->$name;
-	} else {
-		$registry = Registry::instance();
-		$config   = $registry->config;
-		return $config;
-	}
+	throw new Exception('Function c() is highly deprecated.');
 }
 
 /**
@@ -127,6 +117,10 @@ function file_path() {
 	return implode($ds, $files);
 }
 
+/******************************************************************************
+ * YAML functions.
+ *****************************************************************************/
+
 /**
  * Returns YAML-formatted $variable
  *
@@ -141,11 +135,16 @@ function file_path() {
 function to_yaml($variable) {
 	if (function_exists('syck_dump')) {
 		return syck_dump($variable);
-	} else {
-		if (class_exists('Spyc') === false) {
-			require file_path($c()->lib.'spyc', 'spyc.php');
-		}
+	} elseif (class_exists('Spyc')) {
 		return Spyc::YAMLDump($variable);
+	} else {
+		$registry = Registry::instance();
+		if (is_file(file_path($registry->config['lib'].'spyc', 'spyc.php'))) {
+			require file_path($registry->config['lib'].'spyc', 'spyc.php');
+			return Spyc::YAMLDump($variable);
+		} else {
+			throw new Exception('To use YAML you need to either install PECL Syck extension, or the spyc class.');
+		}
 	}
 }
 
@@ -174,11 +173,16 @@ function to_yaml_file($variable, $file) {
 function from_yaml($yaml) {
 	if (function_exists('syck_load')) {
 		return syck_load($yaml);
-	} else {
-		if (class_exists('Spyc') === false) {
-			require file_path($c()->lib.'spyc', 'spyc.php');
-		}
+	} elseif (class_exists('Spyc')) {
 		return Spyc::YAMLLoad($yaml);
+	} else {
+		$registry = Registry::instance();
+		if (is_file(file_path($registry->config['lib'].'spyc', 'spyc.php'))) {
+			require file_path($registry->config['lib'].'spyc', 'spyc.php');
+			return Spyc::YAMLLoad($yaml);
+		} else {
+			throw new Exception('To use YAML you need to either install PECL Syck extension, or the spyc class.');
+		}
 	}
 }
 

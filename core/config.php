@@ -11,7 +11,7 @@
  * @package    Prank
  * @subpackage Core
  * @since      Prank 0.10
- * @version    Prank 0.30
+ * @version    Prank 0.50
  */
 
 /**
@@ -19,9 +19,12 @@
  *
  * @package    Prank
  * @subpackage Core
+ * @todo       Jesus Christ! It's a lion! Get in the car! This monster needs a
+ *             serious rewrite, and fast. Also, YAML is so 2009 - we just may
+ *             need to drop it in favor of, say, PHP?
  */
-class Config {
-	private $config = null;
+class Config implements ArrayAccess {
+	protected $config = null;
 
 /**
  * Constructor
@@ -32,10 +35,8 @@ class Config {
  * @param  string $config_dir 
  * @return void
  */
-	public function __construct($start_point = false, $config_dir = false) {
-		if ($start_point !== false) {
-			$this->setup($start_point, $config_dir);
-		}
+	public function __construct($start_point, $config_dir = false) {
+		$this->setup($start_point, $config_dir);
 	}
 
 /**
@@ -49,14 +50,17 @@ class Config {
  * @return void
  */
 	public function setup($start_point, $config_dir = false) {
-		$config        = new stdClass;
-		$config->ds    = DIRECTORY_SEPARATOR;
-		$config->ps    = PATH_SEPARATOR;
-		$config->app   = dirname(dirname($start_point)).$config->ds;
-		$config->core  = dirname(__FILE__).$config->ds;
-		$config->prank = dirname(dirname(__FILE__)).$config->ds;
-		$config->lib   = $config->prank.'lib'.$config->ds;
 		
+		// Default internal Prank config array
+		$config          = array();
+		$config['ds']    = DIRECTORY_SEPARATOR;
+		$config['ps']    = PATH_SEPARATOR;
+		$config['app']   = dirname(dirname($start_point)).$config['ds'];
+		$config['core']  = dirname(__FILE__).$config['ds'];
+		$config['prank'] = dirname(dirname(__FILE__)).$config['ds'];		
+		$config['lib']   = $config['prank'].'lib'.$config['ds'];
+
+		// Default app config
 		$default_app_config = array(
 			'state'       => 'development',
 			'directories' => array(
@@ -66,35 +70,42 @@ class Config {
 				'webroot'     => 'webroot',
 				'config'      => 'config',
 				'helpers'     => 'helpers'));
-				
+		
+		// Determining the app config dir
 		if ($config_dir === false) {
-			$config_dir = $config->app.'config'.$config->ds;
+			$config_dir = $config['app'].'config'.$config['ds'];
 		}
 		
-		$app_config = array();
-		if (is_file($config_dir.'app.yml')) {
-			$app_config = from_yaml_file($config_dir.'app.yml', $config);
+		// Loading the app config
+		$app = array();
+		if (is_file($config_dir.'app.php')) {
+			$app = array();
+			require $config_dir.'app.php';
 		}
-		$app_config = array_merge($default_app_config, $app_config);
-		
-		$config->state       = $app_config['state'];
-		$config->models      = $config->app.$app_config['directories']['models'].$config->ds;
-		$config->views       = $config->app.$app_config['directories']['views'].$config->ds;
-		$config->controllers = $config->app.$app_config['directories']['controllers'].$config->ds;
-		$config->webroot     = $config->app.$app_config['directories']['webroot'].$config->ds;
-		$config->config      = $config->app.$app_config['directories']['config'].$config->ds;
-		$config->helpers     = $config->app.$app_config['directories']['helpers'].$config->ds;
-		
-		if (is_file($config->config.'db.yml')) {
-			$db_config = from_yaml_file($config->app.'config'.$config->ds.'db.yml');
+		$app_config = array_merge($default_app_config, $app);
+
+		// Merging the internal array with app config
+		$config['state']       = $app_config['state'];
+		$config['models']      = $config['app'].$app_config['directories']['models'].$config['ds'];
+		$config['views']       = $config['app'].$app_config['directories']['views'].$config['ds'];
+		$config['controllers'] = $config['app'].$app_config['directories']['controllers'].$config['ds'];
+		$config['webroot']     = $config['app'].$app_config['directories']['webroot'].$config['ds'];
+		$config['config']      = $config['app'].$app_config['directories']['config'].$config['ds'];
+		$config['helpers']     = $config['app'].$app_config['directories']['helpers'].$config['ds'];
+
+		// Loading the DB config
+		if (is_file($config['config'].'db.php')) {
+			$db = array();
+			require $config['config'].'db.php';
 		} else {
-			throw new Exception('Currently Prank requires a database connection. Provide a config/db.yml with necessary data.');
+			throw new Exception('Currently Prank requires a database connection. Provide a config/db.php with necessary data.');
 		}
-		$config->db = new stdClass;
-		foreach ($db_config[$config->state] as $key => $value) {
-			$config->db->$key = $value;
+		$config['db'] = array();
+		foreach ($db[$config['state']] as $key => $value) {
+			$config['db'][$key] = $value;
 		}
 		
+		// Assigning the internal array to an internal parameter
 		$this->config = $config;
 	}
 
@@ -106,7 +117,7 @@ class Config {
  * @return void
  */
 	public function __set($name, $value) {
-		$this->config->$name = $value;
+		$this->config[$name] = $value;
 	}
 
 /**
@@ -116,11 +127,56 @@ class Config {
  * @return mixed
  */
 	public function __get($name) {
-		if (isset($this->config->$name)) {
-			return $this->config->$name;
+		if (isset($this->config[$name])) {
+			return $this->config[$name];
 		} else {
 			throw new Exception('Property '.$name.' is not defined in the configuration.');
 		}
+	}
+	
+/**
+ * The ArrayAccess interface:
+ */
+
+/**
+ * Part of the ArrayAccess, checks wheter the $offset exists
+ *
+ * @param  mixed   $offset 
+ * @return boolean
+ */
+	public function offsetExists($offset) {
+		return isset($this->config[$offset]);
+	}
+
+/**
+ * Part of the ArrayAccess, returns the value at the $offset
+ *
+ * @param  mixed $offset 
+ * @return mixed
+ */
+	public function offsetGet($offset) {
+		return $this->config[$offset];
+	}
+
+/**
+ * Part of the ArrayAccess, sets a $value at the $offset
+ *
+ * @param  mixed $offset 
+ * @param  mixed $value 
+ * @return void
+ */
+	public function offsetSet($offset, $value) {
+		$this->config[$offset] = $value;
+	}
+
+/**
+ * Part of the ArrayAccess, deletes the value at the $offset
+ *
+ * @param  mixed $offset 
+ * @return void
+ */
+	public function offsetUnset($offset) {
+		unset($this->config[$offset]);
 	}
 }
 

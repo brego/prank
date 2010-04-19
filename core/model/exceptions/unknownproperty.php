@@ -11,7 +11,7 @@
  * @package    Prank
  * @subpackage Model
  * @since      Prank 0.20
- * @version    Prank 0.30
+ * @version    Prank 0.50
  * @todo       Do we really need this? The whole error handling sucks ATM.
  */
 

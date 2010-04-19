@@ -11,7 +11,7 @@
  * @package    Prank
  * @subpackage Controller
  * @since      Prank 0.10
- * @version    Prank 0.30
+ * @version    Prank 0.50
  */
 
 /**
@@ -25,11 +25,12 @@
  */
 class ControllerBase {
 	public    $view_variables    = array();
-	public    $action            = null;
-	public    $view              = null;
-	public    $parameters        = array();
+	private   $action            = null;
+	private   $view              = null;
+	private   $parameters        = array();
 	public    $layout            = 'default';
-	public    $controller        = null;
+	private   $controller        = null;
+	private   $config            = null;
 	private   $params_calculated = false;
 	protected $session           = true;
 
@@ -80,7 +81,13 @@ class ControllerBase {
  * 
  * @return void
  */
-	public function run() {
+	public function run($action, $view, $parameters, $controller, $config) {
+		$this->action     = $action;
+		$this->view       = $view;
+		$this->parameters = $parameters;
+		$this->controller = $controller;
+		$this->config     = $config;
+		
 		if ($this->session !== false) {
 			$this->session = Session::instance();
 		}
@@ -100,17 +107,17 @@ class ControllerBase {
 		
 		ob_start();
 
-		if (is_file(file_path(c()->views.$this->controller, $this->view.'.php')) && $this->view !== false) {
-			require file_path(c()->views.$this->controller, $this->view.'.php');
+		if (is_file(file_path($config->views.$this->controller, $this->view.'.php')) && $this->view !== false) {
+			require file_path($config->views.$this->controller, $this->view.'.php');
 		}
 		
 		$content_for_layout = ob_get_clean();
 		
 		$content_for_layout = $this->before_layout($content_for_layout);
 			
-		if (is_file(file_path(c()->views.'layouts', $this->layout.'.php')) && $this->layout !== false) {
+		if (is_file(file_path($config->views.'layouts', $this->layout.'.php')) && $this->layout !== false) {
 			ob_start();
-			require file_path(c()->views.'layouts', $this->layout.'.php');
+			require file_path($config->views.'layouts', $this->layout.'.php');
 			$output = ob_get_clean();
 		} else {
 			$output = $content_for_layout;
