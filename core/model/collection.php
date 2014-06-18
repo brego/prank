@@ -1,7 +1,7 @@
 <?php
 /**
  * ModelCollection - used to collect Models
- * 
+ *
  * @filesource
  * @copyright  Copyright (c) 2008-2014, Kamil "Brego" Dzieliński
  * @license    http://opensource.org/licenses/mit-license.php The MIT License
@@ -16,9 +16,9 @@
 
 /**
  * ModelCollection - used to collect Models
- * 
- * ModelCollection makes it easy to enclose multiple Models in one, and adds
- * some model-related methods.
+ *
+ * ModelCollection makes it easy to enclose multiple Models in one object, and
+ * adds some model-related methods to the Collection class.
  *
  * @package    Prank
  * @subpackage Model
@@ -72,7 +72,7 @@ class ModelCollection extends Collection {
  *
  * Before adding the model to the Collection, sets model's relation_type to a
  * valid type.
- * 
+ *
  * @see    ModelCollection::relation_type()
  * @param  Model $item
  * @return void
@@ -87,15 +87,15 @@ class ModelCollection extends Collection {
 
 /**
  * Saves all the Models in the Collection, if it's modified
- * 
+ *
  * This method loops through the collection, and saves every Model with
  * Model::save(). Be aware, if any save operation returns false, the loop
  * breaks, and this method returns false. Also remember that saving huge
  * Collections generate a number of queries equal to the number of Models
  * contained.
- * 
+ *
  * @see    ModelCollection::modified()
- * @param  Model $related_model 
+ * @param  Model $related_model
  * @return boolean
  */
 	public function save($related_model = null) {
@@ -118,8 +118,8 @@ class ModelCollection extends Collection {
  *
  * Loops through all the Models and sets their relation type. Returns the
  * current type.
- * 
- * @param  string $relation_type 
+ *
+ * @param  string $relation_type
  * @return string
  */	
 	public function relation_type($relation_type = null) {
@@ -150,7 +150,7 @@ class ModelCollection extends Collection {
  *
  * If any of the Models in this Collection is modified, the Collection counts
  * as being modified.
- * 
+ *
  * @return void
  */
 	private function check_modified() {
@@ -166,7 +166,7 @@ class ModelCollection extends Collection {
 
 /**
  * Checks if any of the Models exist in the database
- * 
+ *
  * If any of the Models in this Collection exists in database, the Collection
  * counts as existing.
  *

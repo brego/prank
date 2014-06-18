@@ -10,11 +10,12 @@
  * @license    http://opensource.org/licenses/mit-license.php The MIT License
  * @author     Kamil "Brego" Dzieliński <brego@brego.dk>
  * @link       http://prank.brego.dk/ Prank's project page
- * @link       http://cakephp.org CakePHP's project page
+ * @link       http://github.com/brego/prank/ Prank's Git repository
+ * @link       http://cakephp.org/ CakePHP's project page
  * @package    Prank
  * @subpackage Core
  * @since      Prank 0.10
- * @version    Prank 0.25
+ * @version    Prank 0.75
  */
 
 /**
@@ -37,7 +38,7 @@ function pluralize($string)	{
 		'/([ti])um$/i'             => '\1a',
 		'/(p)erson$/i'             => '\1eople',
 		'/(m)an$/i'                => '\1en',
-		'/(c)hild$/i'              => '\1hildren', 
+		'/(c)hild$/i'              => '\1hildren',
 		'/(buffal|tomat)o$/i'      => '\1\2oes',
 		'/(bu)s$/i'                => '\1\2ses',
 		'/(alias)/i'               => '\1es',
@@ -230,12 +231,11 @@ function singularize($string)
  * Returns given string as CamelCase
  *
  * String an be underscored, or spaced.
- * 
+ *
  * @param  string $string String to camelize
  * @return string Camelized word - LikeThis
  */
-function camelcase($string)
-{
+function camelcase($string) {
 	return str_replace(" ", "", ucwords(str_replace("_", " ", strtolower($string))));
 }
 
@@ -255,12 +255,11 @@ function camelback($string) {
 
 /**
  * Returns the string underscored
- * 
+ *
  * @param  string $string String to be underscored
  * @return string Underscored version of the $string
  */
-function underscore($string)
-{
+function underscore($string) {
 	if (strpos($string, ' ') !== false) {
 		return strtolower(str_replace(' ', '_', $string));
 	} else {
@@ -277,8 +276,7 @@ function underscore($string)
  * @param  string $string String to be made more readable
  * @return string Human-readable string
  */
-function human($string)
-{
+function human($string) {
 	if (strpos($string, '_') !== false) {
 		return ucfirst(str_replace("_", " ", strtolower($string)));
 	} elseif (strpos($string, ' ') !== false) {
@@ -295,8 +293,7 @@ function human($string)
  * @param  string $table_name Name of database table to get class name for
  * @return string Singularized and Camelized $class_name
  */
-function to_model($table_name)
-{
+function to_model($table_name) {
 	return camelcase(singularize($table_name));
 }
 
@@ -307,8 +304,7 @@ function to_model($table_name)
  * @param  string $class_name Name of class to get database table name for
  * @return string Name of the database table for given class
  */
-function to_table($class_name)
-{
+function to_table($class_name) {
 	return pluralize(underscore($class_name));
 }
 

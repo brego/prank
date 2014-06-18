@@ -28,11 +28,11 @@ class Config implements ArrayAccess {
 
 /**
  * Constructor
- * 
+ *
  * If $start_point is set, calls automatically on Config::setup.
  *
- * @param  string $start_point 
- * @param  string $config_dir 
+ * @param  string $start_point
+ * @param  string $config_dir
  * @return void
  */
 	public function __construct($start_point, $config_dir = false) {
@@ -45,8 +45,8 @@ class Config implements ArrayAccess {
  * $start_point needs to be the an output of the __FILE__ from the starting
  * point of the application. It will be used to determine full paths for
  * directories.
- * 
- * @param  string $start_point 
+ *
+ * @param  string $start_point
  * @return void
  */
 	public function setup($start_point, $config_dir = false) {
@@ -111,9 +111,9 @@ class Config implements ArrayAccess {
 
 /**
  * Overload for setting of a configuration variable
- * 
- * @param  string $name 
- * @param  mixed  $value 
+ *
+ * @param  string $name
+ * @param  mixed  $value
  * @return void
  */
 	public function __set($name, $value) {
@@ -123,7 +123,7 @@ class Config implements ArrayAccess {
 /**
  * Overload for getting the configuration variable
  *
- * @param  string $name 
+ * @param  string $name
  * @return mixed
  */
 	public function __get($name) {
@@ -141,7 +141,7 @@ class Config implements ArrayAccess {
 /**
  * Part of the ArrayAccess, checks wheter the $offset exists
  *
- * @param  mixed   $offset 
+ * @param  mixed   $offset
  * @return boolean
  */
 	public function offsetExists($offset) {
@@ -151,7 +151,7 @@ class Config implements ArrayAccess {
 /**
  * Part of the ArrayAccess, returns the value at the $offset
  *
- * @param  mixed $offset 
+ * @param  mixed $offset
  * @return mixed
  */
 	public function offsetGet($offset) {
@@ -161,8 +161,8 @@ class Config implements ArrayAccess {
 /**
  * Part of the ArrayAccess, sets a $value at the $offset
  *
- * @param  mixed $offset 
- * @param  mixed $value 
+ * @param  mixed $offset
+ * @param  mixed $value
  * @return void
  */
 	public function offsetSet($offset, $value) {
@@ -172,7 +172,7 @@ class Config implements ArrayAccess {
 /**
  * Part of the ArrayAccess, deletes the value at the $offset
  *
- * @param  mixed $offset 
+ * @param  mixed $offset
  * @return void
  */
 	public function offsetUnset($offset) {

@@ -1,7 +1,7 @@
 <?php
 /**
  * Collection - used to collect items
- * 
+ *
  * @filesource
  * @copyright  Copyright (c) 2008-2014, Kamil "Brego" Dzieliński
  * @license    http://opensource.org/licenses/mit-license.php The MIT License
@@ -16,7 +16,7 @@
 
 /**
 * Collection - used to collect items
-* 
+*
 * Collection makes it easy to enclose multiple objects in one.
 * Dev note: this could also be based on ArrayObject.
 *
@@ -40,7 +40,7 @@ class Collection implements Iterator, Countable, ArrayAccess {
  *
  * Takes a variable number of parameters, which will be added to the initial
  * collection with Collection::add().
- * 
+ *
  * @return void
  */
 	public function __construct() {
@@ -81,12 +81,12 @@ class Collection implements Iterator, Countable, ArrayAccess {
 
 /**
  * Registers a lazyload function
- * 
+ *
  * Function is expected to be a callable (lambda), accepting one parameter,
  * which will be used to pass reference to the collection. Loader function will
  * run only once, and will be erased afterwards.
  *
- * @param  callable $callable 
+ * @param  callable $callable
  * @return void
  */
 	public function register_loader($callable) {
@@ -113,7 +113,7 @@ class Collection implements Iterator, Countable, ArrayAccess {
 /**
  * Sets the name of a single item, used in each
  *
- * @param  string $name 
+ * @param  string $name
  * @return mixed
  */
 	public function item_name($name=null) {
@@ -131,7 +131,7 @@ class Collection implements Iterator, Countable, ArrayAccess {
  * at each iteration.
  * Be advised that each calls on a collection result in the lazy-load being run
  * (if applicable).
- * 
+ *
  * Lambda can have a varied number of arguments, which names have significance
  * to what will be passed to them:
  *  - If there's more than one parameter:
@@ -146,18 +146,19 @@ class Collection implements Iterator, Countable, ArrayAccess {
  *    property to the lambda.
  *  - If there's only one parameter, but it's not corresponding to any property
  *    of the current object, the object itself will be passed.
+ *
  * All the correspondence checks between parameter names and object properties
  * are done using isset - so if your object uses overloaded parameters, using
  * __set and __get, remember to define __isset to make the magic work.
- * 
+ *
  * The return value of each depends on the return value of lambda - if it has
  * none, null will be returned. If, on the other hand, it has any return value,
  * each will return an array of return values.
- * 
+ *
  * Note that magic comes at a cost - each uses Reflection to find lambda's
  * parameter names. So if speed is an issue, and you need to loop through a
  * large Collection, consider using foreach instead.
- * 
+ *
  * @param  callable $lambda Lambda function (no callbacks!)
  * @return mixed Array of results or null
  */
@@ -170,14 +171,14 @@ class Collection implements Iterator, Countable, ArrayAccess {
 		foreach ($reflection->getParameters() as $param) {
 			$parameter_names[] = $param->getName();
 		}
-		
+
 		// load eventual lazyload
 		$this->load();
-		
+
 		// loop through the collection
 		foreach ($this as $item) {
 			$parameters = array();
-			
+
 			if (count($parameter_names)>1) {
 				foreach ($parameter_names as $key => $value) {
 					if ($value == $this->item_name) {
@@ -238,7 +239,7 @@ class Collection implements Iterator, Countable, ArrayAccess {
  *
  * Be advised that this method results in the lazy-load being run (if
  * applicable).
- * 
+ *
  * @return mixed Current item
  */
 	public function current() {
@@ -251,7 +252,7 @@ class Collection implements Iterator, Countable, ArrayAccess {
  *
  * Be advised that this method results in the lazy-load being run (if
  * applicable).
- * 
+ *
  * @return integer
  */
 	public function key() {
@@ -264,7 +265,7 @@ class Collection implements Iterator, Countable, ArrayAccess {
  *
  * Be advised that this method results in the lazy-load being run (if
  * applicable).
- * 
+ *
  * @return void
  */
 	public function next() {
@@ -277,7 +278,7 @@ class Collection implements Iterator, Countable, ArrayAccess {
  *
  * Be advised that this method results in the lazy-load being run (if
  * applicable).
- * 
+ *
  * @return void
  */
 	public function rewind() {
@@ -291,7 +292,7 @@ class Collection implements Iterator, Countable, ArrayAccess {
  *
  * Be advised that this method results in the lazy-load being run (if
  * applicable).
- * 
+ *
  * @return boolean
  */
 	public function valid() {
@@ -309,12 +310,12 @@ class Collection implements Iterator, Countable, ArrayAccess {
 
 /**
  * Part of the Countable, counts all the elements
- * 
+ *
  * Makes it possible to use count($Collection).
- * 
+ *
  * Be advised that this method results in the lazy-load being run (if
  * applicable).
- * 
+ *
  * @return integer Size of the collection
  */	
 	public function count() {
@@ -329,7 +330,7 @@ class Collection implements Iterator, Countable, ArrayAccess {
 /**
  * Part of the ArrayAccess, checks wheter the $offset exists
  *
- * @param  mixed   $offset 
+ * @param  mixed   $offset
  * @return boolean
  */
 	public function offsetExists($offset) {
@@ -339,7 +340,7 @@ class Collection implements Iterator, Countable, ArrayAccess {
 /**
  * Part of the ArrayAccess, returns the value at the $offset
  *
- * @param  mixed $offset 
+ * @param  mixed $offset
  * @return mixed
  */
 	public function offsetGet($offset) {
@@ -349,8 +350,8 @@ class Collection implements Iterator, Countable, ArrayAccess {
 /**
  * Part of the ArrayAccess, sets a $value at the $offset
  *
- * @param  mixed $offset 
- * @param  mixed $value 
+ * @param  mixed $offset
+ * @param  mixed $value
  * @return void
  */
 	public function offsetSet($offset, $value) {
@@ -360,7 +361,7 @@ class Collection implements Iterator, Countable, ArrayAccess {
 /**
  * Part of the ArrayAccess, deletes the value at the $offset
  *
- * @param  mixed $offset 
+ * @param  mixed $offset
  * @return void
  */
 	public function offsetUnset($offset) {

@@ -16,38 +16,38 @@
 
 /**
  * Basic interaction methods interface
- * 
+ *
  * @package    Prank
  * @subpackage Model
  */
 interface ModelAdapter {
-	
+
 	public function exec($query);
-	
+
 	public function query();
 	public function query_to_model($query, $model);
-	
+
 	public function last_id();
-	
+
 	public function is_column_of($column, $table);
 	public function fetch_columns($table);
 	public function columns($table);
-	
+
 	public function multiple_create();
 
 	public function create($table, $data);
 	public function read($table, $model, $condition = '', $order = '', $limit = '');
 	public function update($table, $data, $condition);
 	public function delete($table, $condition);
-	
+
 	public function filter_string($value);
 	public function now();
-	
+
 	public function has_many_read($info);
 	public function has_one_read($info);
 	public function belongs_to_read($info);
 	public function has_and_belongs_to_many_read($info);
-	
+
 	public function has_many_create($table, $data, $relation);
 	public function has_one_create($table, $data, $relation);
 	public function belongs_to_create($table, $data, $relation);

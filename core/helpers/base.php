@@ -10,7 +10,7 @@
  * @package    Prank
  * @subpackage Helpers
  * @since      Prank 0.25
- * @version    Prank 0.25
+ * @version    Prank 0.75
  */
 
 function partial($name, $params = array()) {
@@ -74,14 +74,11 @@ function url($path) {
 /**
  * Preforms a proper HTTP redirect to given $address (passed through url())
  *
- * @param  string $address 
+ * @param  string $address
  * @return void
  */
 function redirect($address) {
 	$address = url($address);
-	// header("Location: http://".$_SERVER['HTTP_HOST']
-	// 	."/".dirname($_SERVER['PHP_SELF'])
-	// 	."/".$address);
 	header('Location: '.$address);
 	exit();
 }

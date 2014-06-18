@@ -17,7 +17,7 @@
 /**
  * Base class for all models
  *
- * All models extend this base class. Contains methods basic CRUD, but also 
+ * All models extend this base class. Contains methods basic CRUD, but also
  * advnced finders and assotiations.
  *
  * @package    Prank
@@ -29,7 +29,7 @@ class ModelBase extends Object implements Serializable, Iterator, Countable {
 *
 * String or array of names of models this model have many of. This property
 * will contain a Collection with all the coresponding objects.
-* 
+*
 * @var mixed
 */
 	public    $has_many                = false;
@@ -38,7 +38,7 @@ class ModelBase extends Object implements Serializable, Iterator, Countable {
 *
 * String or array of names of models this model has one of. This property
 * will contain the coresponding model.
-* 
+*
 * @var mixed
 */
 	public    $has_one                 = false;
@@ -47,7 +47,7 @@ class ModelBase extends Object implements Serializable, Iterator, Countable {
 *
 * String or array of names of models this model belongs to. This property
 * will contain the coresponding model.
-* 
+*
 * @var mixed
 */
 	public    $belongs_to              = false;
@@ -56,7 +56,7 @@ class ModelBase extends Object implements Serializable, Iterator, Countable {
 *
 * String or array of names of models this model have many of. This property
 * will contain a Collection with all the coresponding objects.
-* 
+*
 * @var mixed
 */
 	public    $has_and_belongs_to_many = false;
@@ -87,13 +87,13 @@ class ModelBase extends Object implements Serializable, Iterator, Countable {
 /**
  * If this model is lazy-loaded, contains a callable loader function
  *
- * @var mixed                          
- */ 
-	private   $loader                  = null; 
+ * @var mixed                         
+ */
+	private   $loader                  = null;
 
 /**
  * Constructor
- * 
+ *
  * Finds the name of the class, and uses it to identify the table it coresponds
  * to. Connects to Connection, to get DB access. Creates properities simulating
  * columns of the table.
@@ -104,7 +104,7 @@ class ModelBase extends Object implements Serializable, Iterator, Countable {
  * in it, the Model will assume that this is a representation of an existing
  * database row.
  *
- * @param  string $data 
+ * @param  string $data
  * @return void
  */	
 	public function __construct($data = false) {
@@ -124,20 +124,20 @@ class ModelBase extends Object implements Serializable, Iterator, Countable {
 	
 /**
  * Method overloading
- * 
+ *
  * Supports dynamic methods:
  *  - delete() - deletes current model from the database, returns boolean true
  *    or false. Upon succesfull deletion the exists property is set to false,
  *    and the modified property to true - no data is deleted from the model
  *    though.
- * 
+ *
  * Ties in the validator methods.
- * 
+ *
  * Also calls all the mixins (see the Object class).
  * If an unknown method is called, an exception is thrown.
- * 
- * @param  string $method 
- * @param  string $arguments 
+ *
+ * @param  string $method
+ * @param  string $arguments
  * @return mixed
  */
 	public function __call($method, $arguments) {
@@ -161,17 +161,17 @@ class ModelBase extends Object implements Serializable, Iterator, Countable {
 
 /**
  * Property overloading - setter
- * 
+ *
  * Sets value of a Model field to the specified value - if the field exists.
  * Setting a field this way makes the model non-hollow.
- * 
+ *
  * You can set a value for a relation here - but be aware that in the event of
  * saving, the model will overwrite the relation in the database with the
  * provided one. Also, be aware that if you simply want to add an object to a
  * Collection representing a plural relation, you can use Collection's add
  * method.
  *
- * @param  string $variable 
+ * @param  string $variable
  * @param  string $value
  * @return void
  */	
@@ -219,8 +219,8 @@ class ModelBase extends Object implements Serializable, Iterator, Countable {
  *
  * Returns value of the field. Be advised that __get calls on a model result in
  * the lazy-load being run (if applicable).
- * 
- * @param  string $variable 
+ *
+ * @param  string $variable
  * @return void
  */
 	public function __get($variable) {
@@ -244,8 +244,8 @@ class ModelBase extends Object implements Serializable, Iterator, Countable {
  *
  * Be advised that isset calls on a model result in the lazy-load being run (if
  * applicable).
- * 
- * @param  string $variable 
+ *
+ * @param  string $variable
  * @return void
  */
 	public function __isset($variable) {
@@ -279,7 +279,7 @@ class ModelBase extends Object implements Serializable, Iterator, Countable {
  *
  * Also calls all the mixins (see the Object class).
  * If an unknown method is called, an exception is thrown.
- * 
+ *
  * @param  string $method
  * @param  string $arguments
  * @return mixed
@@ -365,7 +365,7 @@ class ModelBase extends Object implements Serializable, Iterator, Countable {
  * Is the Model empty?
  *
  * Triggers lazyload.
- * 
+ *
  * @return boolean
  */
 	public function hollow() {
@@ -417,7 +417,7 @@ class ModelBase extends Object implements Serializable, Iterator, Countable {
  * Has the lazyload run?
  *
  * Be aware that if this model is not lazyloaded, this will return false.
- * 
+ *
  * @return boolean
  */
 	public function loaded() {
@@ -429,8 +429,8 @@ class ModelBase extends Object implements Serializable, Iterator, Countable {
 	}
 
 /**
- * Returns fields of a Model 
- * 
+ * Returns fields of a Model
+ *
  * Returns the names of the fields of this Model (which correspond to the
  * columns of the table it represents), with all their details.
  *
@@ -443,7 +443,7 @@ class ModelBase extends Object implements Serializable, Iterator, Countable {
 /**
  * Does this model has that field
  *
- * @param  string  $field 
+ * @param  string  $field
  * @return boolean
  */
 	public function has_field($field) {
@@ -463,8 +463,8 @@ class ModelBase extends Object implements Serializable, Iterator, Countable {
  * What type of a relation is this model?
  *
  * Provide a type to set it (intended for internal use).
- * 
- * @param  string $relation_type 
+ *
+ * @param  string $relation_type
  * @return string
  */
 	public function relation_type($relation_type = null) {
@@ -491,9 +491,9 @@ class ModelBase extends Object implements Serializable, Iterator, Countable {
  * Uses Adapter's filter_string to filter the input
  *
  * Unless the value is explicitly boolean, a string will be returned.
- * 
- * @param  string $variable 
- * @param  mixed  $value 
+ *
+ * @param  string $variable
+ * @param  mixed  $value
  * @return mixed
  */
 	private function filter_input($variable, $value) {
@@ -507,8 +507,8 @@ class ModelBase extends Object implements Serializable, Iterator, Countable {
 /**
  * Escapes output with htmlspecialchars
  *
- * @param  string $variable 
- * @param  mixed  $value 
+ * @param  string $variable
+ * @param  mixed  $value
  * @return mixed
  */
 	private function escape_output($variable, $value) {
@@ -525,7 +525,7 @@ class ModelBase extends Object implements Serializable, Iterator, Countable {
  * If this model has a method called 'validate', model will be passed to
  * ModelValidator::validate() and the validations will be checked, and boolean
  * result returned. Otherwise, returns true.
- * 
+ *
  * @return boolean
  */
 	public function validates() {
@@ -548,7 +548,7 @@ class ModelBase extends Object implements Serializable, Iterator, Countable {
  *
  * If no errors were found, or Model::valid() has not yet ben run, returns an
  * empty array. Else returns an array errors.
- * 
+ *
  * @return array
  */
 	public function errors() {
@@ -561,7 +561,7 @@ class ModelBase extends Object implements Serializable, Iterator, Countable {
  * Sets the given data of this Model. It will only work if the model has no
  * data yet. Sets the hollowness and existance accordingly (see
  * ModelBase::hollow() and ModelBase::exists()).
- * 
+ *
  * @param  array   $data
  * @return boolean
  */	
@@ -586,7 +586,7 @@ class ModelBase extends Object implements Serializable, Iterator, Countable {
 /**
  * Sets up the relations table of given relation type
  *
- * @param  string $type 
+ * @param  string $type
  * @return void
  */
 	private function setup_relation($type) {
@@ -606,12 +606,12 @@ class ModelBase extends Object implements Serializable, Iterator, Countable {
 
 /**
  * Registers a lazyload function
- * 
+ *
  * Function is expected to be a callable (lambda), accepting one parameter,
  * which will be used to pass reference to the model. Loader function will
  * run only once, and will be erased afterwards.
  *
- * @param  callable $callable 
+ * @param  callable $callable
  * @return void
  */
 	public function register_loader($callable) {
@@ -624,7 +624,7 @@ class ModelBase extends Object implements Serializable, Iterator, Countable {
 
 /**
  * Runs the lazyload function
- * 
+ *
  * This will effectively load the data into this Model.
  *
  * @return void
@@ -639,10 +639,10 @@ class ModelBase extends Object implements Serializable, Iterator, Countable {
 
 /**
  * Loads the relations
- * 
+ *
  * Uses ModelRelations class to load all the relations corresponding to this
  * model - but without loading the data (sets lazyloads on collections/models).
- * 
+ *
  * Be aware of the fact that any existing relation data will not be overwritten
  * by the loaded data!
  *
@@ -711,12 +711,12 @@ class ModelBase extends Object implements Serializable, Iterator, Countable {
 
 /**
  * Saves current Model in the table
- * 
+ *
  * If the Model represents a new data set, it will be added as a new row to the
  * table. If, on the other hand it represents an existing row, the existing row
  * will be updated. Upon insertion, the id, created_at and updated_at fields
  * get filled. Upon update, only the updated_at field gets filled.
- * 
+ *
  * If insertion/update is succesfull, the exists property is set to true, and
  * the modified property is set to false - so you need to modify the model
  * again to be able to perform a save.
@@ -782,7 +782,7 @@ class ModelBase extends Object implements Serializable, Iterator, Countable {
 
 /**
  * The Serializable interface
- * 
+ *
  * @return string Serialized representation of a Model.
  */
 	public function serialize() {
@@ -826,7 +826,7 @@ class ModelBase extends Object implements Serializable, Iterator, Countable {
 	
 /**
  * The Iterator interface
- * 
+ *
  * This is just a mask, for seemless useage between this and a ModelCollection.
  */
 	public function current() {
@@ -855,12 +855,12 @@ class ModelBase extends Object implements Serializable, Iterator, Countable {
 
 /**
  * The Countable interface
- * 
+ *
  * This is just a mask, for seemless useage between this and a ModelCollection.
  */
 	public function count() {
 		return 1;
-	}	
+	}
 }
 
 ?>

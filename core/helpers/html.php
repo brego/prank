@@ -7,10 +7,11 @@
  * @license    http://opensource.org/licenses/mit-license.php The MIT License
  * @author     Kamil "Brego" Dzieliński <brego@brego.dk>
  * @link       http://prank.brego.dk/ Prank's project page
+ * @link       http://github.com/brego/prank/ Prank's Git repository
  * @package    Prank
  * @subpackage Helpers
  * @since      Prank 0.25
- * @version    Prank 0.25
+ * @version    Prank 0.75
  */
 
 function is_current_page($path) {
@@ -100,7 +101,7 @@ function image_path($file) {
 }
 
 function image($file, $options = null) {
-	$file   = image_path($file);
+	$file    = image_path($file);
 	$options = html_parse_params($options);
 	return '<img src="'.$file.'"'.$options.' />';
 }
@@ -111,7 +112,7 @@ function stylesheet_path($file) {
 	}
 	if (substr($file, 0, 7) !== 'http://') {
 		if ($file[0] !== '/') {
-			$file = '/stylesheets/'.$file;
+			$file = "/stylesheets/$file";
 		}
 		$file = url($file);
 	}

@@ -7,17 +7,18 @@
  * @license    http://opensource.org/licenses/mit-license.php The MIT License
  * @author     Kamil "Brego" Dzieliński <brego@brego.dk>
  * @link       http://prank.brego.dk/ Prank's project page
+ * @link       http://github.com/brego/prank/ Prank's Git repository
  * @package    Prank
  * @subpackage Helpers
  * @since      Prank 0.25
- * @version    Prank 0.25
+ * @version    Prank 0.75
  */
 
 /**
  * Returns the $variable converted into JSON format (using built-in
  * json_encode()).
  *
- * @param  mixed  $variable 
+ * @param  mixed  $variable
  * @return string
  */
 function to_json($variable) {
@@ -27,8 +28,8 @@ function to_json($variable) {
 /**
  * Convenience method for writing $variable in JSON format to $file
  *
- * @param  mixed  $variable 
- * @param  string $file 
+ * @param  mixed  $variable
+ * @param  string $file
  * @return mixed  Number of bytes written/false
  */
 function to_json_file($variable, $file) {
@@ -37,7 +38,7 @@ function to_json_file($variable, $file) {
 
 /**
  * Returns $json parsed into a php object/array
- * 
+ *
  * If $array is true, will return an associative array of given data. If it's
  * false, will return an object. Conversion is done using built-in
  * json_decode().
@@ -53,8 +54,8 @@ function from_json($json, $array = true) {
 /**
  * Convenience method for reading JSON from $file
  *
- * @param  string  $file 
- * @param  boolean $array 
+ * @param  string  $file
+ * @param  boolean $array
  * @return mixed
  */
 function from_json_file($file, $array = true) {

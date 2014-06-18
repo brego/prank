@@ -17,14 +17,14 @@
 /**
  * Facilitates the communication with database.
  *
- * Singelton. Establishes a connection with the database, and is responsible 
+ * Singelton. Establishes a connection with the database, and is responsible
  * for all communication with it (through adapters).
  *
  * @package    Prank
  * @subpackage Model
  */
 class ModelConnection {
-	private static $instance = null;  
+	private static $instance = null; 
 	private        $adapter  = null;
 
 /**
@@ -44,7 +44,7 @@ class ModelConnection {
  *
  * Fetches DB configuration dependent on the 'state' setting in app.php. If
  * appropriate adapter is available, it's used - else an exception is thrown.
- * 
+ *
  * @return void
  */
 	private function __construct() {
@@ -63,8 +63,8 @@ class ModelConnection {
 /**
  * Wrapper around the adapters is_column_of for multiple collumns
  *
- * @param  array   $columns 
- * @param  string  $table 
+ * @param  array   $columns
+ * @param  string  $table
  * @return boolean
  */
 	public function are_columns_of($columns, $table) {
@@ -82,9 +82,9 @@ class ModelConnection {
  *
  * If a method is available in the adapter, it'll be called. If an unknown
  * method is called, UnknownMethod will be thrown.
- * 
- * @param  string $method 
- * @param  string $params 
+ *
+ * @param  string $method
+ * @param  string $params
  * @return mixed
  */	
 	public function __call($method, $params) {

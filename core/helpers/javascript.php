@@ -7,15 +7,16 @@
  * @license    http://opensource.org/licenses/mit-license.php The MIT License
  * @author     Kamil "Brego" Dzieliński <brego@brego.dk>
  * @link       http://prank.brego.dk/ Prank's project page
+ * @link       http://github.com/brego/prank/ Prank's Git repository
  * @package    Prank
  * @subpackage Helpers
  * @since      Prank 0.20
- * @version    Prank 0.25
+ * @version    Prank 0.75
  */
 
 /**
  * Return HTML code for linking JS files, and compress them
- * 
+ *
  *
  * Accepts one or more string filenames for javascript files. Files are asumed
  * to reside in /webroot/js/. On first call, files will be catched in a
@@ -58,7 +59,7 @@ function _javascript() {
 /**
  * Returns a html link to a javascript file
  *
- * @param  string $file 
+ * @param  string $file
  * @return string
  */
 function javascript_link($file) {
@@ -72,7 +73,7 @@ function javascript_link($file) {
 /**
  * Print alias for javascript_link method
  *
- * @param  string $file 
+ * @param  string $file
  * @return string
  */
 function _javascript_link($file) {
@@ -83,7 +84,7 @@ function _javascript_link($file) {
  * undocumented function
  *
  * @todo   Fix the session_start()
- * @param  string $behavior 
+ * @param  string $behavior
  * @return void
  */
 function add_javascript_behavior($behavior) {

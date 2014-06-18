@@ -7,29 +7,30 @@
  * @license    http://opensource.org/licenses/mit-license.php The MIT License
  * @author     Kamil "Brego" Dzieliński <brego@brego.dk>
  * @link       http://prank.brego.dk/ Prank's project page
+ * @link       http://github.com/brego/prank/ Prank's Git repository
  * @package    Prank
  * @subpackage Helpers
  * @since      Prank 0.10
- * @version    Prank 0.25
+ * @version    Prank 0.75
  */
 
 function css() {
 	clearstatcache();
 	$args  = func_get_args();
 	$files = array();
-	
+
 	foreach ($args as $index => $filename) {
 		if (substr($filename, -4, 4) != '.css') {
 			$args[$index] = $filename.'.css';
 		}
 	}
-	
+
 	foreach ($args as $filename) {
 		$files[] = $filename;
 		$files[] = filemtime(WEBROOT.'css'.DS.$filename);
 	}
 	$hash = md5(implode($files));
-	
+
 	if(is_file(WEBROOT.'tmp/'.$hash.'.php')) {
 		$link = $link = '<link rel="stylesheet" href="'.url('tmp/'.$hash.'.php').'" type="text/css" />'."\n";
 	} else {

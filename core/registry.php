@@ -42,10 +42,10 @@ class Registry {
 
 /**
  * Property overload
- * 
+ *
  * Returns a property if it is set, else throws an Exception.
  *
- * @param  string $property 
+ * @param  string $property
  * @return mixed
  */
 	public function __get($property) {
@@ -59,8 +59,8 @@ class Registry {
 /**
  * Property overload
  *
- * @param  string $property 
- * @param  mixed  $value 
+ * @param  string $property
+ * @param  mixed  $value
  * @return void
  */
 	public function __set($property, $value) {
@@ -70,7 +70,7 @@ class Registry {
 /**
  * For testing if an overloaded property is set
  *
- * @param  string  $property 
+ * @param  string  $property
  * @return boolean
  */
 	public function __isset($property) {

@@ -32,7 +32,7 @@ class Boot {
 
 /**
  * Constructor
- * 
+ *
  * Initializes the framework, and starts the Controller.
  *
  * @param  string $start_point Full path of index.php (__FILE__)
@@ -101,7 +101,7 @@ class Boot {
  * Sets error reporting
  *
  * Depending on $state sets proper error_reporting level.
- * 
+ *
  * @param  string $state Envoirnmental state
  * @return void
  */
