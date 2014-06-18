@@ -54,7 +54,7 @@ function array_cleanup($array) {
  * @deprecated
  */
 function c($name = false) {
-	throw new Exception('Function c() is highly deprecated.');
+	throw new DeprecatedException('c');
 }
 
 /**
@@ -105,81 +105,53 @@ function file_path() {
 
 /******************************************************************************
  * YAML functions.
+ *
+ * Deprecated.
  *****************************************************************************/
 
 /**
- * Returns YAML-formatted $variable
+ * This function is deprecated.
  *
- * If the Syck extension is avilable, it will be used. Else, the Spyc class is
- * expected to be found in core/lib/spyc/spyc.php.
- *
- * @link   http://pecl.php.net/package/syck Pecl Syck extension
- * @link   http://spyc.sourceforge.net/ A simple php yaml class
- * @param  mixed  $variable
- * @return string
+ * @param      mixed  $variable
+ * @return     void
+ * @deprecated
  */
 function to_yaml($variable) {
-	if (function_exists('syck_dump')) {
-		return syck_dump($variable);
-	} elseif (class_exists('Spyc')) {
-		return Spyc::YAMLDump($variable);
-	} else {
-		$registry = Registry::instance();
-		if (is_file(file_path($registry->config['lib'].'spyc', 'spyc.php'))) {
-			require file_path($registry->config['lib'].'spyc', 'spyc.php');
-			return Spyc::YAMLDump($variable);
-		} else {
-			throw new Exception('To use YAML you need to either install PECL Syck extension, or the spyc class.');
-		}
-	}
+	throw new DeprecatedException('to_yaml');
 }
 
 /**
- * Convenience method for writing $variable in YAML format into $file
+ * This function is deprecated.
  *
- * @param  string $variable
- * @param  string $file
- * @return mixed  Number of bytes written/false
+ * @param      string $variable
+ * @param      string $file
+ * @return     void
+ * @deprecated
  */
 function to_yaml_file($variable, $file) {
-	return file_put_contents($file, to_yaml($variable));
+	throw new DeprecatedException('to_yaml_file');
 }
 
 /**
- * Returns given $yaml converted into php datatypes
+ * This function is deprecated.
  *
- * If the Syck extension is avilable, it will be used. Else, the Spyc class is
- * expected to be found in core/lib/spyc/spyc.php.
- *
- * @link   http://pecl.php.net/package/syck Pecl Syck extension
- * @link   http://spyc.sourceforge.net/ A simple php yaml class
- * @param  string $yaml
- * @return mixed
+ * @param      string $yaml
+ * @return     void
+ * @deprecated
  */
 function from_yaml($yaml) {
-	if (function_exists('syck_load')) {
-		return syck_load($yaml);
-	} elseif (class_exists('Spyc')) {
-		return Spyc::YAMLLoad($yaml);
-	} else {
-		$registry = Registry::instance();
-		if (is_file(file_path($registry->config['lib'].'spyc', 'spyc.php'))) {
-			require file_path($registry->config['lib'].'spyc', 'spyc.php');
-			return Spyc::YAMLLoad($yaml);
-		} else {
-			throw new Exception('To use YAML you need to either install PECL Syck extension, or the spyc class.');
-		}
-	}
+	throw new DeprecatedException('from_yaml');
 }
 
 /**
- * Convenience method for reading YAML from $file
+ * This function is deprecated.
  *
- * @param  string $file
- * @return mixed
+ * @param      string $file
+ * @return     void
+ * @deprecated
  */
 function from_yaml_file($file) {
-	return from_yaml(file_get_contents($file));
+	throw new DeprecatedException('from_yaml_file');
 }
 
 /******************************************************************************
@@ -258,6 +230,15 @@ function use_helper() {
 				throw new Exception('Helper '.$file.' not found in core or application helper directories.');
 			}
 		}
+	}
+}
+
+/**
+ * Deprecated Exception
+ */
+class DeprecatedException extends Exception {
+	public function __construct($method, $code = 0) {
+		parent::__construct("Method '$method' is deprecated.", $code);
 	}
 }
 
