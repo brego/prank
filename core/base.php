@@ -6,7 +6,7 @@
  * and the userland code.
  *
  * @filesource
- * @copyright  Copyright (c) 2008-2010, Kamil "Brego" Dzieliński
+ * @copyright  Copyright (c) 2008-2014, Kamil "Brego" Dzieliński
  * @license    http://opensource.org/licenses/mit-license.php The MIT License
  * @author     Kamil "Brego" Dzieliński <brego@brego.dk>
  * @link       http://prank.brego.dk/ Prank's project page
@@ -14,18 +14,8 @@
  * @package    Prank
  * @subpackage Core
  * @since      Prank 0.10
- * @version    Prank 0.50
+ * @version    Prank 0.75
  */
-
-/**
- * Shortcut for echo
- *
- * @return void
- * @param  string $string String to be echoed to the screen.
- **/
-function _($string) {
-	echo $string;
-}
 
 /**
  * Shortcut for dumping variables.
@@ -47,22 +37,18 @@ function d() {
 /**
  * Deletes empty elements from an array.
  *
+ * Alias for array_filter.
+ *
  * @return array
  * @param  array $array Array to be cleaned
  **/
 function array_cleanup($array) {
-	$clean_array = array();
-	foreach ($array as $element) {
-		if (!empty($element)) {
-			$clean_array[] = $element;
-		}
-	}
-	return $clean_array;
+	return array_filter($array);
 }
 
 /**
  * This function is deprecated.
- * 
+ *
  * @param      string $name
  * @return     mixed
  * @deprecated
@@ -83,7 +69,7 @@ function a() {
 
 /**
  * Sorts an array and returns the result
- * 
+ *
  * Parameter can be either an array, or multiple parameers that'll be converted
  * to an array. Sorting will be performed using sort().
  *
@@ -101,11 +87,11 @@ function s() {
 /**
  * Returns a given arguments separated by current directory separator
  *
- * This method accepts multiple rguments, and returns them glued together by 
+ * This method accepts multiple rguments, and returns them glued together by
  * current directory separator. If the first argument has the separator as it's
  * last character, it'll be stripped (meaning it's ok to use Prank's leading
  * '/' configuration variables, as long as they're used as the first argument).
- * 
+ *
  * @return string
  */
 function file_path() {
@@ -126,10 +112,10 @@ function file_path() {
  *
  * If the Syck extension is avilable, it will be used. Else, the Spyc class is
  * expected to be found in core/lib/spyc/spyc.php.
- * 
+ *
  * @link   http://pecl.php.net/package/syck Pecl Syck extension
  * @link   http://spyc.sourceforge.net/ A simple php yaml class
- * @param  mixed  $variable 
+ * @param  mixed  $variable
  * @return string
  */
 function to_yaml($variable) {
@@ -151,8 +137,8 @@ function to_yaml($variable) {
 /**
  * Convenience method for writing $variable in YAML format into $file
  *
- * @param  string $variable 
- * @param  string $file 
+ * @param  string $variable
+ * @param  string $file
  * @return mixed  Number of bytes written/false
  */
 function to_yaml_file($variable, $file) {
@@ -161,13 +147,13 @@ function to_yaml_file($variable, $file) {
 
 /**
  * Returns given $yaml converted into php datatypes
- * 
+ *
  * If the Syck extension is avilable, it will be used. Else, the Spyc class is
  * expected to be found in core/lib/spyc/spyc.php.
- * 
+ *
  * @link   http://pecl.php.net/package/syck Pecl Syck extension
  * @link   http://spyc.sourceforge.net/ A simple php yaml class
- * @param  string $yaml 
+ * @param  string $yaml
  * @return mixed
  */
 function from_yaml($yaml) {
@@ -189,7 +175,7 @@ function from_yaml($yaml) {
 /**
  * Convenience method for reading YAML from $file
  *
- * @param  string $file 
+ * @param  string $file
  * @return mixed
  */
 function from_yaml_file($file) {
@@ -237,12 +223,12 @@ function is_action_of($action, $controller) {
 
 /**
  * Use this to require helpers
- * 
+ *
  * This method takes multiple arguments, and they don't have to contain .php
  * extension. A helper file can be included only once, so the method will
  * simply ignore a second call with the same helper name. Helpers are searched
  * for in app/helpers and core/helpers respectively.
- * 
+ *
  * If the helper doesn't exist, will throw an Exception.
  *
  * @todo   require_once needs to be changed to require! damn test suite!

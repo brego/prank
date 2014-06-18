@@ -3,7 +3,7 @@
  * Base class for all models
  *
  * @filesource
- * @copyright  Copyright (c) 2008-2010, Kamil "Brego" Dzieliński
+ * @copyright  Copyright (c) 2008-2014, Kamil "Brego" Dzieliński
  * @license    http://opensource.org/licenses/mit-license.php The MIT License
  * @author     Kamil "Brego" Dzieliński <brego@brego.dk>
  * @link       http://prank.brego.dk/ Prank's project page
@@ -11,7 +11,7 @@
  * @package    Prank
  * @subpackage Model
  * @since      Prank 0.10
- * @version    Prank 0.50
+ * @version    Prank 0.75
  */
 
 /**
@@ -336,7 +336,7 @@ class ModelBase extends Object implements Serializable, Iterator, Countable {
 					}
 				}
 			} elseif ($connection->is_column_of($column, $table)) {
-				$result = $connection->read($table, $model, $column."='".$arguments[0]."'", $order, $limit);
+				$result = $connection->read($table, $model, '`'.$column."`='".$arguments[0]."'", $order, $limit);
 				if ($result === false) {
 					return new ModelCollection;
 				} else {
@@ -345,6 +345,11 @@ class ModelBase extends Object implements Serializable, Iterator, Countable {
 			}
 		} elseif (substr($method, 0, 8) === 'find_all') {
 			$found = $connection->read($table, $model, '', $order);
+
+			if ($found === false) {
+				$found = new ModelCollection;
+			}
+
 			if (is_a($found, 'ModelCollection') === false) {
 				$found = new ModelCollection($found);
 			}

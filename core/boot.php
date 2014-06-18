@@ -3,7 +3,7 @@
  * Booting the framework
  *
  * @filesource
- * @copyright  Copyright (c) 2008-2010, Kamil "Brego" Dzieliński
+ * @copyright  Copyright (c) 2008-2014, Kamil "Brego" Dzieliński
  * @license    http://opensource.org/licenses/mit-license.php The MIT License
  * @author     Kamil "Brego" Dzieliński <brego@brego.dk>
  * @link       http://prank.brego.dk/ Prank's project page
@@ -11,7 +11,7 @@
  * @package    Prank
  * @subpackage Core
  * @since      Prank 0.10
- * @version    Prank 0.50
+ * @version    Prank 0.75
  */
 
 /**
@@ -26,8 +26,8 @@ class Boot {
 	private $url        = null;
 	private $controller = null;
 	private $action     = null;
-	private $params     = array();
- 	private $route      = array();
+	private $params     = [];
+	private $route      = [];
 	private $config     = null;
 
 /**
@@ -45,25 +45,25 @@ class Boot {
 		require 'base.php';
 		require 'registry.php';
 		require 'config.php';
-		
+
 		$registry         = Registry::instance();
 		$config           = new Config($start_point, $config_dir);
 		$this->config     = $config;
 		$registry->config = $config;
-		
+
 		use_helper('inflector.php', 'base.php');
-		
+
 		spl_autoload_register('Boot::autoload');
-		
+
 		ini_set('include_path', $config['core'].$config['ps'].$config['app'].$config['ps'].'.');
 		$this->set_error_reporting($config['state']);
-		
+
 		$this->url        = isset($_GET['url']) ? $_GET['url'] : '/';
 		$registry->router = new Router($config);
 		$this->route      = $registry->router->parse_url($this->url);
-		
+
 		$this->parse_route();
-		
+
 		$this->run_controller();
 
 		ob_end_flush();
@@ -86,11 +86,11 @@ class Boot {
 
 				$registry = Registry::instance();
 
-				if(is_file($registry->config['core'].$class.'.php')) {
+				if (is_file($registry->config['core'].$class.'.php')) {
 					require $registry->config['core'].$class.'.php';
 				}
 
-				if(is_file($registry->config['models'].$class_underscore.'.model.php')) {
+				if (is_file($registry->config['models'].$class_underscore.'.model.php')) {
 					require $registry->config['models'].$class_underscore.'.model.php';
 				}
 			}
@@ -130,7 +130,7 @@ class Boot {
 		$action     = null;
 		$params     = array();
 		$route      = $this->route;
-		
+
 		if (isset($route['controller']) && is_file($this->config['controllers'].down($route['controller']).'.controller.php')) {
 			$controller = $route['controller'];
 			unset($route['controller']);
@@ -165,22 +165,16 @@ class Boot {
 			$controller_name   = to_controller($this->controller);
 			$controller_object = new $controller_name;
 
-			// $controller_object->action     = $this->action;
-			// $controller_object->view       = $this->action;
-			// $controller_object->parameters = $this->params;
-			// $controller_object->controller = $this->controller;
-			// $controller_object->config     = $this->config;
-
-			$registry->current_controller  = $controller_object;
+			$registry->current_controller = $controller_object;
 
 			$controller_object->run($this->action, $this->action, $this->params, $this->controller, $this->config);
-			
+
 		} catch (Exception $e) {
 			echo '<p>Exception: '.$e->getMessage().' in '.$e->getFile().' on line '.$e->getLine().".</p>\n",
 				str_replace("\n", "\n<br />", $e->getTraceAsString());
 		}
 	}
-	
+
 /**
  * Loads the controller file
  *

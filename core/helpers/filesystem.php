@@ -3,7 +3,7 @@
  * Filesystem helper functions
  * 
  * @filesource
- * @copyright  Copyright (c) 2008, Kamil "Brego" Dzieliński
+ * @copyright  Copyright (c) 2008-2014, Kamil "Brego" Dzieliński
  * @license    http://opensource.org/licenses/mit-license.php The MIT License
  * @author     Kamil "Brego" Dzieliński <brego@brego.dk>
  * @link       http://prank.brego.dk/ Prank's project page

@@ -3,7 +3,7 @@
  * Config
  *
  * @filesource
- * @copyright  Copyright (c) 2008-2010, Kamil "Brego" Dzieliński
+ * @copyright  Copyright (c) 2008-2014, Kamil "Brego" Dzieliński
  * @license    http://opensource.org/licenses/mit-license.php The MIT License
  * @author     Kamil "Brego" Dzieliński <brego@brego.dk>
  * @link       http://prank.brego.dk/ Prank's project page
@@ -11,7 +11,7 @@
  * @package    Prank
  * @subpackage Core
  * @since      Prank 0.10
- * @version    Prank 0.50
+ * @version    Prank 0.75
  */
 
 /**
@@ -50,9 +50,9 @@ class Config implements ArrayAccess {
  * @return void
  */
 	public function setup($start_point, $config_dir = false) {
-		
+
 		// Default internal Prank config array
-		$config          = array();
+		$config          = [];
 		$config['ds']    = DIRECTORY_SEPARATOR;
 		$config['ps']    = PATH_SEPARATOR;
 		$config['app']   = dirname(dirname($start_point)).$config['ds'];
@@ -61,21 +61,21 @@ class Config implements ArrayAccess {
 		$config['lib']   = $config['prank'].'lib'.$config['ds'];
 
 		// Default app config
-		$default_app_config = array(
+		$default_app_config = [
 			'state'       => 'development',
-			'directories' => array(
+			'directories' => [
 				'models'      => 'models',
 				'views'       => 'views',
 				'controllers' => 'controllers',
 				'webroot'     => 'webroot',
 				'config'      => 'config',
-				'helpers'     => 'helpers'));
-		
+				'helpers'     => 'helpers']];
+
 		// Determining the app config dir
 		if ($config_dir === false) {
 			$config_dir = $config['app'].'config'.$config['ds'];
 		}
-		
+
 		// Loading the app config
 		$app = array();
 		if (is_file($config_dir.'app.php')) {
@@ -104,7 +104,7 @@ class Config implements ArrayAccess {
 		foreach ($db[$config['state']] as $key => $value) {
 			$config['db'][$key] = $value;
 		}
-		
+
 		// Assigning the internal array to an internal parameter
 		$this->config = $config;
 	}

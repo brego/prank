@@ -3,7 +3,7 @@
  * MySQL adapter
  *
  * @filesource
- * @copyright  Copyright (c) 2008-2010, Kamil "Brego" Dzieliński
+ * @copyright  Copyright (c) 2008-2014, Kamil "Brego" Dzieliński
  * @license    http://opensource.org/licenses/mit-license.php The MIT License
  * @author     Kamil "Brego" Dzieliński <brego@brego.dk>
  * @link       http://prank.brego.dk/ Prank's project page
@@ -11,7 +11,7 @@
  * @package    Prank
  * @subpackage Model
  * @since      Prank 0.10
- * @version    Prank 0.50
+ * @version    Prank 0.75
  */
 
 /**
@@ -132,7 +132,7 @@ class ModelAdaptersMysql extends PDO implements ModelAdapter {
 	private function prepare_data($data) {
 		$prepare_data = array();
 		foreach ($data as $column => $value) {
-			$prepared_data[] = $column." = '".$value."'";
+			$prepared_data[] = '`' . $column . "` = '" . $value . "'";
 		}
 		return $prepared_data;
 	}
