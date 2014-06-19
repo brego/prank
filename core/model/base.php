@@ -196,7 +196,7 @@ class ModelBase extends Object implements Serializable, Iterator, Countable {
 				$value->$id_name = $this->id;
 				$value->relation_type('has_one');
 			}
-			if ($this->relations[$variable] == 'belongs_to' && $this->exists() === true) {
+			if ($this->relations[$variable] == 'belongs_to' && $value->exists() === true) {
 				$id_name = singularize($value->table()).'_id';
 				$this->$id_name = $value->id;
 				$value->relation_type('belongs_to');
@@ -205,10 +205,15 @@ class ModelBase extends Object implements Serializable, Iterator, Countable {
 				if (is_a($value, 'ModelCollection') !== true) {
 					$value = new ModelCollection($value);
 				}	
-				$value->relation_type('has_many');
+				$value->relation_type('has_and_belongs_to_many');
 			}
 			$value->relation_type($this->relations[$variable]);
 			$this->relational_data[$variable] = $value;
+			// var_dump("Nope", $variable, $value->exists());
+			// if ($this->relations[$variable] == 'belongs_to' && $value->exists() === true) {
+			// 	$id_name = singularize($value->table()).'_id';
+			// 	var_dump($this->$id_name);
+			// }
 		} else {
 			throw new ModelExceptionsUnknownproperty($variable, $this);
 		}
@@ -664,7 +669,11 @@ class ModelBase extends Object implements Serializable, Iterator, Countable {
 				$config['foreign_id'] = singularize($config['foreign']).'_id';
 				$config['join']       = implode('_', s($config['local'], $config['foreign']));
 				if ($relation_type == 'belongs_to') {
-					$config['id'] = $this->data[$config['foreign_id']];
+					if (isset($this->data[$config['foreign_id']])) {
+						$config['id'] = $this->data[$config['foreign_id']];
+					} else {
+						$config['id'] = null;
+					}
 				}
 			
 				if ($relation_type == 'has_many' || $relation_type == 'has_and_belongs_to_many') {
@@ -732,7 +741,7 @@ class ModelBase extends Object implements Serializable, Iterator, Countable {
 						if ($this->relational_data[$relation]->validates() === true) {
 							$result = $this->relational_data[$relation]->save($this);
 						}
-					}	
+					}
 				}
 			}
 			
@@ -741,6 +750,7 @@ class ModelBase extends Object implements Serializable, Iterator, Countable {
 					$this->updated_at = $this->connection->now();
 				}
 				$result = $this->connection->update($this->table, $this->data, 'id='.$this->id);
+				
 			} elseif ($this->modified === true) {
 				if ($this->connection->is_column_of('created_at', $this->table)) {
 					$this->created_at = $this->connection->now();
@@ -748,7 +758,7 @@ class ModelBase extends Object implements Serializable, Iterator, Countable {
 				if ($this->connection->is_column_of('updated_at', $this->table)) {
 					$this->updated_at = $this->connection->now();
 				}
-		
+
 				if ($related_model !== null && $this->relation() === true) {
 					$method = $this->relation_type.'_create';
 					$result = $this->connection->$method($this->table, $this->data, $related_model);
@@ -758,6 +768,31 @@ class ModelBase extends Object implements Serializable, Iterator, Countable {
 		
 				$this->id = $this->connection->last_id();
 			}
+			
+			if ($related_model !== null && isset($related_model->id) && isset($this->id)) {
+				//echo "ding! $this->table \n";
+				
+				if ($this->relation_type === 'has_and_belongs_to_many') {
+					$relation_table  = implode('_', s($related_model->table(), $this->table()));
+					
+					$local          = singularize($this->table()).'_id';
+					$local_id       = $this->id;
+					$foreign        = singularize($related_model->table()).'_id';
+					$foreign_id     = $related_model->id;
+					
+					$query = "select * from `$relation_table` where `$foreign`='$foreign_id' and `$local`='$local_id';";
+					$relation_exists = $this->connection->query($query);
+
+					if ($relation_exists->rowCount() === 0) {
+						$query = "insert into `$relation_table` set `$foreign`='$foreign_id', `$local`='$local_id';";
+						$return = $this->connection->exec($query);
+					}
+				}
+				
+				// $relation_table = implode('_', s($related_model->table(), $this->table()));
+				// echo "$this->relation_type $relation_table \n";
+			}
+			
 		
 			foreach (array_merge($this->has_one, $this->has_many, $this->has_and_belongs_to_many) as $type => $relation) {
 				if (isset($this->relational_data[$relation])) {

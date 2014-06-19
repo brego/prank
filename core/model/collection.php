@@ -101,7 +101,7 @@ class ModelCollection extends Collection {
 	public function save($related_model = null) {
 		if ($this->modified()) {
 			$return = true;
-			
+//			var_dump($this->relation_type, $related_model->table);
 			foreach ($this->items as $model) {
 				$return = $model->save($related_model);
 				if ($return === false) {

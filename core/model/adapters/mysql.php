@@ -75,7 +75,7 @@ class ModelAdaptersMysql extends PDO implements ModelAdapter {
 		$result = parent::exec($query);
 		if ($result === false) {
 			$error = $this->errorInfo();
-			throw new Exception('Database error: '.$error[2]);
+			throw new Exception('Database error: '.$error[2]."\nQuery: $query\n\n");
 		}
 		return $result;
 	}
@@ -90,7 +90,7 @@ class ModelAdaptersMysql extends PDO implements ModelAdapter {
 		$result = parent::query($arguments[0]);
 		if ($result === false) {
 			$error = $this->errorInfo();
-			throw new Exception('Database error: '.$error[2]);
+			throw new Exception('Database error: '.$error[2]."\nQuery: $arguments[0]\n\n");
 		} else {
 			unset($arguments[0]);
 			call_user_func_array(array($result, 'setFetchMode'), $arguments);
@@ -280,6 +280,7 @@ class ModelAdaptersMysql extends PDO implements ModelAdapter {
 		}
 		$query .= ';';
 		$result = $this->query($query, PDO::FETCH_ASSOC);
+		// var_dump($query);
 		if ($result->rowCount() == 1) {
 			$result = new $model($result->fetch());
 		} elseif ($result->rowCount() > 1) {
@@ -423,6 +424,7 @@ class ModelAdaptersMysql extends PDO implements ModelAdapter {
  * @return void
  */
 	public function has_and_belongs_to_many_create($table, $data, $relation) {
+		// var_dump($table);
 		$return = $this->exec('insert into '.$table.' set '.implode(', ', $this->prepare_data($data)).';');
 		
 		$relation_table = implode('_', s($table, $relation->table()));
@@ -430,12 +432,28 @@ class ModelAdaptersMysql extends PDO implements ModelAdapter {
 		$local_id       = $this->last_id();
 		$foreign        = singularize($relation->table()).'_id';
 		$foreign_id     = $relation->id;
-		
-		$query = "insert into ".$relation_table." set ".$foreign."='".$foreign_id."', ".$local."='".$local_id."';";
-		
-		$return = $this->exec($query);
+
+		$query = "select * from `$relation_table` where `$foreign`='$foreign_id' and `$local`='$local_id';";
+		$relation_exists = $this->query($query);
+
+		if ($relation_exists->rowCount() === 0) {
+			$query  = "insert into ".$relation_table." set ".$foreign."='".$foreign_id."', ".$local."='".$local_id."';";
+			$return = $this->exec($query);
+		}
+		return $return;
+	}
+
+/**
+ * Checks if table exists in the DB
+ *
+ * @param  string  $table Table name
+ * @return boolean
+ */
+	public function table_exists($table) {
+		$return = ($this->query("SHOW TABLES LIKE '$table'")->rowCount() > 0);
 		return $return;
 	}
 }
+
 
 ?>

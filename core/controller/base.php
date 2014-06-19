@@ -26,11 +26,11 @@
 class ControllerBase {
 	public    $view_variables    = array();
 	public    $layout            = 'default';
-	private   $action            = null;
-	private   $view              = null;
-	private   $parameters        = array();
-	private   $controller        = null;
-	private   $config            = null;
+	protected $action            = null;
+	protected $view              = null;
+	protected $parameters        = array();
+	protected $controller        = null;
+	protected $config            = null;
 	private   $params_calculated = false;
 	protected $session           = true;
 

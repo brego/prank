@@ -163,7 +163,7 @@ class Boot {
 		try {
 			$registry          = Registry::instance();
 			$controller_name   = to_controller($this->controller);
-			$controller_object = new $controller_name;
+			$controller_object = new $controller_name($this->action, $this->action, $this->params, $this->controller, $this->config);
 
 			$registry->current_controller = $controller_object;
 

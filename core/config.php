@@ -69,7 +69,9 @@ class Config implements ArrayAccess {
 				'controllers' => 'controllers',
 				'webroot'     => 'webroot',
 				'config'      => 'config',
-				'helpers'     => 'helpers']];
+				'helpers'     => 'helpers',
+				'tmp'         => 'tmp',
+				'lib'         => 'lib']];
 
 		// Determining the app config dir
 		if ($config_dir === false) {
@@ -86,12 +88,14 @@ class Config implements ArrayAccess {
 
 		// Merging the internal array with app config
 		$config['state']       = $app_config['state'];
-		$config['models']      = $config['app'].$app_config['directories']['models'].$config['ds'];
-		$config['views']       = $config['app'].$app_config['directories']['views'].$config['ds'];
+		$config['tmp']         = $config['prank'].$app_config['directories']['tmp'].$config['ds'];
+		$config['lib']         = $config['prank'].$app_config['directories']['lib'].$config['ds'];
+		$config['models']      = $config['app'].$app_config['directories']['models']     .$config['ds'];
+		$config['views']       = $config['app'].$app_config['directories']['views']      .$config['ds'];
 		$config['controllers'] = $config['app'].$app_config['directories']['controllers'].$config['ds'];
-		$config['webroot']     = $config['app'].$app_config['directories']['webroot'].$config['ds'];
-		$config['config']      = $config['app'].$app_config['directories']['config'].$config['ds'];
-		$config['helpers']     = $config['app'].$app_config['directories']['helpers'].$config['ds'];
+		$config['webroot']     = $config['app'].$app_config['directories']['webroot']    .$config['ds'];
+		$config['config']      = $config['app'].$app_config['directories']['config']     .$config['ds'];
+		$config['helpers']     = $config['app'].$app_config['directories']['helpers']    .$config['ds'];
 
 		// Loading the DB config
 		if (is_file($config['config'].'db.php')) {
