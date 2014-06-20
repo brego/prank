@@ -770,16 +770,14 @@ class ModelBase extends Object implements Serializable, Iterator, Countable {
 			}
 			
 			if ($related_model !== null && isset($related_model->id) && isset($this->id)) {
-				//echo "ding! $this->table \n";
-				
 				if ($this->relation_type === 'has_and_belongs_to_many') {
 					$relation_table  = implode('_', s($related_model->table(), $this->table()));
-					
+
 					$local          = singularize($this->table()).'_id';
 					$local_id       = $this->id;
 					$foreign        = singularize($related_model->table()).'_id';
 					$foreign_id     = $related_model->id;
-					
+
 					$query = "select * from `$relation_table` where `$foreign`='$foreign_id' and `$local`='$local_id';";
 					$relation_exists = $this->connection->query($query);
 
@@ -788,9 +786,6 @@ class ModelBase extends Object implements Serializable, Iterator, Countable {
 						$return = $this->connection->exec($query);
 					}
 				}
-				
-				// $relation_table = implode('_', s($related_model->table(), $this->table()));
-				// echo "$this->relation_type $relation_table \n";
 			}
 			
 		

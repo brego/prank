@@ -132,7 +132,7 @@ class ModelAdaptersMysql extends PDO implements ModelAdapter {
 	private function prepare_data($data) {
 		$prepare_data = array();
 		foreach ($data as $column => $value) {
-			$prepared_data[] = '`' . $column . "` = '" . $value . "'";
+			$prepared_data[] = '`' . $column . "` = " . parent::quote($value);
 		}
 		return $prepared_data;
 	}
