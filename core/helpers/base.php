@@ -23,28 +23,49 @@ function partial($name, $params = array()) {
 
 
 /**
- * Returns the filename with a relative path to the root of the page.
+ * Returns the filename with a relative path to the root of the page
  *
+ * url([controller => controller_name]) // Assumes action = index
+ * url([controller => controller_name, action => action_name])
+ * url(action => action_name]) // Assumes current controller
+ * url([controller => controller_name, action => action_name, param, param2])
+ *
+ * url('/controller/action')
+ * url('action') // Assumes current controller, no '/' at first character
+ *
+ * @param  mixed $path A file or action/controller/param or an array
  * @return string Relative path to the file
- * @param  string $path A file or action/controller/param
  * @todo   This is far from being rock-solid... Could use some rethinking or
  *         refactoring...
+ * @todo   Improve documentation
  **/
 function url($path) {
 	$controller = Registry::instance()->current_controller;
 	
 	if (is_array($path)) {
-		if (isset($path['controller']) === false) {
+		if (isset($path['controller']) && isset($path['action']) === false) {
+			$path['action'] = 'index';
+		} elseif (isset($path['action']) && isset($path['controller']) === false) {
+			$path['controller'] = $controller->controller;
+		} elseif (isset($path['controller']) === false && isset($path['action']) === false) {
+			$path['action']     = $controller->action;
 			$path['controller'] = $controller->controller;
 		}
-		if (isset($path['action']) === false) {
-			$path['action'] = $controller->action;
-		}
+
 		$result = array($path['controller'], $path['action']);
+		unset($path['controller'], $path['action']);
+
 		if (isset($path['id']) === true) {
 			$result[] = $path['id'];
+			unset($path['id']);
 		}
+
+		if (count($path) > 0) {
+			$result = array_merge($result, $path);
+		}
+
 		$path = implode('/', $result);
+
 	} else {
 		if ($path[0] !== '/') {
 			$path = $controller->controller.'/'.$path;
@@ -56,7 +77,7 @@ function url($path) {
 	if (isset($_SERVER['REQUEST_URI'])) {
 		$request = split('/', $_SERVER['REQUEST_URI']);
 		$request = array_cleanup($request);	
-	
+
 		$url = array();
 		if (isset($_GET['url'])) {
 			$url = split('/', $_GET['url']);
@@ -64,7 +85,7 @@ function url($path) {
 		}
 
 		$result = array_diff($request, $url);
-		
+
 		return '/'.implode('/', $result).'/'.$path;
 	} else {
 		return '/'.$path;
