@@ -27,7 +27,7 @@ class ModelCollection extends Collection {
 	private $modified      = false;
 	private $relation_type = false;
 	private $exists        = false;
-	
+
 /**
  * Check if any of the models is modified
  *
