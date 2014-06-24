@@ -16,7 +16,7 @@
 
 /**
  * Model Validation class
- * 
+ *
  * Contains only static methods: basic framework for validating the model, and
  * validator methods themselves.
  *
@@ -39,8 +39,8 @@ class ModelValidator {
  * If every validation passes, returns true. Else, returns an array of names of
  * failed validations in following format:
  * array(field=>array(validation[, ...]))
- * 
- * @param  Model $model 
+ *
+ * @param  Model $model
  * @return mixed
  */
 	public static function validate($model) {
@@ -64,10 +64,10 @@ class ModelValidator {
 /**
  * Registers a result of a validation
  *
- * @param  Model   $model 
- * @param  string  $method 
- * @param  string  $field 
- * @param  boolean $result 
+ * @param  Model   $model
+ * @param  string  $method
+ * @param  string  $field
+ * @param  boolean $result
  * @return void
  */
 	private static function register_result($model, $method, $field, $result) {
@@ -77,8 +77,8 @@ class ModelValidator {
 /**
  * Checks if the $field is present & nonempty in $model
  *
- * @param  Model   $model 
- * @param  string  $field 
+ * @param  Model   $model
+ * @param  string  $field
  * @return boolean
  */	
 	public static function validate_presence_of($model, $field) {
@@ -91,9 +91,9 @@ class ModelValidator {
 /**
  * Checks if $field is between $min and $max
  *
- * @param  Model   $model 
- * @param  string  $field 
- * @param  integer $min 
+ * @param  Model   $model
+ * @param  string  $field
+ * @param  integer $min
  * @param  integer $max
  * @return boolean
  */

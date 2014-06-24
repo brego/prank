@@ -29,7 +29,7 @@ class Router {
 
 /**
  * Registers routes
- * 
+ *
  * Calls Router::register_routes().
  *
  * @return void
@@ -60,7 +60,7 @@ class Router {
 /**
  * Parses givven url, tries to match it against routes
  *
- * @param  string $url 
+ * @param  string $url
  * @return array  Current route
  */
 	public function parse_url($url) {
@@ -104,7 +104,7 @@ class Router {
 
 /**
  * Loads user-defined routes
- * 
+ *
  * Loads app/config/routes.php. Defines a local variable $map, referencing
  * $this.
  *
@@ -123,12 +123,12 @@ class Router {
  * action will be run by Prank. You can provide default values for keywords.
  * Keep in mind that Prank supports unnamed attributes (they will not be
  * directly passed to the action though).
- * 
+ *
  * Uses Router::parse_route() for logic.
- * 
+ *
  * @todo   Implement ressourcess
- * @param  string $route 
- * @param  array  $defaults 
+ * @param  string $route
+ * @param  array  $defaults
  * @return void
  */
 	private function connect($route, $defaults = array()) {
@@ -140,8 +140,8 @@ class Router {
  * This will make support for named routes possible
  *
  * @todo   Implement named routes
- * @param  string $method 
- * @param  mixed  $arguments 
+ * @param  string $method
+ * @param  mixed  $arguments
  * @return void
  */
 	public function __call($method, $arguments) {
@@ -150,11 +150,11 @@ class Router {
 
 /**
  * Parses a user-defined route
- * 
+ *
  * Outputs an array consisting of a regular expression, and an array of names
  * (keyowrds) found.
  *
- * @param  string $route 
+ * @param  string $route
  * @return array
  */
 	private function parse_route($route) {
@@ -204,11 +204,11 @@ class Router {
 
 /**
  * Checks if $route matches the $url
- * 
+ *
  * If a match is found, all the submatches of the regex are returned.
  *
  * @param  string $route
- * @param  string $url 
+ * @param  string $url
  * @return mixed  False or array of submatches
  */
 	private function match_route($route, $url) {

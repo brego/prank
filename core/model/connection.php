@@ -24,7 +24,7 @@
  * @subpackage Model
  */
 class ModelConnection {
-	private static $instance = null; 
+	private static $instance = null;
 	private        $adapter  = null;
 
 /**

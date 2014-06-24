@@ -87,7 +87,7 @@ class ModelBase extends Object implements Serializable, Iterator, Countable {
 /**
  * If this model is lazy-loaded, contains a callable loader function
  *
- * @var mixed                         
+ * @var mixed                        
  */
 	private   $loader                  = null;
 
@@ -115,7 +115,7 @@ class ModelBase extends Object implements Serializable, Iterator, Countable {
 		$this->session    = Session::instance();
 
 		$this->set_data($data);
-		
+
 		$this->setup_relation('has_many');
 		$this->setup_relation('has_one');
 		$this->setup_relation('belongs_to');
@@ -209,11 +209,6 @@ class ModelBase extends Object implements Serializable, Iterator, Countable {
 			}
 			$value->relation_type($this->relations[$variable]);
 			$this->relational_data[$variable] = $value;
-			// var_dump("Nope", $variable, $value->exists());
-			// if ($this->relations[$variable] == 'belongs_to' && $value->exists() === true) {
-			// 	$id_name = singularize($value->table()).'_id';
-			// 	var_dump($this->$id_name);
-			// }
 		} else {
 			throw new ModelExceptionsUnknownproperty($variable, $this);
 		}
@@ -295,7 +290,6 @@ class ModelBase extends Object implements Serializable, Iterator, Countable {
 		$table      = to_table($model);
 		$order      = '';
 		$limit      = '';
-
 
 		if (substr($method, -6, 6) == '_limit') {
 			$method = str_replace('_and_limit', '', $method);

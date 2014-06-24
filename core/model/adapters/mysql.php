@@ -19,7 +19,7 @@
  *
  * Provides methods for basic interaction with MySQL databases. Extends upon
  * PDO base class.
- * 
+ *
  * @package    Prank
  * @subpackage Model
  */
