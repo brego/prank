@@ -24,8 +24,8 @@
  * @subpackage Model
  */
 class ModelAdaptersMysql extends PDO implements ModelAdapter {
-	private $columns    = array();
-	private $data_types = array(
+	private $columns    = [];
+	private $data_types = [
 		'binary'    => 'blob',
 		'boolean'   => 'tinyint',
 		'date'      => 'date',
@@ -35,20 +35,21 @@ class ModelAdaptersMysql extends PDO implements ModelAdapter {
 		'integer'   => 'int',
 		'string'    => 'varchar',
 		'text'      => 'text',
-		'time'      => 'time');
-	private $default_data_sizes = array(
+		'time'      => 'time'];
+	private $default_data_sizes = [
 		'boolean' => 1,
 		'integer' => 11,
-		'string'  => 255);
+		'string'  => 255];
+	private $query_log = [];
 
 /**
  * Extending the constructor
- * 
+ *
  * Mostly to set the UTF-8 straight.
  *
- * @param  string $dsn 
- * @param  string $user 
- * @param  string $password 
+ * @param  string $dsn
+ * @param  string $user
+ * @param  string $password
  * @return void
  */
 	public function __construct($dsn, $user, $password) {
@@ -68,7 +69,7 @@ class ModelAdaptersMysql extends PDO implements ModelAdapter {
 /**
  * Execute PDO::exec, with error detection
  *
- * @param  string $query 
+ * @param  string $query
  * @return mixed
  */
 	public function exec($query) {
@@ -123,10 +124,10 @@ class ModelAdaptersMysql extends PDO implements ModelAdapter {
 
 /**
  * Prepares a data array for sql use
- * 
+ *
  * Returns an array of column='value' items for sql insertion/update.
  *
- * @param  array $data 
+ * @param  array $data
  * @return array
  */
 	private function prepare_data($data) {
@@ -139,8 +140,8 @@ class ModelAdaptersMysql extends PDO implements ModelAdapter {
 
 /**
  * Filters a string for security
- * 
- * @param  string $value 
+ *
+ * @param  string $value
  * @return mixed
  */
 	public function filter_string($value) {
@@ -175,8 +176,8 @@ class ModelAdaptersMysql extends PDO implements ModelAdapter {
 /**
  * Checks if $column belongs to $table
  *
- * @param  string  $column 
- * @param  string  $table 
+ * @param  string  $column
+ * @param  string  $table
  * @return boolean
  */	
 	public function is_column_of($column, $table) {
@@ -193,8 +194,8 @@ class ModelAdaptersMysql extends PDO implements ModelAdapter {
  *
  * Always fetches the column informtion from the table, and saves it in the
  * cache.
- * 
- * @param  string $table 
+ *
+ * @param  string $table
  * @return void
  */
 	public function fetch_columns($table) {
@@ -233,8 +234,8 @@ class ModelAdaptersMysql extends PDO implements ModelAdapter {
  *
  * Tries to fetch column informtion from the cache, but calls
  * Mysql::fetch_columns if there's no cache data for this table.
- * 
- * @param  string $table 
+ *
+ * @param  string $table
  * @return void
  */
 	public function columns($table) {
@@ -249,9 +250,9 @@ class ModelAdaptersMysql extends PDO implements ModelAdapter {
  *
  * $data is supposed to be an array of key-value pairs with keys corresponding
  * to the table columns.
- * 
- * @param  string $table 
- * @param  string $data 
+ *
+ * @param  string $table
+ * @param  string $data
  * @return mixed  Number of affected collumns, or false
  */
 	public function create($table, $data) {
@@ -261,10 +262,10 @@ class ModelAdaptersMysql extends PDO implements ModelAdapter {
 /**
  * Reads a from the table
  *
- * @param  string $table 
- * @param  string $model 
- * @param  string $condition 
- * @param  string $order 
+ * @param  string $table
+ * @param  string $model
+ * @param  string $condition
+ * @param  string $order
  * @return mixed
  */
 	public function read($table, $model, $condition = '', $order = '', $limit = '') {
@@ -280,7 +281,6 @@ class ModelAdaptersMysql extends PDO implements ModelAdapter {
 		}
 		$query .= ';';
 		$result = $this->query($query, PDO::FETCH_ASSOC);
-		// var_dump($query);
 		if ($result->rowCount() == 1) {
 			$result = new $model($result->fetch());
 		} elseif ($result->rowCount() > 1) {
@@ -298,9 +298,9 @@ class ModelAdaptersMysql extends PDO implements ModelAdapter {
 /**
  * Updates a record in the table
  *
- * @param  string $table 
- * @param  string $data 
- * @param  string $condition 
+ * @param  string $table
+ * @param  string $data
+ * @param  string $condition
  * @return mixed  Number of affected collumns, or false
  */
 	public function update($table, $data, $condition) {
@@ -310,8 +310,8 @@ class ModelAdaptersMysql extends PDO implements ModelAdapter {
 /**
  * Deletes from table, with $condition
  *
- * @param  string $table 
- * @param  string $condition 
+ * @param  string $table
+ * @param  string $condition
  * @return mixed  Number of affected collumns, or false
  */
 	public function delete($table, $condition) {
@@ -321,7 +321,7 @@ class ModelAdaptersMysql extends PDO implements ModelAdapter {
 /**
  * Warapper for a relational one-to-many query
  *
- * @param  array $info 
+ * @param  array $info
  * @return PDOStatement
  */
 	public function has_many_read($info) {
@@ -332,7 +332,7 @@ class ModelAdaptersMysql extends PDO implements ModelAdapter {
 /**
  * Warapper for a relational one-to-one (foreign) query
  *
- * @param  array $info 
+ * @param  array $info
  * @return array
  */
 	public function has_one_read($info) {
@@ -344,7 +344,7 @@ class ModelAdaptersMysql extends PDO implements ModelAdapter {
 /**
  * Wrapper for a relational one-to-one (local) query
  *
- * @param  array $info 
+ * @param  array $info
  * @return array
  */
 	public function belongs_to_read($info) {
@@ -356,7 +356,7 @@ class ModelAdaptersMysql extends PDO implements ModelAdapter {
 /**
  * Wrapper for a relational many-to-many query
  *
- * @param  array $info 
+ * @param  array $info
  * @return mixed
  */
 	public function has_and_belongs_to_many_read($info) {
@@ -367,9 +367,9 @@ class ModelAdaptersMysql extends PDO implements ModelAdapter {
 /**
  * Creates a new has_many relation
  *
- * @param  string $table 
- * @param  string $data 
- * @param  string $relation 
+ * @param  string $table
+ * @param  string $data
+ * @param  string $relation
  * @return void
  */
 	public function has_many_create($table, $data, $relation) {
@@ -383,9 +383,9 @@ class ModelAdaptersMysql extends PDO implements ModelAdapter {
 /**
  * Create a new has_one relation
  *
- * @param  string $table 
- * @param  string $data 
- * @param  string $relation 
+ * @param  string $table
+ * @param  string $data
+ * @param  string $relation
  * @return void
  */
 	public function has_one_create($table, $data, $relation) {
@@ -399,9 +399,9 @@ class ModelAdaptersMysql extends PDO implements ModelAdapter {
 /**
  * Create a new belongs_to relation
  *
- * @param  string $table 
- * @param  string $data 
- * @param  string $relation 
+ * @param  string $table
+ * @param  string $data
+ * @param  string $relation
  * @return void
  */
 	public function belongs_to_create($table, $data, $relation) {
@@ -418,15 +418,14 @@ class ModelAdaptersMysql extends PDO implements ModelAdapter {
 /**
  * Create a new has_and_belongs_to_many relation
  *
- * @param  string $table 
- * @param  string $data 
- * @param  string $relation 
+ * @param  string $table
+ * @param  string $data
+ * @param  string $relation
  * @return void
  */
 	public function has_and_belongs_to_many_create($table, $data, $relation) {
-		// var_dump($table);
 		$return = $this->exec('insert into '.$table.' set '.implode(', ', $this->prepare_data($data)).';');
-		
+
 		$relation_table = implode('_', s($table, $relation->table()));
 		$local          = singularize($table).'_id';
 		$local_id       = $this->last_id();
