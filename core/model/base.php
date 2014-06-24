@@ -649,7 +649,13 @@ class ModelBase extends Object implements Serializable, Iterator, Countable {
  * Loads the relations
  *
  * Uses ModelRelations class to load all the relations corresponding to this
- * model - but without loading the data (sets lazyloads on collections/models).
+ * model - but without loading the data.
+ *
+ * This method sets lazyloads & count-methods on collections and or models. For
+ * all relation types, it sets the {relation-type}_read method using
+ * collection's and or model's register_loader method. For has_many and HABTM
+ * relations, it also sets the {relation-type}_count method using the
+ * collection's register_counter method.
  *
  * Be aware of the fact that any existing relation data will not be overwritten
  * by the loaded data!
@@ -681,6 +687,13 @@ class ModelBase extends Object implements Serializable, Iterator, Countable {
 			
 				if ($relation_type == 'has_many' || $relation_type == 'has_and_belongs_to_many') {
 					$output = new ModelCollection;
+
+					$output->register_counter(function($internal) use($config) {
+						$connection = ModelConnection::instance();
+						$method     = $config['type'].'_count';
+						$result     = $connection->$method($config);
+						return $result;
+					});
 				} else {
 					$output = new $config['model'];
 				}

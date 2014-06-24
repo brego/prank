@@ -445,6 +445,45 @@ class ModelAdaptersMysql extends PDO implements ModelAdapter {
 	}
 
 /**
+ * undocumented function
+ *
+ * @param  array $info
+ * @return integer
+ */
+	public function has_many_count($info) {
+		throw new Exception('Method has_many_count is not implemented in the ModelAdaptersMysql yet.');
+	}
+
+/**
+ * Counts foreign members of a HABTM
+ *
+ * To be used from a callable on ModelCollection::count() calls, where the
+ * collection contains HABTM members.
+ *
+ * This is more efficient than loading the whole collection from the db.
+ *
+ * @param  array   $info Relation confinguration (built in the ModelBase)
+ * @return integer Number of foreign members
+ */
+	public function has_and_belongs_to_many_count($info) {
+		$query = "SELECT
+				count(*) as count
+			FROM
+				${info['local']},
+				${info['foreign']},
+				${info['join']}
+			WHERE
+				${info['local']}.id = ${info['id']}
+			AND
+				${info['join']}.${info['local_id']} = ${info['local']}.id
+			AND
+				${info['join']}.${info['foreign_id']} = ${info['foreign']}.id;";
+		$result = $this->query($query, PDO::FETCH_ASSOC);
+		$result = $result->fetch();
+		return $result['count'];
+	}
+
+/**
  * Checks if table exists in the DB
  *
  * @param  string  $table Table name
