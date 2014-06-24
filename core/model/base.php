@@ -225,7 +225,7 @@ class ModelBase extends Object implements Serializable, Iterator, Countable {
  */
 	public function __get($variable) {
 		$this->load();
-		if (isset($this->data[$variable])) {
+		if (array_key_exists($variable, $this->data)) {
 			return $this->escape_output($variable, $this->data[$variable]);
 		} elseif (array_search($variable, array_keys($this->relations)) !== false) {
 			$this->load_relations();
@@ -574,6 +574,15 @@ class ModelBase extends Object implements Serializable, Iterator, Countable {
 			foreach ($this->columns as $column => $description) {
 				if (isset($data[$column])) {
 					$this->data[$column] = $data[$column];
+					unset($data[$column]);
+				}
+			}
+			if (count($data) > 0) {
+				foreach ($data as $column => $value) {
+					if (property_exists($this, $column)) {
+						unset($this->$column);
+						$this->data[$column] = $value;
+					}
 				}
 			}
 			return true;
