@@ -54,6 +54,8 @@ interface ModelAdapter {
 	public function has_and_belongs_to_many_create($table, $data, $relation);
 
 	public function table_exists($table);
+
+	public function get_query_log();
 }
 
 ?>

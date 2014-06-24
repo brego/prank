@@ -73,6 +73,7 @@ class ModelAdaptersMysql extends PDO implements ModelAdapter {
  * @return mixed
  */
 	public function exec($query) {
+		$this->query_log[] = $query;
 		$result = parent::exec($query);
 		if ($result === false) {
 			$error = $this->errorInfo();
@@ -87,8 +88,9 @@ class ModelAdaptersMysql extends PDO implements ModelAdapter {
  * @return mixed
  */
 	public function query() {
-		$arguments = func_get_args();
-		$result = parent::query($arguments[0]);
+		$arguments         = func_get_args();
+		$this->query_log[] = $arguments[0];
+		$result            = parent::query($arguments[0]);
 		if ($result === false) {
 			$error = $this->errorInfo();
 			throw new Exception('Database error: '.$error[2]."\nQuery: $arguments[0]\n\n");
@@ -451,6 +453,15 @@ class ModelAdaptersMysql extends PDO implements ModelAdapter {
 	public function table_exists($table) {
 		$return = ($this->query("SHOW TABLES LIKE '$table'")->rowCount() > 0);
 		return $return;
+	}
+
+/**
+ * undocumented function
+ *
+ * @return array
+ */
+	public function get_query_log() {
+		return $this->query_log;
 	}
 }
 
