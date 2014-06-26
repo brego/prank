@@ -35,7 +35,7 @@ function is_current_page($path) {
 		}
 		$path = $result;
 	}
-	if (isset($path['controller']) === true && $path['controller'] === $controller->controller) {
+	if (isset($path['controller']) === true && $path['controller'] === $controller->get_controller()) {
 		if (isset($path['action']) === true) {
 			if ($path['action'] === $controller->action) {
 				return true;

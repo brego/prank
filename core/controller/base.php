@@ -26,10 +26,10 @@
 class ControllerBase {
 	public    $view_variables    = array();
 	public    $layout            = 'default';
+	protected $controller        = null;
 	protected $action            = null;
 	protected $view              = null;
 	protected $parameters        = array();
-	protected $controller        = null;
 	protected $config            = null;
 	private   $params_calculated = false;
 	protected $session           = true;
@@ -183,6 +183,17 @@ class ControllerBase {
  */
 	public function after_render($content = null) {
 		echo $content;
+	}
+
+/**
+ * Getter for current controller name
+ *
+ * Can be used in urls.
+ *
+ * @return string Current controller name
+ */
+	public function get_controller() {
+		return $this->controller;
 	}
 }
 

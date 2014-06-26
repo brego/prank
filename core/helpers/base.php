@@ -18,7 +18,7 @@ function partial($name, $params = array()) {
 	$controller = $registry->current_controller;
 	extract($params);
 	extract($controller->view_variables);
-	require file_path($registry->config->views, $controller->controller, '_'.$name.'.php');
+	require file_path($registry->config->views, $controller->get_controller(), '_'.$name.'.php');
 }
 
 
@@ -46,10 +46,10 @@ function url($path) {
 		if (isset($path['controller']) && isset($path['action']) === false) {
 			$path['action'] = 'index';
 		} elseif (isset($path['action']) && isset($path['controller']) === false) {
-			$path['controller'] = $controller->controller;
+			$path['controller'] = $controller->get_controller();
 		} elseif (isset($path['controller']) === false && isset($path['action']) === false) {
 			$path['action']     = $controller->action;
-			$path['controller'] = $controller->controller;
+			$path['controller'] = $controller->get_controller();
 		}
 
 		$result = array($path['controller'], $path['action']);
@@ -68,7 +68,7 @@ function url($path) {
 
 	} else {
 		if ($path[0] !== '/') {
-			$path = $controller->controller.'/'.$path;
+			$path = $controller->get_controller().'/'.$path;
 		} else {
 			$path = substr($path, 1);
 		}
