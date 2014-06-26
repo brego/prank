@@ -75,12 +75,12 @@ function url($path) {
 	}
 	
 	if (isset($_SERVER['REQUEST_URI'])) {
-		$request = split('/', $_SERVER['REQUEST_URI']);
+		$request = explode('/', $_SERVER['REQUEST_URI']);
 		$request = array_cleanup($request);	
 
 		$url = array();
 		if (isset($_GET['url'])) {
-			$url = split('/', $_GET['url']);
+			$url = explode('/', $_GET['url']);
 			$url = array_cleanup($url);
 		}
 

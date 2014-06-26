@@ -21,7 +21,7 @@ function is_current_page($path) {
 		if ($path[0] === '/') {
 			$result['controller'] = true;
 		}
-		$path = split('/', $path);
+		$path = explode('/', $path);
 		$path = array_cleanup($path);
 		if (isset($result['controller']) && isset($path[0])) {
 			$result['controller'] = $path[0];
