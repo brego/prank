@@ -3,7 +3,7 @@
  * Inflector - inflects words.
  *
  * Pluralizes, singularizes and changes words. Based on CakePHP's Inflector
- * class.
+ * class - http://git.io/z4_CaQ
  *
  * @filesource
  * @copyright  Copyright (c) 2008-2014, Kamil "Brego" Dzieliński

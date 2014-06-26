@@ -52,3 +52,18 @@ through [brego][].
 Enjoy ;)
 
 [brego]: mailto:brego.dk@gmail.com
+
+Credits
+=======
+
+Prank uses a modified version of the CakePHP's [Inflector class][] licensed
+under The MIT License - all credit goes to it's authors and the
+[Cake Software Foundation][], Inc.
+
+Huge thanks to Larry E. Masters aka [phpnut][], Michal Tatarynowicz aka
+[pies][] and the rest of the original CakePHP comunity for inspiration.
+
+[Inflector class]:          http://git.io/z4_CaQ
+[Cake Software Foundation]: http://cakefoundation.org
+[phpnut]:                   https://github.com/phpnut
+[pies]:                     https://github.com/pies
