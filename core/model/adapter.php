@@ -30,8 +30,8 @@ interface ModelAdapter {
 	public function last_id();
 
 	public function is_column_of($column, $table);
-	public function fetch_columns($table);
 	public function columns($table);
+	public function fetch_schemas();
 
 	public function multiple_create();
 

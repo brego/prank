@@ -54,7 +54,7 @@ class ModelConnection {
 		$dsn           = $params['type'].':host='.$params['host'].';dbname='.$params['database'];
 		
 		if (class_exists($adapter_class)) {
-			$this->adapter = new $adapter_class($dsn, $params['user'], $params['password']);
+			$this->adapter = new $adapter_class($dsn, $params['user'], $params['password'], $params['database']);
 		} else {
 			throw new Exception('Adapter class '.$adapter_class.' (type '.$params['type'].') not found.');
 		}

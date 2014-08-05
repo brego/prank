@@ -41,6 +41,7 @@ class ModelAdaptersMysql extends PDO implements ModelAdapter {
 		'integer' => 11,
 		'string'  => 255];
 	private $query_log = [];
+	private $database  = null;
 
 /**
  * Extending the constructor
@@ -50,10 +51,12 @@ class ModelAdaptersMysql extends PDO implements ModelAdapter {
  * @param  string $dsn
  * @param  string $user
  * @param  string $password
+ * @param  string $database
  * @return void
  */
-	public function __construct($dsn, $user, $password) {
+	public function __construct($dsn, $user, $password, $database) {
 		parent::__construct($dsn, $user, $password);
+		$this->database = $database;
 		$this->exec('SET NAMES utf8;');
 	}
 
@@ -133,7 +136,7 @@ class ModelAdaptersMysql extends PDO implements ModelAdapter {
  * @return array
  */
 	private function prepare_data($data) {
-		$prepare_data = array();
+		$prepare_data = [];
 		foreach ($data as $column => $value) {
 			$prepared_data[] = '`' . $column . "` = " . parent::quote($value);
 		}
@@ -149,14 +152,14 @@ class ModelAdaptersMysql extends PDO implements ModelAdapter {
 	public function filter_string($value) {
 		if (is_bool($value) === false) {
 			$value   = trim($value);
-			$search  = array("\x00",  "\n",  "\r",  '\\',   "'",  '"',  "\x1a");
-			$replace = array("\\x00", "\\n", "\\r", '\\\\', "\'", '\"', "\\\\x1a");
+			$search  = ["\x00",  "\n",  "\r",  '\\',   "'",  '"',  "\x1a"];
+			$replace = ["\\x00", "\\n", "\\r", '\\\\', "\'", '\"', "\\\\x1a"];
 			$value   = str_replace($search, $replace, $value);
 		}
 
 		return $value;
 	}
-	
+
 /**
  * Returns current time in database-specific format
  *
@@ -192,20 +195,48 @@ class ModelAdaptersMysql extends PDO implements ModelAdapter {
 	}
 
 /**
- * Fetches column information from the table
+ * Fetches column informtion from the cache
  *
- * Always fetches the column informtion from the table, and saves it in the
- * cache.
+ * Tries to fetch column informtion from the cache, but calls
+ * Mysql::fetch_schemas if there's no cache data for this table.
  *
  * @param  string $table
- * @return void
+ * @return array  Columns belonging to the $table
  */
-	public function fetch_columns($table) {
-		$this->columns[$table] = array();
-		$types = array_flip($this->data_types);
-		foreach ($this->query('show columns from '.$table.';', PDO::FETCH_ASSOC) as $row) {
-			$type  = explode('(', $row['Type']);
+	public function columns($table) {
+		if (count($this->columns) === 0) {
+			$this->columns = $this->fetch_schemas();
+		}
+		return $this->columns[$table];
+	}
+
+/**
+ * Fetch database schema for all tables in the current dabase
+ *
+ * Uses MySQL's information_schema.columns to find info about the columns.
+ *
+ * @return array Schema
+ */
+	public function fetch_schemas() {
+		$database = $this->database;
+		$types    = array_flip($this->data_types);
+		$columns  = [];
+		$query    = "SELECT
+				TABLE_NAME     AS `table`,
+				COLUMN_NAME    AS `column`,
+				COLUMN_TYPE    AS `type`,
+				IS_NULLABLE    AS `null`,
+				COLUMN_DEFAULT AS `default`
+			FROM
+				information_schema.columns
+			WHERE
+				table_schema = '$database';";
+
+
+		foreach ($this->query($query, PDO::FETCH_ASSOC) as $row) {
+			$type  = explode('(', $row['type']);
 			$limit = '';
+
 			if (count($type) === 2) {
 				$limit = (int)str_replace(')', '', $type[1]);
 				$type  = $types[$type[0]];
@@ -213,38 +244,24 @@ class ModelAdaptersMysql extends PDO implements ModelAdapter {
 				$type = $types[$type[0]];
 			}
 			
-			$this->columns[$table][$row['Field']]          = array();
-			$this->columns[$table][$row['Field']]['type']  = $type;
-			$this->columns[$table][$row['Field']]['limit'] = $limit;
-			if ($row['Null'] == 'NO') {
-				$this->columns[$table][$row['Field']]['null'] = false;
+			$columns[$row['table']][$row['column']]          = [];
+			$columns[$row['table']][$row['column']]['type']  = $type;
+			$columns[$row['table']][$row['column']]['limit'] = $limit;
+
+			if ($row['null'] == 'NO') {
+				$columns[$row['table']][$row['column']]['null'] = false;
 			} else {
-				$this->columns[$table][$row['Field']]['null'] = true;
-			}
-			if ($row['Default'] == 'NULL') {
-				$this->columns[$table][$row['Field']]['default'] = null;
-			} else {
-				$this->columns[$table][$row['Field']]['default'] = $row['Default'];
+				$columns[$row['table']][$row['column']]['null'] = true;
 			}
 
+			if ($row['default'] == 'NULL') {
+				$columns[$row['table']][$row['column']]['default'] = null;
+			} else {
+				$columns[$row['table']][$row['column']]['default'] = $row['default'];
+			}
 		}
-		return $this->columns[$table];
-	}
 
-/**
- * Fetches column informtion from the cache
- *
- * Tries to fetch column informtion from the cache, but calls
- * Mysql::fetch_columns if there's no cache data for this table.
- *
- * @param  string $table
- * @return void
- */
-	public function columns($table) {
-		if (!isset($this->columns[$table])) {
-			$this->fetch_columns($table);
-		}
-		return $this->columns[$table];
+		return $columns;
 	}
 
 /**
