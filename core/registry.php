@@ -22,7 +22,7 @@
  */
 class Registry {
 	private static $instance = null;
-	private        $items    = array();
+	private        $items    = [];
 
 /**
  * Returns an instance of the registry

@@ -88,17 +88,14 @@ function _javascript_link($file) {
  * @return void
  */
 function add_javascript_behavior($behavior) {
-	// if (isset($_SESSION) === false) {
-	// 	session_start();
-	// }
 	if (isset($_SESSION['prank']) === false) {
-		$_SESSION['prank'] = array();
+		$_SESSION['prank'] = [];
 	}
 	if (isset($_SESSION['prank']['javascript']) === false) {
-		$_SESSION['javascript'] = array();
+		$_SESSION['javascript'] = [];
 	}
 	if (isset($_SESSION['prank']['javascript']['behaviors']) === false) {
-		$_SESSION['javascript'] = array();
+		$_SESSION['javascript'] = [];
 	}
 	
 	$_SESSION['prank']['javascript']['behaviors'][] = $behavior;

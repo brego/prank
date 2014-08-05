@@ -13,7 +13,7 @@
  * @version    Prank 0.75
  */
 
-function partial($name, $params = array()) {
+function partial($name, $params = []) {
 	$registry   = Registry::instance();
 	$controller = $registry->current_controller;
 	extract($params);
@@ -52,7 +52,7 @@ function url($path) {
 			$path['controller'] = $controller->get_controller();
 		}
 
-		$result = array($path['controller'], $path['action']);
+		$result = [$path['controller'], $path['action']];
 		unset($path['controller'], $path['action']);
 
 		if (isset($path['id']) === true) {
@@ -78,7 +78,7 @@ function url($path) {
 		$request = explode('/', $_SERVER['REQUEST_URI']);
 		$request = array_cleanup($request);	
 
-		$url = array();
+		$url = [];
 		if (isset($_GET['url'])) {
 			$url = explode('/', $_GET['url']);
 			$url = array_cleanup($url);

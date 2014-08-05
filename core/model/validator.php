@@ -24,7 +24,7 @@
  * @subpackage Model
  */
 class ModelValidator {
-	private static $results = array();
+	private static $results = [];
 
 /**
  * Private constructor - this is a static class
@@ -45,7 +45,7 @@ class ModelValidator {
  */
 	public static function validate($model) {
 		$model->validate();
-		$failures = array();
+		$failures = [];
 		foreach (self::$results[get_class($model)] as $field => $validations) {
 			foreach ($validations as $validation => $result) {
 				if ($result === false) {

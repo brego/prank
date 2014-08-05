@@ -24,7 +24,7 @@
 * @subpackage Core
  */
 class Collection implements Iterator, Countable, ArrayAccess {
-	protected $items     = array();
+	protected $items     = [];
 /**
  * Name of single item in the colection (used in each)
  *
@@ -184,8 +184,8 @@ class Collection implements Iterator, Countable, ArrayAccess {
  */
 	public function each($lambda) {
 		$reflection      = new ReflectionFunction($lambda);
-		$parameter_names = array();
-		$return          = array();
+		$parameter_names = [];
+		$return          = [];
 		
 		// find the parameters given in lambda
 		foreach ($reflection->getParameters() as $param) {
@@ -197,7 +197,7 @@ class Collection implements Iterator, Countable, ArrayAccess {
 
 		// loop through the collection
 		foreach ($this as $item) {
-			$parameters = array();
+			$parameters = [];
 
 			if (count($parameter_names)>1) {
 				foreach ($parameter_names as $key => $value) {
@@ -245,7 +245,7 @@ class Collection implements Iterator, Countable, ArrayAccess {
  * @return void
  */
 	public function clear() {
-		$this->items = array();
+		$this->items = [];
 		$this->key   = 0;
 		$this->size  = 0;
 	}

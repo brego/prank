@@ -1,24 +1,24 @@
 <?php
 
-$db['development'] = array(
+$db['development'] = [
     'type'     => 'mysql',
     'host'     => 'localhost',
     'user'     => 'root',
     'password' => '',
-    'database' => 'prank_development');
+    'database' => 'prank_development'];
 
-$db['test'] = array(
+$db['test'] = [
     'type'     => 'mysql',
     'host'     => 'localhost',
     'user'     => 'root',
     'password' => '',
-    'database' => 'prank_test');
+    'database' => 'prank_test'];
 
-$db['production'] = array(
+$db['production'] = [
     'type'     => 'mysql',
     'host'     => 'localhost',
     'user'     => 'root',
     'password' => '',
-    'database' => 'prank_production');
+    'database' => 'prank_production'];
 
 ?>

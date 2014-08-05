@@ -79,9 +79,9 @@ class Config implements ArrayAccess {
 		}
 
 		// Loading the app config
-		$app = array();
+		$app = [];
 		if (is_file($config_dir.'app.php')) {
-			$app = array();
+			$app = [];
 			require $config_dir.'app.php';
 		}
 		$app_config = array_merge($default_app_config, $app);
@@ -99,12 +99,12 @@ class Config implements ArrayAccess {
 
 		// Loading the DB config
 		if (is_file($config['config'].'db.php')) {
-			$db = array();
+			$db = [];
 			require $config['config'].'db.php';
 		} else {
 			throw new Exception('Currently Prank requires a database connection. Provide a config/db.php with necessary data.');
 		}
-		$config['db'] = array();
+		$config['db'] = [];
 		foreach ($db[$config['state']] as $key => $value) {
 			$config['db'][$key] = $value;
 		}

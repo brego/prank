@@ -25,7 +25,7 @@
  * @return string Word in plural
  */
 function pluralize($string)	{
-	$core_plural_rules = array(
+	$core_plural_rules = [
 		'/(s)tatus$/i'             => '\1\2tatuses',
 		'/^(ox)$/i'                => '\1\2en',
 		'/([m|l])ouse$/i'          => '\1ice',
@@ -45,9 +45,9 @@ function pluralize($string)	{
 		'/(octop|vir)us$/i'        => '\1i',
 		'/(ax|cri|test)is$/i'      => '\1es',
 		'/s$/'                     => 's',
-		'/$/'                      => 's');
+		'/$/'                      => 's'];
 
-	$core_uninflected_plural = array('.*[nrlm]ese', '.*deer', '.*fish',
+	$core_uninflected_plural = ['.*[nrlm]ese', '.*deer', '.*fish',
 		'.*measles', '.*ois', '.*pox', '.*rice', '.*sheep', 'Amoyese',
 		'bison', 'Borghese', 'bream', 'breeches', 'britches', 'buffalo',
 		'cantus', 'carp', 'chassis', 'clippers', 'cod', 'coitus',
@@ -62,9 +62,9 @@ function pluralize($string)	{
 		'rhinoceros', 'salmon', 'Sarawakese', 'scissors', 'sea[- ]bass',
 		'series', 'Shavese', 'shears', 'siemens', 'species', 'swine',
 		'testes', 'trousers', 'trout', 'tuna', 'Vermontese', 'Wenchowese',
-		'whiting', 'wildebeest', 'Yengeese');
+		'whiting', 'wildebeest', 'Yengeese'];
 
-		$core_irregular_plural = array(
+		$core_irregular_plural = [
 			'atlas'     => 'atlases',
 			'beef'      => 'beefs',
 			'brother'   => 'brothers',
@@ -93,7 +93,7 @@ function pluralize($string)	{
 			'soliloquy' => 'soliloquies',
 			'testis'    => 'testes',
 			'trilby'    => 'trilbys',
-			'turf'      => 'turfs');
+			'turf'      => 'turfs'];
 
 	$plural_rules = $core_plural_rules;
 	$uninflected  = $core_uninflected_plural;
@@ -126,7 +126,7 @@ function pluralize($string)	{
  */
 function singularize($string)
 {
-	$core_singular_rules = array(
+	$core_singular_rules = [
 		'/(s)tatuses$/i'        => '\1\2tatus',
 		'/(matr)ices$/i'        => '\1ix',
 		'/(vert|ind)ices$/i'    => '\1ex',
@@ -154,9 +154,9 @@ function singularize($string)
 		'/(m)en$/i'             => '\1an',
 		'/(c)hildren$/i'        => '\1\2hild',
 		'/(n)ews$/i'            => '\1\2ews',
-		'/s$/i'                 => '');
+		'/s$/i'                 => ''];
 
-	$core_uninflected_singular = array('.*[nrlm]ese', '.*deer', '.*fish',
+	$core_uninflected_singular = ['.*[nrlm]ese', '.*deer', '.*fish',
 		'.*measles', '.*ois', '.*pox', '.*rice', '.*sheep', 'Amoyese',
 		'bison', 'Borghese', 'bream', 'breeches', 'britches', 'buffalo',
 		'cantus', 'carp', 'chassis', 'clippers', 'cod', 'coitus',
@@ -171,9 +171,9 @@ function singularize($string)
 		'rhinoceros', 'salmon', 'Sarawakese', 'scissors', 'sea[- ]bass',
 		'series', 'Shavese', 'shears', 'siemens', 'species', 'swine',
 		'testes', 'trousers', 'trout', 'tuna', 'Vermontese', 'Wenchowese',
-		'whiting', 'wildebeest', 'Yengeese');
+		'whiting', 'wildebeest', 'Yengeese'];
 
-	$core_irregular_singular = array(
+	$core_irregular_singular = [
 		'atlases'     => 'atlas',
 		'beefs'       => 'beef',
 		'brothers'    => 'brother',
@@ -202,7 +202,7 @@ function singularize($string)
 		'soliloquies' => 'soliloquy',
 		'testes'      => 'testis',
 		'trilbys'     => 'trilby',
-		'turfs'       => 'turf');
+		'turfs'       => 'turf'];
 
 	$singular_rules = $core_singular_rules;
 	$uninflected    = $core_uninflected_singular;

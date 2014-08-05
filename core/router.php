@@ -24,7 +24,7 @@
  */
 class Router {
 	private static $current_route = null;
-	private        $routes        = array();
+	private        $routes        = [];
 	private        $config        = null;
 
 /**
@@ -64,7 +64,7 @@ class Router {
  * @return array  Current route
  */
 	public function parse_url($url) {
-		$out = array();
+		$out = [];
 		$ext = null;
 
 		if (strpos($url, '/') !== 0) {
@@ -133,7 +133,7 @@ class Router {
  */
 	private function connect($route, $defaults = array()) {
 		list($expression, $names) = $this->parse_route($route);
-		$this->routes[$expression] = array('names'=>$names, 'defaults'=>$defaults);
+		$this->routes[$expression] = ['names' => $names, 'defaults' => $defaults];
 	}
 	
 /**
@@ -161,8 +161,8 @@ class Router {
 		if (empty($route) || $route === '/') {
 			return array('/^[\/]*$/', array());
 		}
-		$names    = array();
-		$parsed   = array();
+		$names    = [];
+		$parsed   = [];
 		$elements = explode('/', $route);
 
 		foreach ($elements as $element) {

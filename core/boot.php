@@ -128,7 +128,7 @@ class Boot {
 	private function parse_route() {
 		$controller = null;
 		$action     = null;
-		$params     = array();
+		$params     = [];
 		$route      = $this->route;
 
 		if (isset($route['controller']) && is_file($this->config['controllers'].down($route['controller']).'.controller.php')) {

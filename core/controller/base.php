@@ -24,12 +24,12 @@
  * @subpackage Controller
  */
 class ControllerBase {
-	public    $view_variables    = array();
+	public    $view_variables    = [];
 	public    $layout            = 'default';
 	protected $controller        = null;
 	protected $action            = null;
 	protected $view              = null;
-	protected $parameters        = array();
+	protected $parameters        = [];
 	protected $config            = null;
 	private   $params_calculated = false;
 	protected $session           = true;
@@ -53,8 +53,8 @@ class ControllerBase {
 				return $this->parameters;
 			} else {				
 				$reflection      = new ReflectionMethod($this, $this->action);
-				$parameter_names = array();
-				$parameters      = array();
+				$parameter_names = [];
+				$parameters      = [];
 
 				foreach ($reflection->getParameters() as $param) {
 					$parameter_names[] = $param->getName();

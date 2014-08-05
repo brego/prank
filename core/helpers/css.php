@@ -17,7 +17,7 @@
 function css() {
 	clearstatcache();
 	$args  = func_get_args();
-	$files = array();
+	$files = [];
 
 	foreach ($args as $index => $filename) {
 		if (substr($filename, -4, 4) != '.css') {

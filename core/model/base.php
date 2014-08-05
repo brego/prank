@@ -68,13 +68,13 @@ class ModelBase extends Object implements Serializable, Iterator, Countable {
 	private   $table                   = null;
 	private   $model                   = null;
 	private   $columns                 = null;
-	private   $data                    = array();
-	private   $relational_data         = array();
+	private   $data                    = [];
+	private   $relational_data         = [];
 	private   $relations_loaded        = false;
-	private   $relations               = array();
-	private   $validations             = array();
+	private   $relations               = [];
+	private   $validations             = [];
 	private   $relation_type           = false;
-	private   $errors                  = array();
+	private   $errors                  = [];
 	protected $session                 = false;
 	private   $key                     = false;
 
@@ -601,14 +601,14 @@ class ModelBase extends Object implements Serializable, Iterator, Countable {
 		if ($this->$type !== false) {
 			if (is_array($this->$type) === false) {
 				$this->relations[$this->$type] = $type;
-				$this->$type                   = array($this->$type);
+				$this->$type                   = [$this->$type];
 			} else {
 				foreach ($this->$type as $name) {
 					$this->relations[$name] = $type;
 				}
 			}
 		} else {
-			$this->$type = array();
+			$this->$type = [];
 		}
 	}
 
@@ -665,15 +665,15 @@ class ModelBase extends Object implements Serializable, Iterator, Countable {
 	private function load_relations() {
 		if ($this->exists === true && $this->relations_loaded === false) {
 			
-			$relational_data = array();
+			$relational_data = [];
 			
 			foreach ($this->relations as $relation => $relation_type) {
-				$config = array(
+				$config = [
 					'model'   => to_model($relation),
 					'local'   => $this->table(),
 					'foreign' => to_table($relation),
 					'id'      => $this->data['id'],
-					'type'    => $relation_type);
+					'type'    => $relation_type];
 				$config['local_id']   = singularize($config['local']).'_id';
 				$config['foreign_id'] = singularize($config['foreign']).'_id';
 				$config['join']       = implode('_', s($config['local'], $config['foreign']));
@@ -832,7 +832,7 @@ class ModelBase extends Object implements Serializable, Iterator, Countable {
  * @return string Serialized representation of a Model.
  */
 	public function serialize() {
-		$properties = array(
+		$properties = [
 			'model'                   => $this->model,
 			'table'                   => $this->table,
 			'columns'                 => $this->columns,
@@ -851,7 +851,7 @@ class ModelBase extends Object implements Serializable, Iterator, Countable {
 			'relations'               => $this->relations,
 			'validations'             => $this->validations,
 			'relation_type'           => $this->relation_type,
-			'errors'                  => $this->errors);
+			'errors'                  => $this->errors];
 		
 		return serialize($properties);
 	}

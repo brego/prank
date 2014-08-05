@@ -17,7 +17,7 @@
 function is_current_page($path) {
 	$controller = Registry::instance()->current_controller;
 	if (is_string($path)) {
-		$result = array();
+		$result = [];
 		if ($path[0] === '/') {
 			$result['controller'] = true;
 		}
