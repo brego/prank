@@ -58,13 +58,15 @@ function c($name = false) {
 }
 
 /**
- * Returns an array composed of given arguments
+ * This function is deprecated.
+ *
+ * Use the square bracket notation instead.
  *
  * @return array
+ * @deprecated
  */
 function a() {
-	$args = func_get_args();
-	return $args;
+	throw new DeprecatedException('a');	
 }
 
 /**

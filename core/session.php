@@ -22,16 +22,16 @@
  */
 class Session {
 	public static $instance = null;
-	
+
 	private function __construct() {
 		session_start();
 	}
-	
+
 	public function __set($name, $value) {
 		$_SESSION[$name] = $value;
 		return true;
 	}
-	
+
 	public function __get($name) {
 		if (isset($_SESSION[$name])) {
 			return $_SESSION[$name];
@@ -39,18 +39,18 @@ class Session {
 			return null;
 		}
 	}
-	
+
 	public function __isset($name) {
 		return isset($_SESSION[$name]);
 	}
-	
+
 	public static function instance() {
 		if (self::$instance === null) {
 			self::$instance = new self;
 		}
 		return self::$instance;
 	}
-	
+
 	public static function destroy() {
 		session_start();
 		$_SESSION = [];
