@@ -26,9 +26,9 @@ class Boot {
 	private $url        = null;
 	private $controller = null;
 	private $action     = null;
+	private $config     = null;
 	private $params     = [];
 	private $route      = [];
-	private $config     = null;
 
 /**
  * Constructor
@@ -126,10 +126,10 @@ class Boot {
  * @return void
  */
 	private function parse_route() {
+		$route      = $this->route;
 		$controller = null;
 		$action     = null;
 		$params     = [];
-		$route      = $this->route;
 
 		if (isset($route['controller']) && is_file($this->config['controllers'].down($route['controller']).'.controller.php')) {
 			$controller = $route['controller'];

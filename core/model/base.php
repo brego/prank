@@ -68,13 +68,13 @@ class ModelBase extends Object implements Serializable, Iterator, Countable {
 	private   $table                   = null;
 	private   $model                   = null;
 	private   $columns                 = null;
-	private   $data                    = [];
-	private   $relational_data         = [];
 	private   $relations_loaded        = false;
-	private   $relations               = [];
-	private   $validations             = [];
 	private   $relation_type           = false;
+	private   $validations             = [];
 	private   $errors                  = [];
+	private   $data                    = [];
+	private   $relations               = [];
+	private   $relational_data         = [];
 	protected $session                 = false;
 	private   $key                     = false;
 
@@ -615,19 +615,15 @@ class ModelBase extends Object implements Serializable, Iterator, Countable {
 /**
  * Registers a lazyload function
  *
- * Function is expected to be a callable (lambda), accepting one parameter,
+ * Function is expected to be a callable (closure), accepting one parameter,
  * which will be used to pass reference to the model. Loader function will
  * run only once, and will be erased afterwards.
  *
- * @param  callable $callable
+ * @param  Closure $callable
  * @return void
  */
-	public function register_loader($callable) {
-		if (is_callable($callable)) {
-			$this->loader = $callable;
-		} else {
-			throw new Exception('Non-callable function passed as a loader: '.$callable);
-		}
+	public function register_loader(Closure $callable) {
+		$this->loader = $callable;
 	}
 
 /**

@@ -24,8 +24,8 @@
  */
 class Router {
 	private static $current_route = null;
-	private        $routes        = [];
 	private        $config        = null;
+	private        $routes        = [];
 
 /**
  * Registers routes
@@ -98,7 +98,7 @@ class Router {
 		}
 
 		self::$current_route = $out;
-		
+
 		return $out;
 	}
 

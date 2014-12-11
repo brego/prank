@@ -37,7 +37,7 @@ Design Goals
 *  Object Oriented design as basis of functionality, functions as syntax sugar
    and helpers for common tasks. There's nothing wrong with sugar.
 
-*  Clever use of Lambda/Closures and smart static methods when applicable.
+*  Clever use of Closures and smart static methods when applicable.
 
 Usage
 =====

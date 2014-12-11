@@ -50,8 +50,8 @@ class Object {
  *
  *  - Registers 'extend', which adds a method to an object. Object::extend()
  *    expects two parameters - a string which will identify the method, and
- *    a callable lambda function. On call, the lambda functions first parameter
- *    will be replaced with $this.
+ *    a callable closure function. On call, the closure functions first
+ *    parameter will be replaced with $this.
  *
  * @param  string $method
  * @param  string $arguments
@@ -102,8 +102,8 @@ class Object {
  *
  *  - Registers 'extend', which adds a method to an object. Object::extend()
  *    expects two parameters - a string which will identify the method, and
- *    a callable lambda function. On call, the lambda functions first parameter
- *    will be replaced with the name of the current class.
+ *    a callable closure function. On call, the closure functions first
+ *    parameter will be replaced with the name of the current class.
  *
  * @param  string $method
  * @param  string $arguments

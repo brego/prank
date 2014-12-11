@@ -24,17 +24,17 @@
 * @subpackage Core
  */
 class Collection implements Iterator, Countable, ArrayAccess {
-	protected $items     = [];
 /**
  * Name of single item in the colection (used in each)
  *
  * @var string
  */
 	protected $item_name = 'item';
-	private   $key       = 0;
 	protected $size      = 0;
+	private   $key       = 0;
 	private   $loader    = null;
 	private   $counter   = null;
+	protected $items     = [];
 
 /**
  * Constructor
@@ -83,7 +83,7 @@ class Collection implements Iterator, Countable, ArrayAccess {
 /**
  * Registers a lazyload function
  *
- * Function is expected to be a callable (lambda), accepting one parameter,
+ * Function is expected to be a callable (closure), accepting one parameter,
  * which will be used to pass reference to the collection. Loader function will
  * run only once, and will be erased afterwards.
  *
@@ -119,15 +119,11 @@ class Collection implements Iterator, Countable, ArrayAccess {
  *
  * This method will most likely be called by ModelBase::load_relations().
  *
- * @param  callable $callable The counter method
+ * @param  Closure $callable The counter method
  * @return void
  */
-	public function register_counter($callable) {
-		if (is_callable($callable)) {
-			$this->counter = $callable;
-		} else {
-			throw new Exception('Non-callable function passed as a loader: '.$callable);
-		}
+	public function register_counter(Closure $callable) {
+		$this->counter = $callable;
 	}
 
 /**
@@ -147,12 +143,12 @@ class Collection implements Iterator, Countable, ArrayAccess {
 /**
  * Magic internal iterator
  *
- * This method iterates through the Collection, executing the lambda function
+ * This method iterates through the Collection, executing the closure function
  * at each iteration.
  * Be advised that each calls on a collection result in the lazy-load being run
  * (if applicable).
  *
- * Lambda can have a varied number of arguments, which names have significance
+ * Closure can have a varied number of arguments, which names have significance
  * to what will be passed to them:
  *  - If there's more than one parameter:
  *     - If current object has a property with a name corresponding to the
@@ -163,7 +159,7 @@ class Collection implements Iterator, Countable, ArrayAccess {
  *       the parameter.
  *  - If there's only one parameter, and current object has a property with
  *    name corresponding to the name of the parameter, each will pass this
- *    property to the lambda.
+ *    property to the closure.
  *  - If there's only one parameter, but it's not corresponding to any property
  *    of the current object, the object itself will be passed.
  *
@@ -171,23 +167,23 @@ class Collection implements Iterator, Countable, ArrayAccess {
  * are done using isset - so if your object uses overloaded parameters, using
  * __set and __get, remember to define __isset to make the magic work.
  *
- * The return value of each depends on the return value of lambda - if it has
+ * The return value of each depends on the return value of closure - if it has
  * none, null will be returned. If, on the other hand, it has any return value,
  * each will return an array of return values.
  *
- * Note that magic comes at a cost - each uses Reflection to find lambda's
+ * Note that magic comes at a cost - each uses Reflection to find closure's
  * parameter names. So if speed is an issue, and you need to loop through a
  * large Collection, consider using foreach instead.
  *
- * @param  callable $lambda Lambda function (no callbacks!)
- * @return mixed Array of results or null
+ * @param  Closure $closure Closure function (no callbacks!)
+ * @return mixed   Array of results or null
  */
-	public function each($lambda) {
-		$reflection      = new ReflectionFunction($lambda);
+	public function each(Closure $closure) {
+		$reflection      = new ReflectionFunction($closure);
 		$parameter_names = [];
-		$return          = [];
-		
-		// find the parameters given in lambda
+		$return          = null;
+
+		// find the parameters given in closure
 		foreach ($reflection->getParameters() as $param) {
 			$parameter_names[] = $param->getName();
 		}
@@ -218,12 +214,12 @@ class Collection implements Iterator, Countable, ArrayAccess {
 				$parameters[] = $item;
 			}
 
-			$lambda_return = call_user_func_array($lambda, $parameters);
-			if (empty($lambda_return) === false) {
-				$return[] = $lambda_return;
+			$closure_return = call_user_func_array($closure, $parameters);
+			if (empty($closure_return) === false) {
+				$return[] = $closure_return;
 			}
 		}
-		return (count($return)==0?null:$return);
+		return $return;
 	}
 
 /**

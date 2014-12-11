@@ -319,4 +319,11 @@ function to_controller($class_name)
 	return camelcase(singularize($class_name)).'Controller';
 }
 
+
+function from_controller_to_file($class_name) {
+	$class_name = str_replace('Controller', '', $class_name);
+	$class_name = underscore(pluralize($class_name));
+	return $class_name;
+}
+
 ?>
