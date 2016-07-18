@@ -63,7 +63,7 @@ under The MIT License - all credit goes to it's authors and the
 Huge thanks to Larry E. Masters aka [phpnut][], Michal Tatarynowicz aka
 [pies][] and the rest of the original CakePHP comunity for inspiration.
 
-[Inflector class]:          http://git.io/z4_CaQ
+[Inflector class]:          https://github.com/cakephp/cakephp/blob/master/src/Utility/Inflector.php
 [Cake Software Foundation]: http://cakefoundation.org
 [phpnut]:                   https://github.com/phpnut
 [pies]:                     https://github.com/pies
